@@ -1,0 +1,19 @@
+/* .form-container{
+    border: '1px solid black';
+    width: '100%';
+    padding: '0px 116px 0px';
+} */
+
+.form-container{
+    border: 1px solid black;
+    width: 100%;
+    padding: 0px 116px 0px;
+}
+
+@media (max-width: 600px) {
+    /* .form-container{
+        border: '3px solid red';
+        width: '100%';
+        padding: '0px 116px 0px';
+    } */
+  }
