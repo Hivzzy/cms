@@ -1,17 +1,20 @@
-import { Button, Col, Container, Row } from 'react-bootstrap';
+import { Button, Card, Col, Image, Row, Stack } from 'react-bootstrap';
 import logo from '../assets/images/figma/logo.png';
-import { Outlet, useLocation } from 'react-router-dom';
-import person from '../assets/images/figma/auth-person.png';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import '../assets/css/auth-style.css'
+import '../assets/css/form-style.css'
+
 import lottie from 'lottie-web';
 import { useEffect, useRef } from 'react';
-import eclipse from '../assets/images/figma/eclipse.svg';
-import grapchicSide from '../assets/images/figma/Graphic Side.svg';
 import PropTypes from 'prop-types';
-const AuthLayout = ({ isEmailSent }) => {
 
+import grapchicSide from '../assets/images/figma/graphic-side.png';
+
+const AuthLayout = ({ isEmailSent, setIsEmailSent }) => {
     const location = useLocation();
     const animationContainer = useRef(null);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         const anim = lottie.loadAnimation({
@@ -25,77 +28,78 @@ const AuthLayout = ({ isEmailSent }) => {
         return () => anim.destroy();
     }, []);
 
-    let formHeader = "Sign In";
-    switch (location.pathname) {
-        case '/':
-            formHeader = "Sign In";
-            break;
-        case '/login':
-            formHeader = "Sign In";
-            break;
-        case '/forgot-password':
-            formHeader = "Forgot Password";
-            break;
-        case '/change-password':
-            formHeader = "Change Password";
-            break;
-    }
+    const getFormHeader = {
+        '/sign-in': 'Sign In',
+        '/forgot-password': 'Forgot Password',
+        '/change-password': 'Change Password'
+    };
+
+    const formHeader = getFormHeader[location.pathname] || '';
+
+    const handleNavigate = () => {
+        setIsEmailSent(false);
+        navigate('/');
+    };
 
     return (
-        <Container fluid style={{ background: 'linear-gradient(to right, #ffffff 50%, #0078D7 50%)', overflow: 'hidden', position: 'relative' }}>
-            <Container fluid="xxl">
-                <Row style={{ height: '100vh' }}>
-                    <Col xs={6} style={{ backgroundColor: '#ffffff' }} className='d-flex align-items-center justify-content-center'>
-                        <div style={{ marginTop: -86 }}>
-                            <div>
-                                <img src={logo} alt="Logo Tujuh Sembilan" style={{ height: 42, marginBottom: 64 }} />
-                            </div>
-                            <div style={{ maxHeight: '405px', width: '400px' }}>
-                                {isEmailSent ?
-                                    <>
-                                        <div className='d-flex flex-column align-items-center justify-content-center'>
-                                            <div ref={animationContainer} style={{ width: 220, height: '100%', marginTop: -70, marginBottom: -50 }} />
-                                            <div style={{ fontSize: '36px', fontWeight: 700, color: '#23BD33', marginBottom: 8 }}>
-                                                Success!
-                                            </div>
-                                            <div style={{ textAlign: 'center', lineHeight: '28px', fontSize: '16px', color: '#232D42' }}>
-                                                A email has been send. Please check for an email from Tujuh Semilan and click on the included link to reset your password.
-                                            </div>
-                                            <Button type="submit" style={{ width: '40%', marginBottom: '2em', backgroundColor: '#fffff', marginTop: '40px' }}>
-                                                Back to home
-                                            </Button>
+        <>
+            <section className="login-content">
+                <Row className="m-0 align-items-center bg-white vh-100">
+                    <Col md="6">
+                        <Row className="justify-content-center">
+                            <Col md="10">
+                                <Card className="card-transparent shadow-none d-flex justify-content-center mb-0 auth-card">
+                                    <Card.Body>
+                                        <div className='d-md-block d-flex justify-content-center'>
+                                            <img src={logo} alt="Logo Tujuh Sembilan" className='position-absolute auth-logo' />
                                         </div>
-                                    </>
-                                    :
-                                    <>
-                                        <div className='text-center' style={{ marginBottom: '36px' }}>
-                                            <div style={{ fontWeight: 700, fontSize: '36px', fontFamily: '"SF Compact Rounded", sans-serif' }}>
-                                                {formHeader}
-                                            </div>
-                                            <div style={{ fontSize: '16px', lineHeight: '22px', color: '#8A92A6' }}>
-                                                Company Profile 79 CMS.
-                                            </div>
+                                        <div className={`d-flex justify-content-center w-100 h-100 ${isEmailSent ? '' : 'd-none'}`} style={{ marginTop: '-5rem' }}>
+                                            <div ref={animationContainer} style={{ width: '260px', height: '260px' }} />
                                         </div>
-                                        <Outlet />
-                                    </>
-                                }
-                            </div>
-                        </div>
+                                        {isEmailSent ?
+                                            <>
+                                                <h2 style={{ fontWeight: 700, fontSize: '36px', fontFamily: '"SF Compact Rounded", sans-serif', marginTop: '-3rem', color: '#23BD33' }}
+                                                    className='text-center mb-3'>
+                                                    Success !
+                                                </h2>
+                                                <Stack gap={1} className='d-flex align-items-center justify-content-center'>
+                                                    <p className='text-center' style={{ color: '#232D42' }}>
+                                                        A email has been send. Please check for an email from Tujuh Semilan and click on the included link to reset your password.
+                                                    </p>
+                                                    <Button variant="" className='button-submit primary' onClick={handleNavigate}>
+                                                        Back To Home
+                                                    </Button>
+                                                </Stack>
+                                            </>
+                                            :
+                                            <>
+                                                <h2 style={{ fontWeight: 700, fontSize: '36px', fontFamily: '"SF Compact Rounded", sans-serif', marginTop: '-0.75rem' }}
+                                                    className='text-center mb-2'>
+                                                    {formHeader}
+                                                </h2>
+                                                <p style={{ fontSize: '16px', lineHeight: '22px', color: '#8A92A6' }} className='text-center'>
+                                                    Company Profile 79 CMS.
+                                                </p>
+                                                <Outlet />
+                                            </>
+                                        }
+
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
                     </Col>
-                    <Col xs={6} style={{ backgroundColor: '#0078D7' }} className='position-relative overflow-y-hidden overflow-y-visible'>
-                        <img src={person} alt='Illustration' className='z-1 position-absolute top-50 start-50 translate-middle'></img>
-                        {/* <img src={eclipse} alt="" className='z-1 position-absolute start-50 translate-middle' style={{bottom: -420}} /> */}
-                        <img src={grapchicSide} alt='Illustration' className='position-absolute top-50 start-50 translate-middle'></img>
+                    <Col md='6' className='d-md-block d-none p-0 mt-n1 vh-100 overflow-hidden' style={{ background: '#0078D7' }}>
+                        <Image src={grapchicSide} fluid style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt='Graphic Side' />
                     </Col>
                 </Row>
-            </Container>
-            {/*  */}
-            {/* <img src={eclipse} alt="" style={{position: 'absolute', bottom: -50, right: -226, width: '80vw', maxWidth: '1216px'}} /> */}
-        </Container>
+            </section>
+        </>
     )
 }
 
 AuthLayout.propTypes = {
-    isEmailSent: PropTypes.bool.isRequired
+    isEmailSent: PropTypes.bool,
+    setIsEmailSent: PropTypes.func
 }
 export default AuthLayout;

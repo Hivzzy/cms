@@ -8,3 +8,8 @@ body {
 input+span {
     color: red;
 }
+
+/* Override bootstrap */
+.btn-primary {
+    background: #0078D7;
+}

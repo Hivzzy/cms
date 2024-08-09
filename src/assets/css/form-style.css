@@ -1,0 +1,107 @@
+div label {
+    color: #242845;
+    font-size: 14px;
+}
+
+div label::after {
+    content: ' *';
+    color: red;
+}
+
+div.form-check label::after {
+    content: '';
+}
+
+.form-control {
+    color: #242845;
+}
+
+.form-select {
+    color: #242845;
+}
+
+/* BUTTON */
+.button-submit.primary {
+    color: #fff;
+    border-color: #0078D7;
+    background-color: #0078D7;
+}
+
+.button-submit.primary:active {
+    color: #fff;
+    border-color: #0078D7;
+    background-color: #1853c1;
+}
+
+.button-submit.primary:hover {
+    color: #fff;
+    border-color: #0078D7;
+    background-color: #1853c1;
+}
+
+.button-submit {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
+    border-color: #23BD33;
+    background-color: #23BD33;
+    padding-top: 0.7rem;
+    padding-bottom: 0.75rem;
+}
+
+.button-cancel {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #23BD33;
+    border-color: #23BD33;
+    background: #fff;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.button-cancel.edit {
+    color: #FFBB34;
+    border-color: #FFBB34;
+    background-color: #fff;
+}
+
+.button-cancel.edit:hover {
+    color: #FFBB34;
+    border-color: #FFBB34;
+    background-color: #f3f3f3;
+}
+
+.button-submit.edit {
+    color: #fff;
+    border-color: #FFBB34;
+    background-color: #FFBB34;
+}
+
+.button-submit.edit:hover {
+    border-color: #FFBB34;
+    background-color: #e68917;
+}
+
+/* Danger */
+.button-cancel.danger {
+    color: #FF3548;
+    border-color: #FF3548;
+    background-color: #fff;
+}
+
+.button-cancel.danger:hover {
+    color: #FF3548;
+    border-color: #FF3548;
+    background-color: #f3f3f3;
+}
+
+.button-submit.danger {
+    color: #fff;
+    border-color: #FF3548;
+    background-color: #FF3548;
+}
+
+.button-submit.danger:hover {
+    border-color: #FF3548;
+    background-color: #FF3548;
+}
