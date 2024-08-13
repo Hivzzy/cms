@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
 import { useMediaQuery } from "react-responsive";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 
@@ -12,8 +12,10 @@ import QuillForm from "../../../components/form/QuillForm";
 
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
+import { useParams } from "react-router-dom";
+import { getArticleById } from "../../../services/apiServices";
 
-const AddArticle = () => {
+const EditArticle = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
@@ -21,11 +23,50 @@ const AddArticle = () => {
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
+    const { articleId } = useParams();
+    const [article, setArticle] = useState({
+        title: '',
+        releaseDate: '',
+        description: '',
+        image: '',
+        highlight: '',
+        status: '',
+    });
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                const data = await getArticleById(articleId);
+                if (data?.data) {
+                    setArticle(data.data);
+                    console.log(data.data);
+                } else {
+                    setArticle({});
+                }
+            } catch (error) {
+                console.error("Error API", error.message);
+            }
+        };
+
+        getData();
+    }, [])
+
     const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         defaultValues: {
             status: 'Active',
             highlight: 'Yes',
             description: ''
+        },
+        values: {
+            tittle: article.title,
+            releaseDate: article.releaseDate,
+            description: article.description,
+            image: article.image,
+            highlight: article.highlight,
+            status: article.status,
+            tags: article.metadata?.tags?.join(', '),
+            source: article.metadata?.source?.join(', '),
+            category: article.metadata?.category
         }
     });
 
@@ -79,7 +120,11 @@ const AddArticle = () => {
     };
 
     const removeImage = () => {
-        setImagePreview(null);
+        if (article.image) {
+            setArticle(prev => ({ ...prev, image: null }))
+        } else {
+            setImagePreview(null);
+        }
         document.getElementById('image').value = null;
     }
 
@@ -88,7 +133,7 @@ const AddArticle = () => {
             <Card>
                 <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                     <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Add Article</h5>
+                        <h5 className="card-title" style={{ color: '#242845' }}>Edit Article</h5>
                     </div>
                 </Card.Header>
                 <Card.Body>
@@ -117,7 +162,32 @@ const AddArticle = () => {
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
-                                    {imagePreview && (
+                                    {article.image ?
+                                        <>
+                                            <Image src={article.image} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <div className="d-flex align-items-center">
+                                                <div className="text-truncate">
+                                                    <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                        {article.image.split('/').pop()}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                                </div>
+                                            </div>
+                                        </>
+                                        :
+                                        imagePreview &&
+                                        <>
+                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <div>
+                                                <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                    {imagePreview.name}{imagePreview.name}
+                                                </span>
+                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                            </div>
+                                        </>}
+                                    {/* {imagePreview && (
                                         <>
                                             <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
                                             <div>
@@ -127,7 +197,7 @@ const AddArticle = () => {
                                                 <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
                                             </div>
                                         </>
-                                    )}
+                                    )} */}
                                 </Form.Group>
                                 <Form.Group controlId="tittle">
                                     <Form.Label>Tittle</Form.Label>
@@ -187,7 +257,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type='radio'
                                             id={`status-radio-1`}
-                                            value="Active"
+                                            value="ACTIVE"
                                             {...register('status', { required: 'Role is required' })}
                                         />
                                         <Form.Check
@@ -196,7 +266,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type="radio"
                                             id={`status-radio-2`}
-                                            value="Not Active"
+                                            value="NOT ACTIVE"
                                             {...register('status', { required: 'Role is required' })}
                                         />
                                     </div>
@@ -210,7 +280,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type='radio'
                                             id={`highlight-radio-1`}
-                                            value="Yes"
+                                            value="YES"
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                         <Form.Check
@@ -219,7 +289,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type="radio"
                                             id={`highlight-radio-2`}
-                                            value="No"
+                                            value="NO"
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                     </div>
@@ -240,7 +310,7 @@ const AddArticle = () => {
                                 </Form.Group>
                                 <Form.Group controlId="tags">
                                     <Form.Label>Tags</Form.Label>
-                                    <Form.Control type="password" placeholder="Example: code, programmer, etc"
+                                    <Form.Control type="text" placeholder="Example: code, programmer, etc"
                                         {...register('tags', {
                                             required: 'Tags is required'
                                         })} isInvalid={errors.tags}
@@ -265,6 +335,7 @@ const AddArticle = () => {
                                             value: 5, message: 'Input min 5 characters'
                                         }
                                     }}
+                                    initialValue={article.description}
                                 />
                             </Col>
                             <Row>
@@ -288,4 +359,4 @@ const AddArticle = () => {
     );
 }
 
-export default AddArticle
+export default EditArticle

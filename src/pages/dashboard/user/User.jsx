@@ -1,4 +1,4 @@
-import { Button, Card, Form, InputGroup, Pagination, Stack, Table } from "react-bootstrap"
+import { Button, Card, Form, InputGroup, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
 import { deleteUser, getAllUser } from "../../../services/apiServices";
 // import DataTable from "../../../src/components/DataTable";
@@ -9,7 +9,7 @@ import { GoTrash } from "react-icons/go";
 
 import { useMediaQuery } from 'react-responsive';
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ModalForm from "../../../components/form/ModalForm";
 import PaginationCustom from "../../../components/form/PaginationCustom";
 
@@ -18,15 +18,14 @@ const User = () => {
     const [users, setUsers] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState('');
-    const [pageSize, setPageSize] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(18);
 
-    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedData, setSelectedData] = useState(null);
 
     const handleSelectChange = (e) => {
         setSelectedValue(e.target.value);
@@ -75,18 +74,18 @@ const User = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedUser) => {
-        setSelectedUser(selectedUser);
+    const handleShow = (selectedData) => {
+        setSelectedData(selectedData);
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ userId: selectedUser.userId });
+            const response = await deleteUser({ userId: selectedData.userId });
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../user');
+                getData(pageSize, pageNumber, selectedValue, searchValue);
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -161,7 +160,7 @@ const User = () => {
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(user)}
+                                                onClick={() => handleShow(user.username)}
                                             >
                                                 <GoTrash />
                                             </Button>
@@ -177,18 +176,21 @@ const User = () => {
                             pageNumber={pageNumber}
                             setPageNumber={setPageNumber}
                             totalData={totalData}
+                            setPageSize={setPageSize}
                         />
                     </div>
                 </Card.Body>
             </Card>
             <ModalForm
                 show={show}
+                buttonType='danger'
                 handleClose={handleClose}
-                page='User'
-                data={selectedUser?.username}
+                page='Article'
+                data={selectedData}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
+                isDelete={true}
             />
         </>
     )

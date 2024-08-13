@@ -31,6 +31,7 @@ import "./assets/scss/customizer.scss"
 import Metadata from './pages/dashboard/metadata/Metadata';
 import Article from './pages/dashboard/article/Article';
 import AddArticle from './pages/dashboard/article/AddArticle';
+import EditArticle from './pages/dashboard/article/EditArticle';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -50,7 +51,7 @@ function App() {
             <Route path="/dashboard/metadata" element={<Metadata />}></Route>
             <Route path="/dashboard/article" element={<Article />}></Route>
             <Route path="/dashboard/article/add" element={<AddArticle />}></Route>
-            <Route path="/dashboard/article/edit/:articleId" element={<Article />}></Route>
+            <Route path="/dashboard/article/edit/:articleId" element={<EditArticle />}></Route>
             <Route path="/dashboard/article/detail/:articleId" element={<Article />}></Route>
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>

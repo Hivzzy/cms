@@ -4,9 +4,6 @@ import PropTypes from 'prop-types';
 
 const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setPageSize }) => {
     const totalPage = Math.ceil(totalData / pageSize);
-    console.log('totalData', totalData);
-    console.log('pageSize', pageSize);
-    console.log('totalPage', totalPage);
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
     const isSmallScreen = useMediaQuery({ query: '(max-width: 375px)' });

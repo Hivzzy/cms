@@ -77,3 +77,25 @@ export const getAllArticle = async (params) => {
         return error.response.data;
     }
 };
+
+export const getArticleById = async (id) => {
+    try {
+        const response = await apiClient.get(`/article-management/articles/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+export const deleteArticle = async (id) => {
+    try {
+        const response = await apiClient.delete(`/article-management/articles/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response);
+        return error.response.data;
+    }
+};

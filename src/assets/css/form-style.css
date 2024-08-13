@@ -16,7 +16,19 @@ div.form-check label::after {
     color: #242845;
 }
 
+div .form-select {
+    color: #242845;
+}
+
+div .form-control {
+    color: #242845;
+}
+
 .form-select {
+    color: #242845;
+}
+
+.ql-editor {
     color: #242845;
 }
 
@@ -59,6 +71,26 @@ div.form-check label::after {
     background: #fff;
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
+}
+
+.btn.button-submit:hover {
+    color: #fff;
+    background-color: #31a31f;
+}
+
+.btn.button-cancel {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #23BD33;
+    border-color: #23BD33;
+    background: #fff;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.btn.button-cancel:hover {
+    color: #31a31f;
+    border-color: #31a31f;
 }
 
 .button-submit.primary {

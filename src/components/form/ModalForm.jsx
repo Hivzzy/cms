@@ -5,7 +5,7 @@ import iconDelete from '../../assets/images/figma/modal-submit-delete.svg';
 import PropTypes from 'prop-types';
 
 const ModalForm = ({ show, handleClose, page, data, buttonType, formSubmit, isError, errorMessage, isDelete }) => {
-    return (
+    return ( 
         <Modal show={show} onHide={handleClose} centered aria-labelledby="contained-modal-title-vcenter" style={{ '--bs-modal-width': '400px' }}>
             <Modal.Header closeButton style={{ border: 'none' }} />
             <Stack className="px-4 d-flex justify-content-center text-center">

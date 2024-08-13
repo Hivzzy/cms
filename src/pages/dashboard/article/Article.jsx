@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllArticle } from "../../../services/apiServices";
+import { deleteArticle, getAllArticle } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -26,7 +26,6 @@ const Article = () => {
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(10);
 
-    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
@@ -89,25 +88,23 @@ const Article = () => {
 
     const handleShow = (selectedData) => {
         setSelectedData(selectedData);
-        console.log(selectedData);
-
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ userId: selectedData.userId });
+            const response = await deleteArticle(selectedData);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../user');
-            } else if (response.code === 400) {
+                getData(pageSize, pageNumber, selectedValue, searchValue);
+            } else {
                 setIsError(true);
                 setErrorMessage(response.message)
                 setShow(true);
             }
         } catch (error) {
-            console.error('Error:', error.response?.data || error.message);
+            console.error('Error:', error.response || error.message);
         }
     };
 
@@ -179,7 +176,7 @@ const Article = () => {
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data?.title)}
+                                                onClick={() => handleShow(data?.id)}
                                             >
                                                 <GoTrash />
                                             </Button>
