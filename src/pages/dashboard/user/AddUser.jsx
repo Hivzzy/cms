@@ -1,4 +1,4 @@
-import { Card, Col, Form, Row, Stack } from "react-bootstrap"
+import { Card, Col, Form, Row } from "react-bootstrap"
 import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
@@ -6,8 +6,9 @@ import { useMediaQuery } from "react-responsive";
 import { useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createUser } from "../../../services/apiServices";
+import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 
 const AddUser = () => {
     const navigate = useNavigate();
@@ -204,12 +205,7 @@ const AddUser = () => {
                             </Col>
                         </Row>
                         <Row>
-                            <Stack direction={isMobile ? "vertical" : "horizontal"} gap={3} className="justify-content-end mt-3">
-                                <Link to='../user'>
-                                    <button className="btn button-cancel">Cancel</button>
-                                </Link>
-                                <button className="btn button-submit" type="submit">Add Data</button>
-                            </Stack>
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../user' />
                         </Row>
                     </Form>
                 </Card.Body>

@@ -1,11 +1,13 @@
-import { Card, Col, Form, Row, Stack } from "react-bootstrap"
+import { Card, Col, Form, Row } from "react-bootstrap"
 import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
 import { getUserById, updateUser } from "../../../services/apiServices";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ModalForm from "../../../components/form/ModalForm";
+import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
+import { useMediaQuery } from "react-responsive";
 
 const EditUser = () => {
     const { userId } = useParams();
@@ -16,6 +18,8 @@ const EditUser = () => {
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
     const [formData, setFormData] = useState([]);
+
+    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
@@ -188,13 +192,7 @@ const EditUser = () => {
                             </Col>
                         </Row>
                         <Row className="mt-4">
-                            <Stack direction="horizontal" gap={3} className="justify-content-end mt-3">
-                                <Link to='../user'>
-                                    <button className="btn button-cancel edit">Cancel</button>
-                                </Link>
-                                {/* <Button className="button-submit edit" type="submit">Edit Data</Button> */}
-                                <button className="btn button-submit edit">Edit</button>
-                            </Stack>
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../user' typeButton='edit' />
                         </Row>
                     </Form>
                 </Card.Body>

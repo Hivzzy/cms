@@ -21,24 +21,6 @@ div.form-check label::after {
 }
 
 /* BUTTON */
-.button-submit.primary {
-    color: #fff;
-    border-color: #0078D7;
-    background-color: #0078D7;
-}
-
-.button-submit.primary:active {
-    color: #fff;
-    border-color: #0078D7;
-    background-color: #1853c1;
-}
-
-.button-submit.primary:hover {
-    color: #fff;
-    border-color: #0078D7;
-    background-color: #1853c1;
-}
-
 .button-submit {
     border-radius: 8px;
     font-weight: 600;
@@ -57,6 +39,44 @@ div.form-check label::after {
     background: #fff;
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
+}
+
+.btn.button-submit {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
+    border-color: #23BD33;
+    background-color: #23BD33;
+    padding-top: 0.7rem;
+    padding-bottom: 0.75rem;
+}
+
+.btn.button-cancel {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #23BD33;
+    border-color: #23BD33;
+    background: #fff;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.button-submit.primary {
+    color: #fff;
+    border-color: #0078D7;
+    background-color: #0078D7;
+}
+
+.button-submit.primary:active {
+    color: #fff;
+    border-color: #0078D7;
+    background-color: #1853c1;
+}
+
+.button-submit.primary:hover {
+    color: #fff;
+    border-color: #0078D7;
+    background-color: #1853c1;
 }
 
 .button-cancel.edit {

@@ -64,3 +64,16 @@ export const deleteUser = async (params) => {
         return error.response.data;
     }
 };
+
+// Article API
+export const getAllArticle = async (params) => {
+    try {
+        const response = await apiClient.get('/article-management/articles/cms-articles', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+};

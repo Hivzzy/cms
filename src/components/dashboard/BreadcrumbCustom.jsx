@@ -9,8 +9,8 @@ const BreadcrumbCustom = () => {
         <Breadcrumb>
             {pathnames.map((value, index) => {
                 const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-                console.log("nilai to", to);
-                console.log("nilai path", pathnames);
+                // console.log("nilai to", to);
+                // console.log("nilai path", pathnames);
                 if (value === "dashboard" && value.length > 1) {
                     return null;
                 }
