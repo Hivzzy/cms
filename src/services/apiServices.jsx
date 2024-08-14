@@ -7,6 +7,31 @@ const apiClient = axios.create({
     },
 });
 
+apiClient.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// Auth API
+export const authSignIn = async (body) => {
+    try {
+        const response = await apiClient.post('/auth-management/auth/sign-in', body);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+};
+
 // User API
 export const getAllUser = async (params) => {
     try {
@@ -14,7 +39,7 @@ export const getAllUser = async (params) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         // throw error;
         return error.response.data;
     }
@@ -26,7 +51,7 @@ export const createUser = async (body) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         return error.response.data;
     }
 };
@@ -37,7 +62,7 @@ export const getUserById = async (params) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         return error.response.data;
     }
 };
@@ -49,7 +74,7 @@ export const updateUser = async (body, params) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         return error.response.data;
     }
 };
@@ -60,7 +85,7 @@ export const deleteUser = async (params) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         return error.response.data;
     }
 };
@@ -72,7 +97,7 @@ export const getAllArticle = async (params) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         // throw error;
         return error.response.data;
     }
@@ -84,7 +109,7 @@ export const getArticleById = async (id) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response.data);
+        console.error('Get error data:', error.response.data);
         return error.response.data;
     }
 };
@@ -95,7 +120,38 @@ export const deleteArticle = async (id) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get data:', error.response);
+        console.error('Get error data:', error.response);
+        return error.response.data;
+    }
+};
+
+export const createArticle = async (request, imageFile) => {
+    const formData = new FormData();
+    try {
+        const json = JSON.stringify(request);
+        const blob = new Blob([json], {
+            type: 'application/json'
+        });
+
+        formData.append('request', blob);
+
+        formData.append('file', imageFile[0]);
+
+        console.log('formData API request', request);
+        console.log('formData API request', JSON.stringify(request));
+        console.log('formData API', imageFile[0]);
+
+
+        const response = await apiClient.post('/article-management/articles', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        // throw error;
         return error.response.data;
     }
 };

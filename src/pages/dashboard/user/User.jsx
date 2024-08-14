@@ -20,7 +20,7 @@ const User = () => {
     const [searchValue, setSearchValue] = useState('');
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
-    const [totalData, setTotalData] = useState(18);
+    const [totalData, setTotalData] = useState(0);
 
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -40,9 +40,10 @@ const User = () => {
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
             const data = await getAllUser(
-                { pageSize, pageNumber, [selectedValue]: searchValue }
+                { size: pageSize, page: pageNumber, [selectedValue]: searchValue }
             );
             if (data?.data) {
+                setTotalData(data.total)
                 setUsers(data.data);
             } else {
                 setUsers([]);

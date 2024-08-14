@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 const ButtonFormBottom = ({ isMobile, navigateCancelPath, typeButton }) => {
   const navigate = useNavigate();
   const buttonPageStyle = typeButton !== undefined ? typeButton : '';
-  console.log('prop type', buttonPageStyle);
   
   return (
     <Stack direction={isMobile ? "vertical" : "horizontal"} gap={3} className="justify-content-end mt-3">

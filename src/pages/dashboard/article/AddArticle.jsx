@@ -12,12 +12,17 @@ import QuillForm from "../../../components/form/QuillForm";
 
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
+import { createArticle } from "../../../services/apiServices";
 
 const AddArticle = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
-    const [formData, setFormData] = useState([]);
+    const [formData, setFormData] = useState({
+        source: '',
+        tags: ''
+    });
+    const [image, setImage] = useState();
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
@@ -25,24 +30,22 @@ const AddArticle = () => {
         defaultValues: {
             status: 'Active',
             highlight: 'Yes',
-            description: ''
+            description: '',
         }
     });
 
     const formSubmit = async () => {
         try {
-            console.log('formData', formData);
-
-            // const response = await createUser(formData);
-            // console.log('Success:', response);
-            // setShow(false);
-            // if (response.code === 200) {
-            //     navigate('../user');
-            // } else if (response.code === 400) {
-            //     setIsError(true);
-            //     setErrorMessage(response.message)
-            //     setShow(true);
-            // }
+            const response = await createArticle(formData, image);
+            console.log('response:', response);
+            setShow(false);
+            if (response.code === 200) {
+                console.log('Success:', response);
+            } else if (response.code === 400) {
+                setIsError(true);
+                setErrorMessage(response.message)
+                setShow(true);
+            }
         } catch (error) {
             console.error('Error:', error.response?.data || error.message);
         }
@@ -57,7 +60,24 @@ const AddArticle = () => {
     }
 
     const handleShow = (data) => {
-        setFormData(data);
+        // setFormData(data);
+        const sourceArray = typeof data.source === 'string' ? data.source.split(", ") : [data.source];
+        const tagsArray = typeof data.tags === 'string' ? data.tags.split(", ") : [data.tags];
+
+        setImage(data.image);
+
+        setFormData(prevData => ({
+            ...prevData,
+            category: data.category,
+            description: data.description,
+            highlight: data.highlight,
+            releaseDate: data.releaseDate,
+            status: data.status,
+            title: data.title,
+            source: sourceArray,
+            tags: tagsArray,
+            createdBy: 'ADMIN'
+        }))
         setShow(true);
     }
 
@@ -69,8 +89,6 @@ const AddArticle = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview({ name: file.name, src: reader.result });
-                console.log('imagePrev', reader.result);
-
             };
             reader.readAsDataURL(file);
         } else {
@@ -120,27 +138,31 @@ const AddArticle = () => {
                                     {imagePreview && (
                                         <>
                                             <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
-                                            <div>
-                                                <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
-                                                    {imagePreview.name}{imagePreview.name}
-                                                </span>
-                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                            <div className="d-flex align-items-center">
+                                                <div className="text-truncate">
+                                                    <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                        {imagePreview.name}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                                </div>
                                             </div>
                                         </>
                                     )}
                                 </Form.Group>
-                                <Form.Group controlId="tittle">
+                                <Form.Group controlId="title">
                                     <Form.Label>Tittle</Form.Label>
-                                    <Form.Control type="text" placeholder="Tittle"
-                                        {...register('tittle', {
+                                    <Form.Control type="text" placeholder="title"
+                                        {...register('title', {
                                             required: 'Tittle is required',
                                             minLength: { value: 5, message: 'Input min 5 characters' },
                                             maxLength: { value: 255, message: 'Input max 255 characters' }
-                                        })} isInvalid={errors.tittle}
+                                        })} isInvalid={errors.title}
                                     />
-                                    {errors.tittle ?
+                                    {errors.title ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.tittle?.message}
+                                            {errors.title?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
@@ -240,7 +262,7 @@ const AddArticle = () => {
                                 </Form.Group>
                                 <Form.Group controlId="tags">
                                     <Form.Label>Tags</Form.Label>
-                                    <Form.Control type="password" placeholder="Example: code, programmer, etc"
+                                    <Form.Control type="text" placeholder="Example: code, programmer, etc"
                                         {...register('tags', {
                                             required: 'Tags is required'
                                         })} isInvalid={errors.tags}
@@ -277,7 +299,7 @@ const AddArticle = () => {
                     show={show}
                     handleClose={handleClose}
                     page='Article'
-                    data={formData?.tittle}
+                    data={formData?.title}
                     formSubmit={formSubmit}
                     isError={isError}
                     errorMessage={errorMessage}

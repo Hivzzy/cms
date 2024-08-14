@@ -25,9 +25,6 @@ const QuillForm = ({ formError, setValue, register, formName, validationRules, i
         'link', 'image', 'code-block', 'blockquote'
     ];
 
-    console.log('init val', initialValue);
-
-
     const { quill, quillRef } = useQuill({ theme, modules, formats });
 
     useEffect(() => {
