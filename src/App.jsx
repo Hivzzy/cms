@@ -31,6 +31,15 @@ import "./assets/scss/customizer.scss"
 import Metadata from './pages/dashboard/metadata/Metadata';
 import Article from './pages/dashboard/article/Article';
 import AddArticle from './pages/dashboard/article/AddArticle';
+import Career from './pages/dashboard/career/Career';
+import AddCareer from './pages/dashboard/career/AddCareer';
+import EditCareer from './pages/dashboard/career/EditCareer';
+import ClientCategory from './pages/dashboard/client-category/ClientCategory';
+import AddClientCategory from './pages/dashboard/client-category/AddClientCategory';
+import EditClientCategory from './pages/dashboard/client-category/EditClientCategory';
+import Client from './pages/dashboard/client/Client';
+import AddClient from './pages/dashboard/client/AddClient';
+import EditClient from './pages/dashboard/client/EditClient';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -52,6 +61,15 @@ function App() {
             <Route path="/dashboard/article/add" element={<AddArticle />}></Route>
             <Route path="/dashboard/article/edit/:articleId" element={<Article />}></Route>
             <Route path="/dashboard/article/detail/:articleId" element={<Article />}></Route>
+            <Route path="/dashboard/career" element={<Career />}></Route>
+            <Route path="/dashboard/career/add" element={<AddCareer />}></Route>
+            <Route path="/dashboard/career/edit/:careerId" element={<EditCareer />}></Route>
+            <Route path="/dashboard/clientCategory" element={<ClientCategory />}></Route>
+            <Route path="/dashboard/clientCategory/add" element={<AddClientCategory />}></Route>
+            <Route path="/dashboard/clientCategory/edit/:clientCategoryId" element={<EditClientCategory />}></Route>
+            <Route path="/dashboard/client" element={<Client />}></Route>
+            <Route path="/dashboard/client/add" element={<AddClient />}></Route>
+            <Route path="/dashboard/client/edit/:clientId" element={<EditClient />}></Route>
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>
             <Route path="/dashboard/user/edit/:userId" element={<EditUser />}></Route>

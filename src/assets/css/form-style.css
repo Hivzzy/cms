@@ -1,127 +1,165 @@
 div label {
-    color: #242845;
-    font-size: 14px;
+	color: #242845;
+	font-size: 14px;
 }
 
 div label::after {
-    content: ' *';
-    color: red;
+	content: " *";
+	color: red;
 }
 
 div.form-check label::after {
-    content: '';
+	content: "";
 }
 
 .form-control {
-    color: #242845;
+	color: #242845;
 }
 
 .form-select {
-    color: #242845;
+	color: #242845;
 }
 
 /* BUTTON */
 .button-submit {
-    border-radius: 8px;
-    font-weight: 600;
-    color: #fff;
-    border-color: #23BD33;
-    background-color: #23BD33;
-    padding-top: 0.7rem;
-    padding-bottom: 0.75rem;
+	border-radius: 8px;
+	font-weight: 600;
+	color: #fff;
+	border-color: #23bd33;
+	background-color: #23bd33;
+	padding-top: 0.7rem;
+	padding-bottom: 0.75rem;
 }
 
 .button-cancel {
-    border-radius: 8px;
-    font-weight: 600;
-    color: #23BD33;
-    border-color: #23BD33;
-    background: #fff;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+	border-radius: 8px;
+	font-weight: 600;
+	color: #23bd33;
+	border-color: #23bd33;
+	background: #fff;
+	padding-top: 0.75rem;
+	padding-bottom: 0.75rem;
 }
 
 .btn.button-submit {
-    border-radius: 8px;
-    font-weight: 600;
-    color: #fff;
-    border-color: #23BD33;
-    background-color: #23BD33;
-    padding-top: 0.7rem;
-    padding-bottom: 0.75rem;
+	border-radius: 8px;
+	font-weight: 600;
+	color: #fff;
+	border-color: #23bd33;
+	background-color: #23bd33;
+	padding-top: 0.7rem;
+	padding-bottom: 0.75rem;
 }
 
 .btn.button-cancel {
-    border-radius: 8px;
-    font-weight: 600;
-    color: #23BD33;
-    border-color: #23BD33;
-    background: #fff;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+	border-radius: 8px;
+	font-weight: 600;
+	color: #23bd33;
+	border-color: #23bd33;
+	background: #fff;
+	padding-top: 0.75rem;
+	padding-bottom: 0.75rem;
 }
 
 .button-submit.primary {
-    color: #fff;
-    border-color: #0078D7;
-    background-color: #0078D7;
+	color: #fff;
+	border-color: #0078d7;
+	background-color: #0078d7;
 }
 
 .button-submit.primary:active {
-    color: #fff;
-    border-color: #0078D7;
-    background-color: #1853c1;
+	color: #fff;
+	border-color: #0078d7;
+	background-color: #1853c1;
 }
 
 .button-submit.primary:hover {
-    color: #fff;
-    border-color: #0078D7;
-    background-color: #1853c1;
+	color: #fff;
+	border-color: #0078d7;
+	background-color: #1853c1;
 }
 
 .button-cancel.edit {
-    color: #FFBB34;
-    border-color: #FFBB34;
-    background-color: #fff;
+	color: #ffbb34;
+	border-color: #ffbb34;
+	background-color: #fff;
 }
 
 .button-cancel.edit:hover {
-    color: #FFBB34;
-    border-color: #FFBB34;
-    background-color: #f3f3f3;
+	color: #ffbb34;
+	border-color: #ffbb34;
+	background-color: #f3f3f3;
 }
 
 .button-submit.edit {
-    color: #fff;
-    border-color: #FFBB34;
-    background-color: #FFBB34;
+	color: #fff;
+	border-color: #ffbb34;
+	background-color: #ffbb34;
 }
 
 .button-submit.edit:hover {
-    border-color: #FFBB34;
-    background-color: #e68917;
+	border-color: #ffbb34;
+	background-color: #e68917;
 }
 
 /* Danger */
 .button-cancel.danger {
-    color: #FF3548;
-    border-color: #FF3548;
-    background-color: #fff;
+	color: #ff3548;
+	border-color: #ff3548;
+	background-color: #fff;
 }
 
 .button-cancel.danger:hover {
-    color: #FF3548;
-    border-color: #FF3548;
-    background-color: #f3f3f3;
+	color: #ff3548;
+	border-color: #ff3548;
+	background-color: #f3f3f3;
 }
 
 .button-submit.danger {
-    color: #fff;
-    border-color: #FF3548;
-    background-color: #FF3548;
+	color: #fff;
+	border-color: #ff3548;
+	background-color: #ff3548;
 }
 
 .button-submit.danger:hover {
-    border-color: #FF3548;
+	border-color: #ff3548;
+	background-color: #ff3548;
+}
+/* ini yang saya buat*/ 
+.button-cancel.detailCareer {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #0078D7; /* Blue color */
+    border-color: #0078D7;
+    background-color: #fff;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+.button-cancel.detailCareer:hover {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff; /* Blue color */
+	border-color: #0078D7;
+	background-color: #0078D7;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+.button-submit.detailCareer {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #e3e3e3; /* Red color */
     background-color: #FF3548;
+    border-color:#FF3548 ;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.button-edit.detailCareer {
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff; /* Yellow color */
+    background-color: #FFBB34;
+    border-color:#FFBB34 ;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
 }
