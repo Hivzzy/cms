@@ -13,8 +13,10 @@ import QuillForm from "../../../components/form/QuillForm";
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
 import { createArticle } from "../../../services/apiServices";
+import { useNavigate } from "react-router-dom";
 
 const AddArticle = () => {
+    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
@@ -38,10 +40,12 @@ const AddArticle = () => {
         try {
             const response = await createArticle(formData, image);
             console.log('response:', response);
-            setShow(false);
             if (response.code === 200) {
-                console.log('Success:', response);
-            } else if (response.code === 400) {
+                setIsError(false);
+                setErrorMessage('')
+                setShow(false);
+                // navigate('../metadata');
+            } else {
                 setIsError(true);
                 setErrorMessage(response.message)
                 setShow(true);
@@ -60,14 +64,12 @@ const AddArticle = () => {
     }
 
     const handleShow = (data) => {
-        // setFormData(data);
         const sourceArray = typeof data.source === 'string' ? data.source.split(", ") : [data.source];
         const tagsArray = typeof data.tags === 'string' ? data.tags.split(", ") : [data.tags];
 
         setImage(data.image);
 
-        setFormData(prevData => ({
-            ...prevData,
+        setFormData({
             category: data.category,
             description: data.description,
             highlight: data.highlight,
@@ -76,7 +78,11 @@ const AddArticle = () => {
             title: data.title,
             source: sourceArray,
             tags: tagsArray,
-        }))
+            // For dev
+            createdBy: 'ADMIN',
+            modifiedBy: 'ADMIN'
+        })
+
         setShow(true);
     }
 

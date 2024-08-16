@@ -33,6 +33,7 @@ import Article from './pages/dashboard/article/Article';
 import AddArticle from './pages/dashboard/article/AddArticle';
 import EditArticle from './pages/dashboard/article/EditArticle';
 import AddMetadata from './pages/dashboard/metadata/AddMetadata';
+import EditMetadata from './pages/dashboard/metadata/EditMetadata';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -51,6 +52,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="/dashboard/metadata" element={<Metadata />}></Route>
             <Route path="/dashboard/metadata/add" element={<AddMetadata />}></Route>
+            <Route path="/dashboard/metadata/edit/:id" element={<EditMetadata />}></Route>
 
             <Route path="/dashboard/article" element={<Article />}></Route>
             <Route path="/dashboard/article/add" element={<AddArticle />}></Route>

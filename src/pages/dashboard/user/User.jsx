@@ -40,7 +40,7 @@ const User = () => {
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
             const data = await getAllUser(
-                { size: pageSize, page: pageNumber, [selectedValue]: searchValue }
+                { pageSize: pageSize, pageNumber: pageNumber, [selectedValue]: searchValue }
             );
             if (data?.data) {
                 setTotalData(data.total)
@@ -58,7 +58,7 @@ const User = () => {
 
     useEffect(() => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
-    }, []);
+    }, [pageSize, pageNumber]);
 
     const userTableHeader = ["FULLNAME", "USERNAME", "EMAIL", "ROLE", "STATUS", "ACTION"];
 
@@ -82,7 +82,7 @@ const User = () => {
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ userId: selectedData.userId });
+            const response = await deleteUser(selectedData.userId);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {

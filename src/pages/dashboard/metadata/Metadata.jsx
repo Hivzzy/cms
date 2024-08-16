@@ -8,6 +8,8 @@ import ModalForm from "../../../components/form/ModalForm";
 import PaginationCustom from "../../../components/form/PaginationCustom";
 import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
 import DashboardRowActionButton from "../../../components/dashboard/DashboardRowActionButton";
+import MetadataForm from "./MetadataForm";
+import DashboardCard from "../DashboardCard";
 
 const Metadata = () => {
     const [metadata, setMetadata] = useState([
@@ -162,7 +164,7 @@ const Metadata = () => {
                                             setSelectedData={setSelectedData}
                                             data={data?.code}
                                             handleShowModalDetail={handleShowModalDetail}
-                                            linkToEdit={''}
+                                            linkToEdit={`./edit/${data.id}`}
                                             dataId={data.id}
                                         />
                                     </tr>
@@ -194,8 +196,13 @@ const Metadata = () => {
             />
 
             {/* Modal Detail */}
-            <Modal show={showDetail} onHide={handleCloseDetail} centered>
-                 
+            <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '80%' }}>
+                <DashboardCard cardTittle="Detail Metadata">
+                    <MetadataForm
+                        defaultValues={metadataDetail}
+                        isJustDetail={true}
+                    />
+                </DashboardCard>
             </Modal>
         </>
     )

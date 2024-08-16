@@ -21,7 +21,7 @@ const Article = () => {
         status: ''
     });
     const [pageSize, setPageSize] = useState(10);
-    const [pageNumber, setPageNumber] = useState(0);
+    const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(10);
 
     const [isError, setIsError] = useState(false);
@@ -33,8 +33,10 @@ const Article = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
+            console.log('panggil api, page Number', pageNumber);
+            
             const data = await getAllArticle(
-                { size: pageSize, page: pageNumber, [selectedValue]: searchValue[selectedValue] }
+                { pageSize: pageSize, pageNumber: pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
 
             if (data?.data) {

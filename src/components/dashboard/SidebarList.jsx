@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import PropTypes from 'prop-types';
 
 function SidebarList({path, name, icon}) {
+    const location = useLocation();
     return (
         <li className={`${location.pathname === path ? 'active' : ''} nav-item `}>
             <Link className={`${location.pathname === path ? 'active' : ''} nav-link `} aria-current="page" to={path} onClick={() => { }}>

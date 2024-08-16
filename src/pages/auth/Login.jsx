@@ -66,7 +66,8 @@ const Login = () => {
         </Form.Group>
         <Form.Group className="mb-1" controlId="formGroupPassword">
           <Form.Label className="mb-1">Password</Form.Label>
-          <Form.Control type="password" placeholder="Password" autoComplete='current-password'
+          <div className="password-wrapper" style={{ position: 'relative' }}>
+<Form.Control type="password" placeholder="Password" autoComplete='current-password'
             {...register('password', {
               required: 'Password is required',
               minLength: { value: 8, message: 'Input min 8 character' },
@@ -81,6 +82,8 @@ const Login = () => {
               // }
             })}
           />
+          </div>
+          
           {errors.password ? <span>{errors.password.message}</span> : <br></br>}
         </Form.Group>
         <Stack gap={1} className='d-flex align-items-center justify-content-center'>

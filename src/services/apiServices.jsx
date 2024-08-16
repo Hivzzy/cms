@@ -62,9 +62,9 @@ export const createUser = async (body) => {
     }
 };
 
-export const getUserById = async (params) => {
+export const getUserById = async (id) => {
     try {
-        const response = await apiClient.get('/user-management/users/id', { params });
+        const response = await apiClient.get(`/user-management/users/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -85,9 +85,9 @@ export const updateUser = async (body, params) => {
     }
 };
 
-export const deleteUser = async (params) => {
+export const deleteUser = async (id) => {
     try {
-        const response = await apiClient.delete('/user-management/users/id', { params });
+        const response = await apiClient.delete(`/user-management/users/id/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -138,9 +138,9 @@ export const createArticle = async (request, imageFile) => {
         const blob = new Blob([json], {
             type: 'application/json'
         });
-
+        console.log('form data di api', request);
+        console.log('blob di api', blob);
         formData.append('request', blob);
-
         formData.append('file', imageFile[0]);
 
         const response = await apiClient.post('/article-management/articles', formData, {
@@ -165,6 +165,8 @@ export const updateArticle = async (request, imageFile) => {
             type: 'application/json'
         });
         formData.append('request', blob);
+        console.log('form data di api', request);
+        console.log('blob di api', blob);
         
         if (imageFile === null) {
             const imageFromURL = await urlToFile(request.image, request.title, 'image/jpeg');

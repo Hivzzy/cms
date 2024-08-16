@@ -78,7 +78,7 @@ const EditArticle = () => {
             const response = await updateArticle(formData, image);
             setShow(false);
             if (response.code === 201) {
-                // navigate('../metadata');
+                navigate('../metadata');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -110,6 +110,7 @@ const EditArticle = () => {
         }
 
         setFormData({
+            articleId: data.id,
             category: data.category,
             description: data.description,
             highlight: data.highlight,

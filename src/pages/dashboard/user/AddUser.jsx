@@ -101,25 +101,10 @@ const AddUser = () => {
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="email">
-                                    <Form.Label>Email</Form.Label>
-                                    <Form.Control type="email" placeholder="Email"
-                                        {...register('email', {
-                                            required: 'Email is required',
-                                            minLength: { value: 5, message: 'Input min 5 character' },
-                                            maxLength: { value: 100, message: 'Input max 100 character' }
-                                        })} isInvalid={errors.email}
-                                    />
-                                    {errors.email ?
-                                        <Form.Control.Feedback type="invalid">
-                                            {errors.email?.message}
-                                        </Form.Control.Feedback>
-                                        : <br></br>
-                                    }
-                                </Form.Group>
+                                
                             </Col>
                             <Col md='6' sm='12'>
-                                <Form.Group controlId="password">
+                                {/* <Form.Group controlId="password">
                                     <Form.Label>Password</Form.Label>
                                     <Form.Control type="password" placeholder="Password"
                                         {...register('password', {
@@ -165,6 +150,22 @@ const AddUser = () => {
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
+                                </Form.Group> */}
+                                <Form.Group controlId="email">
+                                    <Form.Label>Email</Form.Label>
+                                    <Form.Control type="email" placeholder="Email"
+                                        {...register('email', {
+                                            required: 'Email is required',
+                                            minLength: { value: 5, message: 'Input min 5 character' },
+                                            maxLength: { value: 100, message: 'Input max 100 character' }
+                                        })} isInvalid={errors.email}
+                                    />
+                                    {errors.email ?
+                                        <Form.Control.Feedback type="invalid">
+                                            {errors.email?.message}
+                                        </Form.Control.Feedback>
+                                        : <br></br>
+                                    }
                                 </Form.Group>
                                 <Form.Group controlId="role">
                                     <Form.Label>Role</Form.Label>
@@ -178,29 +179,6 @@ const AddUser = () => {
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
-                                </Form.Group>
-                                <Form.Group controlId="status" className="mb-2">
-                                    <Form.Label>Status</Form.Label>
-                                    <div key='inline-radio'>
-                                        <Form.Check
-                                            inline
-                                            label="Active"
-                                            name="group1"
-                                            type='radio'
-                                            id={`inline-radio-1`}
-                                            value="Active"
-                                            {...register('status', { required: 'Role is required' })}
-                                        />
-                                        <Form.Check
-                                            inline
-                                            label="Not Active"
-                                            name="group1"
-                                            type="radio"
-                                            id={`inline-radio-2`}
-                                            value="Not Active"
-                                            {...register('status', { required: 'Role is required' })}
-                                        />
-                                    </div>
                                 </Form.Group>
                             </Col>
                         </Row>
