@@ -4,29 +4,29 @@ import PropTypes from 'prop-types';
 
 const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setPageSize }) => {
     const totalPage = Math.ceil(totalData / pageSize);
-    console.log('totalData', totalData);
-    console.log('pageSize', pageSize);
-    console.log('totalPage', totalPage);
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
     const isSmallScreen = useMediaQuery({ query: '(max-width: 375px)' });
 
     const handleChangePage = (number) => {
-        setPageNumber(number)
+        setPageNumber(number - 1)
     }
 
     const handleNextPage = () => {
         setPageNumber(prev => prev + 1)
+        // console.log('change page', number);
     }
 
     const handlePreviousPage = () => {
         setPageNumber(prev => prev - 1)
     }
 
+    const numberPage = pageNumber + 1;
+
     const renderPaginationItems = () => {
         const items = [];
-        const isNearStart = isMobile ? pageNumber <= 2 : pageNumber <= 4;
-        const isNearEnd = isMobile ? pageNumber >= totalPage - 1 : pageNumber >= totalPage - 3;
+        const isNearStart = isMobile ? numberPage <= 2 : numberPage <= 4;
+        const isNearEnd = isMobile ? numberPage >= totalPage - 1 : numberPage >= totalPage - 3;
         const isInMiddle = !isNearStart && !isNearEnd;
 
         const mddlePaginationValue = isMobile ? 0 : 1;
@@ -39,7 +39,7 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
 
         // Halaman no 1
         items.push(
-            <Pagination.Item key={1} active={1 === pageNumber} onClick={() => handleChangePage(1)}>
+            <Pagination.Item key={1} active={1 === numberPage} onClick={() => handleChangePage(1)}>
                 1
             </Pagination.Item>
         );
@@ -48,7 +48,7 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             // Halaman lainnya
             for (let number = 2; number <= Math.min(7, totalPage - 1); number++) {
                 items.push(
-                    <Pagination.Item key={number} active={number === pageNumber} onClick={() => handleChangePage(number)}>
+                    <Pagination.Item key={number} active={number === numberPage} onClick={() => handleChangePage(number)}>
                         {number}
                     </Pagination.Item>
                 );
@@ -57,7 +57,7 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             // Halaman terakhir
             if (totalPage > 1) {
                 items.push(
-                    <Pagination.Item key={totalPage} active={totalPage === pageNumber} onClick={() => handleChangePage(totalPage)}>
+                    <Pagination.Item key={totalPage} active={totalPage === numberPage} onClick={() => handleChangePage(totalPage)}>
                         {totalPage}
                     </Pagination.Item>
                 );
@@ -65,20 +65,20 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
 
         } else {
             // Ellipsis near one if reach last page
-            if (pageNumber >= ellipsisNearOne && !isInMiddle) {
+            if (numberPage >= ellipsisNearOne && !isInMiddle) {
                 items.push(<Pagination.Ellipsis key="end-ellipsis" />);
             }
 
             // Left ellipsis after reach middle pagination
-            if (isInMiddle && pageNumber > leftElippsisInMiddle) {
+            if (isInMiddle && numberPage > leftElippsisInMiddle) {
                 items.push(<Pagination.Ellipsis key="start-ellipsis" />);
             }
 
             // Shown when reach middle pagination
             if (isInMiddle) {
-                for (let number = pageNumber - mddlePaginationValue; number <= pageNumber + mddlePaginationValue; number++) {
+                for (let number = numberPage - mddlePaginationValue; number <= numberPage + mddlePaginationValue; number++) {
                     items.push(
-                        <Pagination.Item key={number} active={number === pageNumber} onClick={() => handleChangePage(number)}>
+                        <Pagination.Item key={number} active={number === numberPage} onClick={() => handleChangePage(number)}>
                             {number}
                         </Pagination.Item>
                     );
@@ -89,7 +89,7 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             if (isNearStart) {
                 for (let number = 2; number <= Math.min(maxFirstPage, totalPage - 1); number++) {
                     items.push(
-                        <Pagination.Item key={number} active={number === pageNumber} onClick={() => handleChangePage(number)}>
+                        <Pagination.Item key={number} active={number === numberPage} onClick={() => handleChangePage(number)}>
                             {number}
                         </Pagination.Item>
                     );
@@ -97,7 +97,7 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             }
 
             // Right ellipsis after reach middle pagination
-            if (isInMiddle && pageNumber < totalPage - rightElippsisInMiddle) {
+            if (isInMiddle && numberPage < totalPage - rightElippsisInMiddle) {
                 items.push(<Pagination.Ellipsis key="end-ellipsis" />);
             }
 
@@ -105,7 +105,7 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             if (isNearEnd) {
                 for (let number = Math.max(totalPage - maxLastPage, 2); number <= totalPage; number++) {
                     items.push(
-                        <Pagination.Item key={number} active={number === pageNumber} onClick={() => handleChangePage(number)}>
+                        <Pagination.Item key={number} active={number === numberPage} onClick={() => handleChangePage(number)}>
                             {number}
                         </Pagination.Item>
                     );
@@ -113,14 +113,14 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             }
 
             // Elipsis sebelah kiri jika berada di 4 halaman terakhir
-            if (pageNumber <= 4 && !isInMiddle) {
+            if (numberPage <= 4 && !isInMiddle) {
                 items.push(<Pagination.Ellipsis key="end-ellipsis" />);
             }
 
             // Halaman terakhir yang selalu muncul
             if (!isNearEnd && totalPage > 1) {
                 items.push(
-                    <Pagination.Item key={totalPage} active={totalPage === pageNumber} onClick={() => handleChangePage(totalPage)}>
+                    <Pagination.Item key={totalPage} active={totalPage === numberPage} onClick={() => handleChangePage(totalPage)}>
                         {totalPage}
                     </Pagination.Item>
                 );
@@ -138,9 +138,9 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
         <>
             {/* <Pagination> */}
             <Pagination size={isSmallScreen ? 'sm' : ''}>
-                <Pagination.First onClick={handlePreviousPage} disabled={pageNumber == 1} />
+                <Pagination.First onClick={handlePreviousPage} disabled={numberPage == 1} />
                 {renderPaginationItems()}
-                <Pagination.Last onClick={handleNextPage} disabled={pageNumber === totalPage} />
+                <Pagination.Last onClick={handleNextPage} disabled={numberPage === totalPage} />
             </Pagination>
             <div className={`ms-3`}>
                 <select className="form-select form-select-sm" aria-label="Default select example" onChange={handleChangeSelect}>

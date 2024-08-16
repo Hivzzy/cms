@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
 import { useMediaQuery } from "react-responsive";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 
@@ -12,35 +12,73 @@ import QuillForm from "../../../components/form/QuillForm";
 
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
-import { createArticle } from "../../../services/apiServices";
+import { useNavigate, useParams } from "react-router-dom";
+import { getArticleById, updateArticle } from "../../../services/apiServices";
 
-const AddArticle = () => {
+const EditArticle = () => {
+    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
-    const [formData, setFormData] = useState({
-        source: '',
-        tags: ''
-    });
-    const [image, setImage] = useState();
+    const [formData, setFormData] = useState([]);
+    const [isUpdateImage, setIsUpdateImage] = useState(false)
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
+    const { articleId } = useParams();
+    const [article, setArticle] = useState({
+        title: '',
+        releaseDate: '',
+        description: '',
+        image: '',
+        highlight: '',
+        status: '',
+    });
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                const data = await getArticleById(articleId);
+                if (data?.data) {
+                    setArticle(data.data);
+                    console.log('useEffect awal', data.data);
+                } else {
+                    setArticle({});
+                }
+            } catch (error) {
+                console.error("Error API", error.message);
+            }
+        };
+
+        getData();
+    }, [])
+
     const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         defaultValues: {
-            status: 'Active',
-            highlight: 'Yes',
-            description: '',
+            status: 'ACTIVE',
+            highlight: 'YES',
+            description: ''
+        },
+        values: {
+            title: article.title,
+            releaseDate: article.releaseDate,
+            description: article.description,
+            highlight: article.highlight,
+            status: article.status,
+            tags: article.metadata?.tags?.join(', '),
+            source: article.metadata?.source?.join(', '),
+            category: article.metadata?.category
         }
     });
 
+    const [image, setImage] = useState(null);
+
     const formSubmit = async () => {
         try {
-            const response = await createArticle(formData, image);
-            console.log('response:', response);
+            const response = await updateArticle(formData, image);
             setShow(false);
-            if (response.code === 200) {
-                console.log('Success:', response);
+            if (response.code === 201) {
+                // navigate('../metadata');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -60,14 +98,18 @@ const AddArticle = () => {
     }
 
     const handleShow = (data) => {
-        // setFormData(data);
         const sourceArray = typeof data.source === 'string' ? data.source.split(", ") : [data.source];
         const tagsArray = typeof data.tags === 'string' ? data.tags.split(", ") : [data.tags];
 
-        setImage(data.image);
+        console.log('apa ada gambar', data.image && data.image > 0);
+        
 
-        setFormData(prevData => ({
-            ...prevData,
+        if (data.image && data.image > 0) {
+            setImage(data.image)
+            setIsUpdateImage(true)
+        }
+
+        setFormData({
             category: data.category,
             description: data.description,
             highlight: data.highlight,
@@ -76,7 +118,12 @@ const AddArticle = () => {
             title: data.title,
             source: sourceArray,
             tags: tagsArray,
-        }))
+            image: isUpdateImage ? null : article.image,
+            // For dev
+            createdBy: 'ADMIN',
+            modifiedBy: 'ADMIN'
+        })
+
         setShow(true);
     }
 
@@ -88,6 +135,7 @@ const AddArticle = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview({ name: file.name, src: reader.result });
+                console.log('imagePrev', reader.result);
             };
             reader.readAsDataURL(file);
         } else {
@@ -96,7 +144,11 @@ const AddArticle = () => {
     };
 
     const removeImage = () => {
-        setImagePreview(null);
+        if (article.image) {
+            setArticle(prev => ({ ...prev, image: null }))
+        } else {
+            setImagePreview(null);
+        }
         document.getElementById('image').value = null;
     }
 
@@ -105,7 +157,7 @@ const AddArticle = () => {
             <Card>
                 <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                     <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Add Article</h5>
+                        <h5 className="card-title" style={{ color: '#242845' }}>Edit Article</h5>
                     </div>
                 </Card.Header>
                 <Card.Body>
@@ -117,7 +169,7 @@ const AddArticle = () => {
                                     <Form.Control
                                         type="file" isInvalid={!!errors.image}
                                         {...register('image', {
-                                            required: 'Cover Image is required',
+                                            required: !article ? 'Cover Image is required' : false,
                                             onChange: handleImageChange
                                         })}
                                         className="d-none"
@@ -134,13 +186,13 @@ const AddArticle = () => {
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
-                                    {imagePreview && (
+                                    {article.image ?
                                         <>
-                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <Image src={article.image} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
                                             <div className="d-flex align-items-center">
                                                 <div className="text-truncate">
                                                     <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
-                                                        {imagePreview.name}
+                                                        {article.image.split('/').pop()}
                                                     </span>
                                                 </div>
                                                 <div>
@@ -148,11 +200,32 @@ const AddArticle = () => {
                                                 </div>
                                             </div>
                                         </>
-                                    )}
+                                        :
+                                        imagePreview &&
+                                        <>
+                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <div>
+                                                <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                    {imagePreview.name}{imagePreview.name}
+                                                </span>
+                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                            </div>
+                                        </>}
+                                    {/* {imagePreview && (
+                                        <>
+                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <div>
+                                                <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                    {imagePreview.name}{imagePreview.name}
+                                                </span>
+                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                            </div>
+                                        </>
+                                    )} */}
                                 </Form.Group>
                                 <Form.Group controlId="title">
                                     <Form.Label>Tittle</Form.Label>
-                                    <Form.Control type="text" placeholder="title"
+                                    <Form.Control type="text" placeholder="Tittle"
                                         {...register('title', {
                                             required: 'Tittle is required',
                                             minLength: { value: 5, message: 'Input min 5 characters' },
@@ -208,7 +281,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type='radio'
                                             id={`status-radio-1`}
-                                            value="Active"
+                                            value="ACTIVE"
                                             {...register('status', { required: 'Role is required' })}
                                         />
                                         <Form.Check
@@ -217,7 +290,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type="radio"
                                             id={`status-radio-2`}
-                                            value="Not Active"
+                                            value="NOT ACTIVE"
                                             {...register('status', { required: 'Role is required' })}
                                         />
                                     </div>
@@ -231,7 +304,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type='radio'
                                             id={`highlight-radio-1`}
-                                            value="Yes"
+                                            value="YES"
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                         <Form.Check
@@ -240,7 +313,7 @@ const AddArticle = () => {
                                             name="group1"
                                             type="radio"
                                             id={`highlight-radio-2`}
-                                            value="No"
+                                            value="NO"
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                     </div>
@@ -286,6 +359,7 @@ const AddArticle = () => {
                                             value: 5, message: 'Input min 5 characters'
                                         }
                                     }}
+                                    initialValue={article.description}
                                 />
                             </Col>
                             <Row>
@@ -309,4 +383,4 @@ const AddArticle = () => {
     );
 }
 
-export default AddArticle
+export default EditArticle
