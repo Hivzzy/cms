@@ -12,14 +12,16 @@ import QuillForm from "../../../components/form/QuillForm";
 
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
-import { useParams } from "react-router-dom";
-import { getArticleById } from "../../../services/apiServices";
+import { useNavigate, useParams } from "react-router-dom";
+import { getArticleById, updateArticle } from "../../../services/apiServices";
 
 const EditArticle = () => {
+    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
     const [formData, setFormData] = useState([]);
+    const [isUpdateImage, setIsUpdateImage] = useState(false)
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
@@ -39,7 +41,7 @@ const EditArticle = () => {
                 const data = await getArticleById(articleId);
                 if (data?.data) {
                     setArticle(data.data);
-                    console.log(data.data);
+                    console.log('useEffect awal', data.data);
                 } else {
                     setArticle({});
                 }
@@ -53,15 +55,14 @@ const EditArticle = () => {
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         defaultValues: {
-            status: 'Active',
-            highlight: 'Yes',
+            status: 'ACTIVE',
+            highlight: 'YES',
             description: ''
         },
         values: {
-            tittle: article.title,
+            title: article.title,
             releaseDate: article.releaseDate,
             description: article.description,
-            image: article.image,
             highlight: article.highlight,
             status: article.status,
             tags: article.metadata?.tags?.join(', '),
@@ -70,20 +71,19 @@ const EditArticle = () => {
         }
     });
 
+    const [image, setImage] = useState(null);
+
     const formSubmit = async () => {
         try {
-            console.log('formData', formData);
-
-            // const response = await createUser(formData);
-            // console.log('Success:', response);
-            // setShow(false);
-            // if (response.code === 200) {
-            //     navigate('../user');
-            // } else if (response.code === 400) {
-            //     setIsError(true);
-            //     setErrorMessage(response.message)
-            //     setShow(true);
-            // }
+            const response = await updateArticle(formData, image);
+            setShow(false);
+            if (response.code === 201) {
+                // navigate('../metadata');
+            } else if (response.code === 400) {
+                setIsError(true);
+                setErrorMessage(response.message)
+                setShow(true);
+            }
         } catch (error) {
             console.error('Error:', error.response?.data || error.message);
         }
@@ -98,7 +98,32 @@ const EditArticle = () => {
     }
 
     const handleShow = (data) => {
-        setFormData(data);
+        const sourceArray = typeof data.source === 'string' ? data.source.split(", ") : [data.source];
+        const tagsArray = typeof data.tags === 'string' ? data.tags.split(", ") : [data.tags];
+
+        console.log('apa ada gambar', data.image && data.image > 0);
+        
+
+        if (data.image && data.image > 0) {
+            setImage(data.image)
+            setIsUpdateImage(true)
+        }
+
+        setFormData({
+            category: data.category,
+            description: data.description,
+            highlight: data.highlight,
+            releaseDate: data.releaseDate,
+            status: data.status,
+            title: data.title,
+            source: sourceArray,
+            tags: tagsArray,
+            image: isUpdateImage ? null : article.image,
+            // For dev
+            createdBy: 'ADMIN',
+            modifiedBy: 'ADMIN'
+        })
+
         setShow(true);
     }
 
@@ -111,7 +136,6 @@ const EditArticle = () => {
             reader.onloadend = () => {
                 setImagePreview({ name: file.name, src: reader.result });
                 console.log('imagePrev', reader.result);
-
             };
             reader.readAsDataURL(file);
         } else {
@@ -145,7 +169,7 @@ const EditArticle = () => {
                                     <Form.Control
                                         type="file" isInvalid={!!errors.image}
                                         {...register('image', {
-                                            required: 'Cover Image is required',
+                                            required: !article ? 'Cover Image is required' : false,
                                             onChange: handleImageChange
                                         })}
                                         className="d-none"
@@ -199,18 +223,18 @@ const EditArticle = () => {
                                         </>
                                     )} */}
                                 </Form.Group>
-                                <Form.Group controlId="tittle">
+                                <Form.Group controlId="title">
                                     <Form.Label>Tittle</Form.Label>
                                     <Form.Control type="text" placeholder="Tittle"
-                                        {...register('tittle', {
+                                        {...register('title', {
                                             required: 'Tittle is required',
                                             minLength: { value: 5, message: 'Input min 5 characters' },
                                             maxLength: { value: 255, message: 'Input max 255 characters' }
-                                        })} isInvalid={errors.tittle}
+                                        })} isInvalid={errors.title}
                                     />
-                                    {errors.tittle ?
+                                    {errors.title ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.tittle?.message}
+                                            {errors.title?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
@@ -348,7 +372,7 @@ const EditArticle = () => {
                     show={show}
                     handleClose={handleClose}
                     page='Article'
-                    data={formData?.tittle}
+                    data={formData?.title}
                     formSubmit={formSubmit}
                     isError={isError}
                     errorMessage={errorMessage}

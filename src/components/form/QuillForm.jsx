@@ -4,6 +4,7 @@ import 'quill/dist/quill.snow.css';
 import PropTypes from 'prop-types';
 
 const QuillForm = ({ formError, setValue, register, formName, validationRules, initialValue }) => {
+    
     const theme = 'snow';
     const modules = {
         toolbar: [
@@ -34,8 +35,8 @@ const QuillForm = ({ formError, setValue, register, formName, validationRules, i
     useEffect(() => {
         if (quill && initialValue) {
             quill.clipboard.dangerouslyPasteHTML(initialValue);
-            setValue(formName, initialValue);
         }
+        setValue(formName, initialValue);
     }, [quill, initialValue, setValue, formName]);
 
     useEffect(() => {

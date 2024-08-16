@@ -1,18 +1,13 @@
-import { Button, Card, Form, InputGroup, Pagination, Stack, Table } from "react-bootstrap"
+import { Card, Modal, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllUser } from "../../../services/apiServices";
-// import DataTable from "../../../src/components/DataTable";
-import { FiPlusCircle } from "react-icons/fi";
-import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
-import { IoEyeOutline } from "react-icons/io5";
+import { deleteUser, getAllMetadata, getMetadataById } from "../../../services/apiServices";
 
-
-import { useMediaQuery } from 'react-responsive';
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ModalForm from "../../../components/form/ModalForm";
 import PaginationCustom from "../../../components/form/PaginationCustom";
+import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
+import DashboardRowActionButton from "../../../components/dashboard/DashboardRowActionButton";
 
 const Metadata = () => {
     const [metadata, setMetadata] = useState([
@@ -26,16 +21,22 @@ const Metadata = () => {
         }
     ]);
     const [selectedValue, setSelectedValue] = useState('');
-    const [searchValue, setSearchValue] = useState('');
-    const [pageSize, setPageSize] = useState(1);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [totalData, setTotalData] = useState(18);
+    const [searchValue, setSearchValue] = useState({
+        code: '',
+        value: '',
+    });
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNumber, setPageNumber] = useState(0);
+    const [totalData, setTotalData] = useState(10);
 
     const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedData, setSelectedData] = useState(null);
+
+    const [metadataDetail, setMetadataDetail] = useState({});
+    const [showDetail, setShowDetail] = useState(false);
 
     const handleSelectChange = (e) => {
         setSelectedValue(e.target.value);
@@ -45,28 +46,27 @@ const Metadata = () => {
         setSearchValue(e.target.value);
     };
 
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
-
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllUser(
-                { pageSize, pageNumber, [selectedValue]: searchValue }
+            const data = await getAllMetadata(
+                { size: pageSize, page: pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
+            console.log(data);
+
             if (data?.data) {
                 setMetadata(data.data);
+                setTotalData(data.total);
             } else {
                 setMetadata([]);
             }
 
         } catch (error) {
             // setError(error.message);
-        } finally {
-            // setLoading(false);
         }
     };
 
     useEffect(() => {
-        // getData(pageSize, pageNumber, selectedValue, searchValue);
+        getData(pageSize, pageNumber, selectedValue, searchValue);
     }, []);
 
     const userTableHeader = ["CODE", "VALUE", "ACTION"];
@@ -84,14 +84,9 @@ const Metadata = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedUser) => {
-        setSelectedUser(selectedUser);
-        setShow(true);
-    }
-
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ userId: selectedUser.userId });
+            const response = await deleteUser({ userId: selectedData.userId });
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
@@ -106,98 +101,102 @@ const Metadata = () => {
         }
     };
 
+    const filterOptions = [
+        {
+            value: 'code', name: 'Code'
+        },
+        {
+            value: 'value', name: 'value'
+        }
+    ]
+
+    const handleShowModalDetail = async (dataId) => {
+        try {
+            const data = await getMetadataById(dataId);
+            if (data.code === 200) {
+                setMetadataDetail(data.data)
+                setShowDetail(true)
+                console.log(data.data);
+            }
+
+        } catch (error) {
+            // setError(error.message);
+        }
+    }
+
+    const handleCloseDetail = () => {
+        setShowDetail(false);
+    }
+
     return (
         <>
             <Card>
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Metadata</h5>
-                    </div>
-                    <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '150px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="username">Value</option>
-                                <option value="email">Code</option>
-                            </Form.Select>
-                            <InputGroup>
-                                <InputGroup.Text id="search-input">
-                                    <svg width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                        <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                    </svg>
-                                </InputGroup.Text>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter"
-                                    value={searchValue} onChange={handleSearchChange} readOnly={!selectedValue}
-                                />
-                            </InputGroup>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack>
-                </Card.Header>
+                <DashboardCardHeader
+                    tittle='Article'
+                    filterOptions={filterOptions}
+                    handleSubmit={handleSubmit}
+                    selectedValue={selectedValue}
+                    handleSelectChange={handleSelectChange}
+                    searchValue={searchValue}
+                    handleSearchChange={handleSearchChange}
+                />
                 <Card.Body>
                     <div className="table-responsive border-bottom my-3">
                         <Table>
                             <thead>
                                 <tr>
                                     {userTableHeader.map((header, index) => (
-                                        <th key={header} style={{ fontSize: '14px', width: index=== 2 ? '100px' : '50%'}}>
-                                    {header}
-                                </th>
+                                        <th key={header} style={{ fontSize: '14px', width: index === 2 ? '100px' : '50%' }}>
+                                            {header}
+                                        </th>
                                     ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {metadata.map((data, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    <td>{data.code}</td>
-                                    <td>{data.value}</td>
-                                    <td>
-                                        <Link to={`/dashboard/user/edit/${rowIndex}`}>
-                                            <Button className="p-0" style={{ fontSize: '15px', color: '#0078D7', width: '24px', height: '24px', background: '#F4F7FE', border: '0px', marginRight: '0.5rem' }}>
-                                                <IoEyeOutline />
-                                            </Button>
-                                        </Link>
-                                        <Link to={`/dashboard/user/edit/${rowIndex}`}>
-                                            <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
-                                                <FaRegEdit />
-                                            </Button>
-                                        </Link>
-                                        <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                            onClick={() => handleShow(rowIndex)}
-                                        >
-                                            <GoTrash />
-                                        </Button>
-                                    </td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                </div>
-                <div className="d-flex justify-content-center">
-                    <PaginationCustom
-                        pageSize={pageSize}
-                        pageNumber={pageNumber}
-                        setPageNumber={setPageNumber}
-                        totalData={totalData}
-                    />
-                </div>
-            </Card.Body>
-        </Card >
+                            </thead>
+                            <tbody>
+                                {metadata.map((data, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        <td>{data.code}</td>
+                                        <td>{data.value}</td>
+                                        <DashboardRowActionButton
+                                            setShow={setShow}
+                                            setSelectedData={setSelectedData}
+                                            data={data?.code}
+                                            handleShowModalDetail={handleShowModalDetail}
+                                            linkToEdit={''}
+                                            dataId={data.id}
+                                        />
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </div>
+                    <div className="d-flex justify-content-center">
+                        <PaginationCustom
+                            pageSize={pageSize}
+                            pageNumber={pageNumber}
+                            setPageNumber={setPageNumber}
+                            totalData={totalData}
+                            setPageSize={setPageSize}
+                        />
+                    </div>
+                </Card.Body>
+            </Card >
             <ModalForm
                 show={show}
+                buttonType='danger'
                 handleClose={handleClose}
-                page='User'
-                data={selectedUser?.username}
+                page='Metadata'
+                data={selectedData}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
+                isDelete={true}
             />
+
+            {/* Modal Detail */}
+            <Modal show={showDetail} onHide={handleCloseDetail} centered>
+                 
+            </Modal>
         </>
     )
 }

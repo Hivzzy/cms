@@ -76,7 +76,6 @@ const AddArticle = () => {
             title: data.title,
             source: sourceArray,
             tags: tagsArray,
-            createdBy: 'ADMIN'
         }))
         setShow(true);
     }

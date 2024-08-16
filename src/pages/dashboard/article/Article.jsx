@@ -1,17 +1,15 @@
-import { Button, Card, Form, InputGroup, Stack, Table } from "react-bootstrap"
+import { Button, Card, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
 import { deleteArticle, getAllArticle } from "../../../services/apiServices";
-import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
 import { IoEyeOutline } from "react-icons/io5";
 
-
-import { useMediaQuery } from 'react-responsive';
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import { Link } from "react-router-dom";
 import ModalForm from "../../../components/form/ModalForm";
 import PaginationCustom from "../../../components/form/PaginationCustom";
+import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
 
 const Article = () => {
     const [article, setArticle] = useState([]);
@@ -32,21 +30,6 @@ const Article = () => {
     const [selectedData, setSelectedData] = useState(null);
 
     const [isNoData, setIsNoData] = useState(false);
-
-    const handleSelectChange = (e) => {
-        setSelectedValue(e.target.value);
-    };
-
-    const handleSearchChange = (e) => {
-        // setSearchValue(e.target.value);
-        const { name, value } = e.target;
-        setSearchValue(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
-
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
@@ -110,67 +93,33 @@ const Article = () => {
         }
     };
 
+    const filterOptions = [
+        {
+            value: 'startReleaseDate', name: 'Release Date'
+        },
+        {
+            value: 'category', name: 'Category'
+        },
+        {
+            value: 'highlight', name: 'Highlight'
+        },
+        {
+            value: 'status', name: 'Status'
+        },
+    ]
+
     return (
         <>
             <Card>
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Article</h5>
-                    </div>
-                    {/* <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="startReleaseDate">Release Date</option>
-                                <option value="category">Category</option>
-                                <option value="highlight">Highlight</option>
-                                <option value="status">Status</option>
-                            </Form.Select>
-
-                            <div className="inline-block">
-                                <svg className="position-absolute" style={{ top: '2.25rem', marginLeft: '1rem' }} width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                    <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                </svg>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingLeft: '3rem' }}
-                                    value={searchValue[selectedValue] || ''} onChange={handleSearchChange} disabled={!selectedValue}
-                                />
-                            </div>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack> */}
-                    <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="startReleaseDate">Release Date</option>
-                                <option value="category">Category</option>
-                                <option value="highlight">Highlight</option>
-                                <option value="status">Status</option>
-                            </Form.Select>
-                            <InputGroup>
-                                <svg className="position-absolute" style={{ top: '0.75rem', marginLeft: '1rem', zIndex: 1 }} width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                    <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                </svg>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingLeft: '3rem' }}
-                                    value={searchValue[selectedValue] || ''} onChange={handleSearchChange} disabled={!selectedValue}
-                                />
-                            </InputGroup>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack>
-                </Card.Header>
+                <DashboardCardHeader
+                    tittle='Article'
+                    filterOptions={filterOptions}
+                    handleSubmit={handleSubmit}
+                    selectedValue={selectedValue}
+                    setSelectedValue={setSelectedValue}
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                />
                 <Card.Body>
                     {isNoData ?
                         <div className="text-center fw-bold h1 m-5">
@@ -209,7 +158,7 @@ const Article = () => {
                                                         </Button>
                                                     </Link>
                                                     <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                        onClick={() => handleShow(data?.id)}
+                                                        onClick={() => handleShow(data?.title)}
                                                     >
                                                         <GoTrash />
                                                     </Button>
