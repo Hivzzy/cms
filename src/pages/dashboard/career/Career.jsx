@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllArticle } from "../../../services/apiServices";
+import { deleteUser, getAllCareer } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -52,7 +52,7 @@ const Career = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllArticle(
+            const data = await getAllCareer(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
             console.log(data.data);
@@ -92,8 +92,6 @@ const Career = () => {
 
     const handleShow = (selectedData) => {
         setSelectedData(selectedData);
-        console.log(selectedData);
-
         setShow(true);
     }
 
@@ -175,11 +173,11 @@ const Career = () => {
                             <tbody>
                                 {article.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
-                                        <td>{data.releaseDate}</td>
-                                        <td>{data.releaseDate}</td>
-                                        <td>{data.releaseDate}</td>
-                                        <td>{data.category}</td>
-                                        <td>{data.highlight}</td>
+                                        <td>{data.title}</td>
+                                        <td>{data.position}</td>
+                                        <td>{data.placement}</td>
+                                        <td>{data.stratDate}</td>
+                                        <td>{data.endDate}</td>
                                         <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
                                             <Button

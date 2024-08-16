@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllArticle } from "../../../services/apiServices";
+import { deleteUser, getAllClientCategory } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -45,7 +45,7 @@ const ClientCategory = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllArticle(
+            const data = await getAllClientCategory(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
             console.log(data.data);
@@ -155,7 +155,7 @@ const ClientCategory = () => {
                             <tbody>
                                 {article.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
-                                        <td>{data.highlight}</td>
+                                        <td>{data.name}</td>
                                         <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
                                             <Link to={`/dashboard/clientCategory/edit/1`}>

@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../../services/apiServices";
+import { createClientCategory } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 
 const AddClientCategory = () => {
@@ -26,12 +26,14 @@ const AddClientCategory = () => {
     });
 
     const formSubmit = async () => {
+
+        console.log( "ini formdata",formData)
         try {
-            const response = await createUser(formData);
+            const response = await createClientCategory(formData);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../career');
+                navigate('../clientCategory');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -111,7 +113,7 @@ const AddClientCategory = () => {
                             </Col>
                         </Row>
                         <Row>
-                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../career' />
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../clientCategory' />
                         </Row>
                     </Form>
                 </Card.Body>

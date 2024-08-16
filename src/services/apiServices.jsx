@@ -77,3 +77,43 @@ export const getAllArticle = async (params) => {
         return error.response.data;
     }
 };
+
+// Career API
+export const getAllCareer = async (params) => {
+    try {
+        const response = await apiClient.get('/career-management/cms-careers', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+};
+
+
+//Client Category API
+export const getAllClientCategory = async (params) => {
+    try {
+        const response = await apiClient.get('/client-category-management/client-categories', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+};
+
+export const createClientCategory = async (body) => {
+    try {
+        const response = await apiClient.post('/client-category-management/client-categories', body);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+
