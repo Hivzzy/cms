@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllCareer } from "../../../services/apiServices";
+import { deleteCareer, getAllCareer } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -17,9 +17,11 @@ const Career = () => {
     const [article, setArticle] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
-        startReleaseDate: '',
-        category: '',
-        highlight: '',
+        title: '',
+        position: '',
+        placements: '',
+        startDate: '',
+        endDate: '',
         status: ''
     });
     const [pageSize, setPageSize] = useState(10);
@@ -30,8 +32,8 @@ const Career = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [detailShow, setDetailShow] = useState(false); // State untuk ModalDetail
-    const [selectedData, setSelectedData] = useState(null); // State untuk menyimpan data yang dipilih
+    const [detailShow, setDetailShow] = useState(false);
+    const [selectedData, setSelectedData] = useState(null);
 
 
 
@@ -72,7 +74,6 @@ const Career = () => {
 
     useEffect(() => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const userTableHeader = ["TITLE", "POSISITION", "PLACEMENT", 'START', 'END', 'STATUS', 'ACTION'];
@@ -105,12 +106,13 @@ const Career = () => {
     };
 
     const handleDelete = async () => {
+        console.log("isi ini",selectedData)
         try {
-            const response = await deleteUser({ careerId: selectedData.careerId });
+            const response = await deleteCareer(selectedData);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../user');
+                navigate('../Career');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -176,7 +178,7 @@ const Career = () => {
                                         <td>{data.title}</td>
                                         <td>{data.position}</td>
                                         <td>{data.placement}</td>
-                                        <td>{data.stratDate}</td>
+                                        <td>{data.startDate}</td>
                                         <td>{data.endDate}</td>
                                         <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
@@ -187,7 +189,7 @@ const Career = () => {
                                             >
                                                 <IoEyeOutline />
                                             </Button>
-                                            <Link to={`/dashboard/career/edit/1`}>
+                                            <Link to={`/dashboard/career/edit/${data.id}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>
@@ -195,7 +197,7 @@ const Career = () => {
                                             <Button
                                                 className="p-0"
                                                 style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data?.title)}
+                                                onClick={() => handleShow(data.id)}
                                             >
                                                 <GoTrash />
                                             </Button>
@@ -230,7 +232,7 @@ const Career = () => {
             <DetailCareerCard
                 show={detailShow}
                 handleClose={handleDetailClose}
-                data={selectedData} // Data yang akan ditampilkan di modal
+                data={selectedData} 
             />
         </>
     )

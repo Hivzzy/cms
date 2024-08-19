@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../../services/apiServices";
+import { createCareer } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 
 const AddCareer = () => {
@@ -26,8 +26,10 @@ const AddCareer = () => {
     });
 
     const formSubmit = async () => {
+
+        console.log(formData)
         try {
-            const response = await createUser(formData);
+            const response = await createCareer(formData);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
@@ -87,7 +89,7 @@ const AddCareer = () => {
                                     <Form.Label>Position</Form.Label>
                                     <Form.Select aria-label="Select position"
                                         {...register('position', { required: 'Position is required' })}
-                                        isInvalid={!!errors.position} defaultValue=''
+                                        isInvalid={!!errors.position} 
                                     >
                                         <option value='' disabled>Position</option>
                                         <option value="Public">Public</option>
@@ -104,7 +106,7 @@ const AddCareer = () => {
                                     <Form.Label>Placement</Form.Label>
                                     <Form.Select aria-label="Select placement"
                                         {...register('placement', { required: 'Placement is required' })}
-                                        isInvalid={!!errors.placement} defaultValue=''
+                                        isInvalid={!!errors.placement}
                                     >
                                         <option value='' disabled>Placement</option>
                                         <option value="Public">Public</option>
@@ -143,35 +145,12 @@ const AddCareer = () => {
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="status" className="mb-2">
-                                    <Form.Label>Status</Form.Label>
-                                    <div key='inline-radio'>
-                                        <Form.Check
-                                            inline
-                                            label="Active"
-                                            name="group1"
-                                            type='radio'
-                                            id={`inline-radio-1`}
-                                            value="Active"
-                                            {...register('status', { required: 'Status is required' })}
-                                        />
-                                        <Form.Check
-                                            inline
-                                            label="Not Active"
-                                            name="group1"
-                                            type="radio"
-                                            id={`inline-radio-2`}
-                                            value="Not Active"
-                                            {...register('status', { required: 'Status is required' })}
-                                        />
-                                    </div>
-                                </Form.Group>
                             </Col>
                             <Col md='6' sm='12'>
                             <Form.Group controlId="description">
                                     <Form.Label>Description</Form.Label>
                                     <Form.Control as="textarea" placeholder="Description"
-                                        {...register('Description', {
+                                        {...register('description', {
                                             required: 'Description is required',
                                         })} isInvalid={errors.description}
                                     />
@@ -182,26 +161,26 @@ const AddCareer = () => {
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="generalRequirement">
+                                <Form.Group controlId="generalReq">
                                     <Form.Label>General Requirement</Form.Label>
                                     <Form.Control as="textarea" placeholder="General Requirement"
-                                        {...register('generalRequirement')} isInvalid={errors.generalRequirement}
+                                        {...register('generalReq')} isInvalid={errors.generalReq}
                                     />
-                                    {errors.generalRequirement ?
+                                    {errors.generalReq ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.generalRequirement?.message}
+                                            {errors.generalReq?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="specificRequirement">
+                                <Form.Group controlId="specificReq">
                                     <Form.Label>Specific Requirement</Form.Label>
                                     <Form.Control as="textarea" placeholder="Specific Requirement"
-                                        {...register('specificRequirement')} isInvalid={errors.specificRequirement}
+                                        {...register('specificReq')} isInvalid={errors.specificReq}
                                     />
-                                    {errors.specificRequirement ?
+                                    {errors.specificReq ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.specificRequirement?.message}
+                                            {errors.specificReq?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }

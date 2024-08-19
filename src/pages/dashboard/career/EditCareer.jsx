@@ -6,15 +6,12 @@ import { useMediaQuery } from "react-responsive";
 import { useEffect, useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
-import { useParams } from "react-router-dom";
-// import { getUserById, updateUser } from "../../../services/apiServices";
+import { useNavigate, useParams } from "react-router-dom";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
+import { getCareerById, updateCareer } from "../../../services/apiServices";
 
 const EditCareer = () => {
-    const { careerId } = useParams();
-    const [career, setCareer] = useState({});
-
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
@@ -22,74 +19,74 @@ const EditCareer = () => {
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm();
+    const { careerId } = useParams();
+    const [career, setCareer] = useState({
+        id: '',
+        title: '',
+        position: '',
+        placement: '',
+        startDate: '',
+        endDate: '',
+        status: '',
+        description: '',
+        generalReq: '',
+        specificReq: '',
+        benefit: ''
+    });
 
-    // Commented out API call function for now
-    // const formSubmit = async () => {
-    //     try {
-    //         const response = await updateUser(formData);
-    //         console.log('Success:', response);
-    //         setShow(false);
-    //         if (response.code === 200) {
-    //             navigate('../career');
-    //         } else if (response.code === 400) {
-    //             setIsError(true);
-    //             setErrorMessage(response.message)
-    //             setShow(true);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error:', error.response?.data || error.message);
-    //     }
-    // };
-
+    
     useEffect(() => {
-        // Commented out API data fetch for now
-        // const getData = async () => {
-        //     try {
-        //         const data = await getUserById({ careerId });
-        //         if (data?.data) {
-        //             setCareer(data.data);
-        //         } else {
-        //             setCareer({});
-        //         }
-        //     } catch (error) {
-        //         console.error("Error API", error.message);
-        //     }
-        // };
-
-        // Using dummy data instead
-        const dummyData = {
-            id: 1,
-            title: "Senior Developer",
-            position: "Private",
-            placement: "Public",
-            startDate: "2024-08-15",
-            endDate: "2025-08-15",
-            status: "Not Active",
-            description: "Oversee projects and mentor junior developers.",
-            generalRequirement: "5+ years experience in software development.",
-            specificRequirement: "Expertise in React and Node.js.",
-            benefit: "Health insurance, remote work, stock options.",
+        const getData = async () => {
+            try {
+                const data = await getCareerById(careerId);
+                if (data?.data) {
+                    setCareer(data.data);
+                } else {
+                    setCareer({});
+                }
+            } catch (error) {
+                console.error("Error API", error.message);
+            }
         };
-        setCareer(dummyData);
-
-        // getData(); // Commented out actual data fetching
+        getData();
     }, [careerId]);
 
-    useEffect(() => {
-        if (career) {
-            setValue('title', career.title);
-            setValue('position', career.position);
-            setValue('placement', career.placement);
-            setValue('startDate', career.startDate);
-            setValue('endDate', career.endDate);
-            setValue('status', career.status);
-            setValue('description', career.description);
-            setValue('generalRequirement', career.generalRequirement);
-            setValue('specificRequirement', career.specificRequirement);
-            setValue('benefit', career.benefit);
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        defaultValues: {
+            status: 'Active',
+        },
+        values: {
+            id: careerId,
+            title: career.title,
+            position: career.position,
+            placement: career.placement,
+            startDate: career.startDate,
+            endDate: career.endDate,
+            status: career.status,
+            description: career.description,
+            generalReq: career.generalReq,
+            specificReq: career.specificReq,
+            benefit: career.benefit
         }
-    }, [career, setValue]);
+    });
+
+
+    const formSubmit = async () => {
+        try {
+            const response = await updateCareer(formData);
+            console.log('Success:', response);
+            setShow(false);
+            if (response.code === 200) {
+                navigate('../career');
+            } else if (response.code === 400) {
+                setIsError(true);
+                setErrorMessage(response.message)
+                setShow(true);
+            }
+        } catch (error) {
+            console.error('Error:', error.response?.data || error.message);
+        }
+    };
 
     const handleClose = () => {
         setShow(false);
@@ -123,7 +120,7 @@ const EditCareer = () => {
                                     <Form.Control type="text" placeholder="Title"
                                         {...register('title', {
                                             required: 'Title is required',
-                                        })} isInvalid={errors.tittle} defaultValue={career.title}
+                                        })} isInvalid={errors.tittle}
                                     />
                                     {errors.tittle ?
                                         <Form.Control.Feedback type="invalid">
@@ -136,7 +133,7 @@ const EditCareer = () => {
                                     <Form.Label>Position</Form.Label>
                                     <Form.Select aria-label="Select position"
                                         {...register('position', { required: 'Position is required' })}
-                                        isInvalid={!!errors.position} defaultValue={career.position}
+                                        isInvalid={!!errors.position}
                                     >
                                         <option value='' disabled>Position</option>
                                         <option value="Public">Public</option>
@@ -153,7 +150,7 @@ const EditCareer = () => {
                                     <Form.Label>Placement</Form.Label>
                                     <Form.Select aria-label="Select placement"
                                         {...register('placement', { required: 'Placement is required' })}
-                                        isInvalid={!!errors.placement} defaultValue={career.placement}
+                                        isInvalid={!!errors.placement} 
                                     >
                                         <option value='' disabled>Placement</option>
                                         <option value="Public">Public</option>
@@ -170,7 +167,7 @@ const EditCareer = () => {
                                     <Form.Label>Start</Form.Label>
                                     <Form.Control type="date" placeholder="Start Date"
                                         {...register('startDate',
-                                        )} isInvalid={errors.startDate} defaultValue={career.startDate}
+                                        )} isInvalid={errors.startDate} 
                                     />
                                     {errors.startDate ?
                                         <Form.Control.Feedback type="invalid">
@@ -183,7 +180,7 @@ const EditCareer = () => {
                                     <Form.Label>End</Form.Label>
                                     <Form.Control type="date" placeholder="End Date"
                                         {...register('endDate'
-                                        )} isInvalid={errors.endDate} defaultValue={career.endDate}
+                                        )} isInvalid={errors.endDate}
                                     />
                                     {errors.endDate ?
                                         <Form.Control.Feedback type="invalid">
@@ -220,9 +217,9 @@ const EditCareer = () => {
                             <Form.Group controlId="description">
                                     <Form.Label>Description</Form.Label>
                                     <Form.Control as="textarea" placeholder="Description"
-                                        {...register('Description', {
+                                        {...register('description', {
                                             required: 'Description is required',
-                                        })} isInvalid={errors.description} defaultValue={career.description}
+                                        })} isInvalid={errors.description} 
                                     />
                                     {errors.description ?
                                         <Form.Control.Feedback type="invalid">
@@ -231,26 +228,26 @@ const EditCareer = () => {
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="generalRequirement">
+                                <Form.Group controlId="generalReq">
                                     <Form.Label>General Requirement</Form.Label>
                                     <Form.Control as="textarea" placeholder="General Requirement"
-                                        {...register('generalRequirement')} isInvalid={errors.generalRequirement} defaultValue={career.generalRequirement}
+                                        {...register('generalReq')} isInvalid={errors.generalReq} 
                                     />
-                                    {errors.generalRequirement ?
+                                    {errors.generalReq ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.generalRequirement?.message}
+                                            {errors.generalReq?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="specificRequirement">
+                                <Form.Group controlId="specificReq">
                                     <Form.Label>Specific Requirement</Form.Label>
                                     <Form.Control as="textarea" placeholder="Specific Requirement"
-                                        {...register('specificRequirement')} isInvalid={errors.specificRequirement} defaultValue={career.specificRequirement}
+                                        {...register('specificReq')} isInvalid={errors.specificReq}
                                     />
-                                    {errors.specificRequirement ?
+                                    {errors.specificReq ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.specificRequirement?.message}
+                                            {errors.specificReq?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
@@ -258,7 +255,7 @@ const EditCareer = () => {
                                 <Form.Group controlId="benefit">
                                     <Form.Label>Benefit</Form.Label>
                                     <Form.Control as="textarea" placeholder="Benefit"
-                                        {...register('benefit')} isInvalid={errors.benefit} defaultValue={career.benefit}
+                                        {...register('benefit')} isInvalid={errors.benefit}
                                     />
                                     {errors.benefit ?
                                         <Form.Control.Feedback type="invalid">
@@ -281,7 +278,7 @@ const EditCareer = () => {
                 page='Career'
                 data={formData?.title}
                 buttonType='Edit'
-                // formSubmit={formSubmit} // Commented out formSubmit for now
+                formSubmit={formSubmit}
                 isError={isError}
                 errorMessage={errorMessage}
             />

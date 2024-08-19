@@ -225,6 +225,51 @@ export const getAllCareer = async (params) => {
     }
 };
 
+export const getCareerById = async (id) => {
+    try {
+        const response = await apiClient.get(`/career-management/careers/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+export const createCareer = async (body) => {
+    try {
+        const response = await apiClient.post('/career-management/careers', body);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+export const updateCareer = async (body) => {
+    try {
+        const response = await apiClient.put(`/career-management/careers`,body);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return error.response?.data || { error: error.message };
+    }
+};
+
+export const deleteCareer = async (id) => {
+    try {
+        const response = await apiClient.delete(`/career-management/careers/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+
+
 
 //Client Category API
 export const getAllClientCategory = async (params) => {
