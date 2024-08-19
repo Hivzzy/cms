@@ -1,27 +1,20 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteCareer, getAllCareer } from "../../../services/apiServices";
+import { deleteUser, getAllArticle } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
-import { IoEyeOutline } from "react-icons/io5";
 
 import { useMediaQuery } from 'react-responsive';
 import { Link, useNavigate } from "react-router-dom";
 import PaginationCustom from "../../../components/form/PaginationCustom";
 import ModalForm from "../../../components/form/ModalForm";
-import DetailCareerCard from "./DetailCareerCard";
 
-
-const Career = () => {
-    const [career, setCareer] = useState([]);
+const ExpertiseCategory = () => {
+    const [expertise, setExpertise] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
-        title: '',
-        position: '',
-        placements: '',
-        startDate: '',
-        endDate: '',
+        name: '',
         status: ''
     });
     const [pageSize, setPageSize] = useState(10);
@@ -32,9 +25,7 @@ const Career = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [detailShow, setDetailShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
-
 
 
     const handleSelectChange = (e) => {
@@ -54,15 +45,15 @@ const Career = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllCareer(
+            const data = await getAllArticle(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
             console.log(data.data);
 
             if (data?.data) {
-                setCareer(data.data);
+                setExpertise(data.data);
             } else {
-                setCareer([]);
+                setExpertise([]);
             }
 
         } catch (error) {
@@ -74,9 +65,10 @@ const Career = () => {
 
     useEffect(() => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const userTableHeader = ["TITLE", "POSISITION", "PLACEMENT", 'START', 'END', 'STATUS', 'ACTION'];
+    const userTableHeader = ["ICON", "NAME", "CATEGORY", "STATUS", "ACTION"];
 
     const handleSubmit = (event) => {
         event.preventDefault(); // Prevent the default form submission behavior
@@ -96,23 +88,13 @@ const Career = () => {
         setShow(true);
     }
 
-    const handleDetailShow = (selectedData) => {
-        setSelectedData(selectedData);
-        setDetailShow(true);
-    };
-
-    const handleDetailClose = () => {
-        setDetailShow(false);
-    };
-
     const handleDelete = async () => {
-        console.log("isi ini",selectedData)
         try {
-            const response = await deleteCareer(selectedData);
+            const response = await deleteUser({ clientId: selectedData.clientId });
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../Career');
+                navigate('../user');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -128,17 +110,13 @@ const Career = () => {
             <Card>
                 <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                     <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Career</h5>
+                        <h5 className="card-title" style={{ color: '#242845' }}>Client</h5>
                     </div>
                     <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
                         <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
                             <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
                                 <option value="">Filter</option>
-                                <option value="title">Title</option>
-                                <option value="position">Position</option>
-                                <option value="placement">Placement</option>
-                                <option value="startDate">Start Date</option>
-                                <option value="endDate">End Date</option>
+                                <option value="name">Name</option>
                                 <option value="status">Status</option>
                             </Form.Select>
                             <div className="inline-block">
@@ -173,31 +151,32 @@ const Career = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {career.map((data, rowIndex) => (
+                                {expertise.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
-                                        <td>{data.title}</td>
-                                        <td>{data.position}</td>
-                                        <td>{data.placement}</td>
-                                        <td>{data.startDate}</td>
-                                        <td>{data.endDate}</td>
-                                        <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        {/* Ganti tampilan icon dengan image */}
                                         <td>
-                                            <Button
-                                                className="p-0"
-                                                style={{ fontSize: '15px', color: '#0078D7', width: '24px', height: '24px', background: '#F4F7FE', border: '0px', marginRight: '0.5rem' }}
-                                                onClick={() => handleDetailShow(data)} // Panggil handleDetailShow dengan data yang sesuai
-                                            >
-                                                <IoEyeOutline />
-                                            </Button>
-                                            <Link to={`/dashboard/career/edit/${data.id}`}>
+                                             <img
+                                                src="https://via.placeholder.com/40"
+                                                alt="icon"
+                                                style={{
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '4px'
+                                                }}
+                                            />
+                                        </td>
+                                        <td>{data.name || "PT. Telkom Indonesia"}</td>
+                                        <td>{data.category || "BUMN"}</td>
+                                        <td>{data.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        <td>
+                                            <Link to={`/dashboard/client/edit/${data.id || 1}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>
                                             </Link>
-                                            <Button
-                                                className="p-0"
-                                                style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data.id)}
+                                            <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
+                                                onClick={() => handleShow(data?.title || "Client Title")}
                                             >
                                                 <GoTrash />
                                             </Button>
@@ -222,21 +201,16 @@ const Career = () => {
                 show={show}
                 buttonType='danger'
                 handleClose={handleClose}
-                page='Career'
+                page='Client'
                 data={selectedData}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
                 isDelete={true}
             />
-            <DetailCareerCard
-                show={detailShow}
-                handleClose={handleDetailClose}
-                data={selectedData} 
-            />
         </>
     )
 };
 
 
-export default Career
+export default ExpertiseCategory

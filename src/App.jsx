@@ -42,6 +42,8 @@ import EditClientCategory from './pages/dashboard/client-category/EditClientCate
 import Client from './pages/dashboard/client/Client';
 import AddClient from './pages/dashboard/client/AddClient';
 import EditClient from './pages/dashboard/client/EditClient';
+import ExpertiseCategory from './pages/dashboard/expertise-category/ExpertiseCategory';
+import Portofolio from './pages/dashboard/portofolio/Portofolio';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -73,6 +75,10 @@ function App() {
             <Route path="/dashboard/clientCategory" element={<ClientCategory />}></Route>
             <Route path="/dashboard/clientCategory/add" element={<AddClientCategory />}></Route>
             <Route path="/dashboard/clientCategory/edit/:clientCategoryId" element={<EditClientCategory />}></Route>
+
+            <Route path="/dashboard/expertiseCategory" element={<ExpertiseCategory />}></Route>
+
+            <Route path="/dashboard/portofolio" element={<Portofolio />}></Route>
 
             <Route path="/dashboard/client" element={<Client />}></Route>
             <Route path="/dashboard/client/add" element={<AddClient />}></Route>

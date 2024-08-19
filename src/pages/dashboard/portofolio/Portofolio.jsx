@@ -13,7 +13,7 @@ import ModalForm from "../../../components/form/ModalForm";
 import DetailCareerCard from "./DetailCareerCard";
 
 
-const Career = () => {
+const Portofolio = () => {
     const [career, setCareer] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
@@ -239,4 +239,4 @@ const Career = () => {
 };
 
 
-export default Career
+export default Portofolio
