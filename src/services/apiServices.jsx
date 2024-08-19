@@ -239,6 +239,18 @@ export const getAllClientCategory = async (params) => {
     }
 };
 
+export const getClientCategoryById = async (id) => {
+    try {
+        const response = await apiClient.get(`/client-category-management/client-categories/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+
 export const createClientCategory = async (body) => {
     try {
         const response = await apiClient.post('/client-category-management/client-categories', body);
@@ -246,6 +258,27 @@ export const createClientCategory = async (body) => {
     } catch (error) {
         console.error('Error fetching data:', error);
         console.error('Get data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+export const updateClientCategory = async (body) => {
+    try {
+        const response = await apiClient.put(`/client-category-management/client-categories`,body);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return error.response?.data || { error: error.message };
+    }
+};
+
+export const deleteClientCategory = async (id) => {
+    try {
+        const response = await apiClient.delete(`/client-category-management/client-categories/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
         return error.response.data;
     }
 };

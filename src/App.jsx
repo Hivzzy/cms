@@ -69,12 +69,15 @@ function App() {
             <Route path="/dashboard/career" element={<Career />}></Route>
             <Route path="/dashboard/career/add" element={<AddCareer />}></Route>
             <Route path="/dashboard/career/edit/:careerId" element={<EditCareer />}></Route>
+
             <Route path="/dashboard/clientCategory" element={<ClientCategory />}></Route>
             <Route path="/dashboard/clientCategory/add" element={<AddClientCategory />}></Route>
             <Route path="/dashboard/clientCategory/edit/:clientCategoryId" element={<EditClientCategory />}></Route>
+
             <Route path="/dashboard/client" element={<Client />}></Route>
             <Route path="/dashboard/client/add" element={<AddClient />}></Route>
             <Route path="/dashboard/client/edit/:clientId" element={<EditClient />}></Route>
+            
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>
             <Route path="/dashboard/user/edit/:userId" element={<EditUser />}></Route>

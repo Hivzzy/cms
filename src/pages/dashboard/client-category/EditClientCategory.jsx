@@ -7,13 +7,10 @@ import { useEffect, useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate, useParams } from "react-router-dom";
-import { updateUser } from "../../../services/apiServices";
+import { getClientCategoryById, updateClientCategory } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 
 const EditClientCategory = () => {
-    const { clientCategoryId } = useParams();
-    const [clientCategory, setClientCategory] = useState({});
-
     const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
@@ -22,61 +19,56 @@ const EditClientCategory = () => {
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
-    const { register, handleSubmit,setValue, formState: { errors } } = useForm({
+    const { clientCategoryId } = useParams();
+    const [clientCategory, setClientCategory] = useState({
+        id: '',
+        name: '',
+        status: ''
+    });
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                const data = await getClientCategoryById(clientCategoryId);
+                if (data?.data) {
+                    setClientCategory(data.data);
+                } else {
+                    setClientCategory({});
+                }
+            } catch (error) {
+                console.error("Error API", error.message);
+            }
+        };
+        getData();
+    }, []);
+
+    const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             status: 'Active',
+        },
+        values: {
+            id: clientCategoryId,
+            name: clientCategory.name,
+            status: clientCategory.status
         }
     });
 
     const formSubmit = async () => {
         try {
-            const response = await updateUser(formData);
-            console.log('Success:', response);
+            const response = await updateClientCategory(formData);
             setShow(false);
             if (response.code === 200) {
-                navigate('../career');
+                navigate('../clientCategory');
             } else if (response.code === 400) {
                 setIsError(true);
-                setErrorMessage(response.message)
+                setErrorMessage(response.message);
                 setShow(true);
             }
         } catch (error) {
             console.error('Error:', error.response?.data || error.message);
         }
     };
-
-    useEffect(() => {
-        // Commented out API data fetch for now
-        // const getData = async () => {
-        //     try {
-        //         const data = await getUserById({ careerId });
-        //         if (data?.data) {
-        //             setCareer(data.data);
-        //         } else {
-        //             setCareer({});
-        //         }
-        //     } catch (error) {
-        //         console.error("Error API", error.message);
-        //     }
-        // };
-
-        // Using dummy data instead
-        const dummyData = {
-            id: 1,
-            name: "BUMN",
-            status: "Not Active",
-        };
-        setClientCategory(dummyData);
-
-        // getData(); // Commented out actual data fetching
-    }, [clientCategoryId]);
-
-    useEffect(() => {
-        if (clientCategory) {
-            setValue('name', clientCategory.name);
-            setValue('status', clientCategory.status);
-        }
-    }, [clientCategory, setValue]);
+    
 
     const handleClose = () => {
         setShow(false);
@@ -87,10 +79,14 @@ const EditClientCategory = () => {
     }
 
     const handleShow = (data) => {
-        setFormData(data);
-        console.log(data);
+        setFormData({
+            id: data.id,
+            name: data.name,
+            status: data.status
+        });
         setShow(true);
     }
+    
 
 
     return (

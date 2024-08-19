@@ -30,7 +30,6 @@ const AddClientCategory = () => {
         console.log( "ini formdata",formData)
         try {
             const response = await createClientCategory(formData);
-            console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
                 navigate('../clientCategory');
@@ -54,7 +53,6 @@ const AddClientCategory = () => {
 
     const handleShow = (data) => {
         setFormData(data);
-        console.log(data);
         setShow(true);
     }
 

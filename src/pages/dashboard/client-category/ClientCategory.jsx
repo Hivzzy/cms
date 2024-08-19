@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllClientCategory } from "../../../services/apiServices";
+import { deleteClientCategory, getAllClientCategory } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -11,7 +11,7 @@ import PaginationCustom from "../../../components/form/PaginationCustom";
 import ModalForm from "../../../components/form/ModalForm";
 
 const ClientCategory = () => {
-    const [article, setArticle] = useState([]);
+    const [clientCategory, setClientCategory] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
         name: '',
@@ -48,12 +48,10 @@ const ClientCategory = () => {
             const data = await getAllClientCategory(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
-            console.log(data.data);
-
             if (data?.data) {
-                setArticle(data.data);
+                setClientCategory(data.data);
             } else {
-                setArticle([]);
+                setClientCategory([]);
             }
 
         } catch (error) {
@@ -71,7 +69,7 @@ const ClientCategory = () => {
     const userTableHeader = ["NAME", 'STATUS', 'ACTION'];
 
     const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
+        event.preventDefault();
         getData(pageSize, pageNumber, selectedValue, searchValue);
     };
 
@@ -85,18 +83,16 @@ const ClientCategory = () => {
 
     const handleShow = (selectedData) => {
         setSelectedData(selectedData);
-        console.log(selectedData);
-
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ careerId: selectedData.careerId });
-            console.log('Success:', response);
+            const response = await deleteClientCategory(selectedData);
             setShow(false);
             if (response.code === 200) {
-                navigate('../user');
+                navigate('../clientCategory');
+                window.location.reload();
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -153,18 +149,19 @@ const ClientCategory = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {article.map((data, rowIndex) => (
+                                {clientCategory.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
                                         <td>{data.name}</td>
+
                                         <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
-                                            <Link to={`/dashboard/clientCategory/edit/1`}>
+                                            <Link to={`/dashboard/clientCategory/edit/${data.id}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data?.title)}
+                                                onClick={() => handleShow(data.id)}
                                             >
                                                 <GoTrash />
                                             </Button>
