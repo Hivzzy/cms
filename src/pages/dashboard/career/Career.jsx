@@ -34,6 +34,7 @@ const Career = () => {
     const [show, setShow] = useState(false);
     const [detailShow, setDetailShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
+    const [idDelete, setIdDelete] = useState(null);
 
 
 
@@ -91,8 +92,9 @@ const Career = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
+    const handleShow = (careerId, selectedData) => {
         setSelectedData(selectedData);
+        setIdDelete(careerId)
         setShow(true);
     }
 
@@ -106,13 +108,12 @@ const Career = () => {
     };
 
     const handleDelete = async () => {
-        console.log("isi ini",selectedData)
         try {
-            const response = await deleteCareer(selectedData);
+            const response = await deleteCareer(idDelete);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../Career');
+                navigate('../career');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -185,7 +186,7 @@ const Career = () => {
                                             <Button
                                                 className="p-0"
                                                 style={{ fontSize: '15px', color: '#0078D7', width: '24px', height: '24px', background: '#F4F7FE', border: '0px', marginRight: '0.5rem' }}
-                                                onClick={() => handleDetailShow(data)} // Panggil handleDetailShow dengan data yang sesuai
+                                                onClick={() => handleDetailShow(data)}
                                             >
                                                 <IoEyeOutline />
                                             </Button>
@@ -197,7 +198,7 @@ const Career = () => {
                                             <Button
                                                 className="p-0"
                                                 style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data.id)}
+                                                onClick={() => handleShow(data?.id, data?.title)}
                                             >
                                                 <GoTrash />
                                             </Button>

@@ -26,6 +26,7 @@ const ClientCategory = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
+    const [idDelete, setIdDelete] = useState(null);
 
 
     const handleSelectChange = (e) => {
@@ -81,14 +82,15 @@ const ClientCategory = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
+    const handleShow = (clientCategoryId ,selectedData) => {
         setSelectedData(selectedData);
+        setIdDelete(clientCategoryId);
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteClientCategory(selectedData);
+            const response = await deleteClientCategory(idDelete);
             setShow(false);
             if (response.code === 200) {
                 navigate('../clientCategory');
@@ -161,7 +163,7 @@ const ClientCategory = () => {
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data.id)}
+                                                onClick={() => handleShow(data.id, data.name)}
                                             >
                                                 <GoTrash />
                                             </Button>

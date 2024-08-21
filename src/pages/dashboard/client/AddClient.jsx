@@ -1,4 +1,4 @@
-import { Card, Col, Form, Row } from "react-bootstrap"
+import { Button, Card, Col, Form, Image, Row } from "react-bootstrap"
 import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
@@ -7,8 +7,10 @@ import { useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../../services/apiServices";
+import { createClient } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
+import { MdFileUpload } from "react-icons/md";
+import { IoIosCloseCircle } from "react-icons/io";
 
 const AddClient = () => {
     const navigate = useNavigate();
@@ -16,19 +18,22 @@ const AddClient = () => {
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
     const [formData, setFormData] = useState([]);
+    const [icon, setIcon] = useState();
+    const [imagePreview, setImagePreview] = useState(null);
+    const dataS = [{ id: "1u", name: "Public" }, { id: "2s", name: "Private" }];
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
-            priority: 'Active',
+            priority: 'Yes',
             status: 'Active',
         }
     });
 
     const formSubmit = async () => {
         try {
-            const response = await createUser(formData);
+            const response = await createClient(formData, icon);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
@@ -50,11 +55,40 @@ const AddClient = () => {
             setErrorMessage('')
         }, 1000);
     }
-
     const handleShow = (data) => {
-        setFormData(data);
-        console.log(data);
+        setIcon(data.icon);
+        setFormData(prevData => ({
+            ...prevData,
+            icon: data.name,
+            name: data.name,
+            category: {
+                id: formData?.category?.id || '00258081-9a33-486b-9b14-a0457c6cf855',
+                name: formData?.category?.name || 'BUMN'
+            },
+            trustedSeq: parseInt(data.trustedSeq, 10),
+            priority: data.priority,
+            status: data.status
+        }));
         setShow(true);
+    }
+
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview({ name: file.name, src: reader.result });
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null);
+        }
+    };
+
+    const removeImage = () => {
+        setImagePreview(null);
+        document.getElementById('icon').value = null;
     }
 
 
@@ -70,17 +104,49 @@ const AddClient = () => {
                     <Form onSubmit={handleSubmit(handleShow)}>
                         <Row>
                             <Col md='6' sm='12'>
-                                <Form.Group controlId="image">
-                                    <Form.Label>Cover Image</Form.Label>
-                                    <Form.Control type="file" placeholder="Image Client"
-                                        {...register('image')}
+                                <Form.Group controlId="icon">
+                                    <Form.Label>Icon</Form.Label>
+                                    <Form.Control
+                                        type="file" isInvalid={!!errors.icon} placeholder="Image Client"
+                                        {...register('icon', {
+                                            required: 'Icon Image is required',
+                                            onChange: handleImageChange
+                                        })}
+                                        className="d-none"
                                     />
-                                    {errors.image ?
+                                    <Button style={{ lineHeight: '1.5', paddingLeft: '0.75rem', paddingRight: '1rem', width: isMobile && '100%' }} className="d-block"
+                                        onClick={() => document.getElementById('icon').click()}
+                                    >
+                                        <MdFileUpload className="me-2" size={20} />
+                                        Upload Image
+                                    </Button>
+                                    {errors.icon ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.image?.message}
+                                            {errors.icon?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
+                                    {errors.icon ?
+                                        <Form.Control.Feedback type="invalid">
+                                            {errors.icon?.message}
+                                        </Form.Control.Feedback>
+                                        : <br></br>
+                                    }
+                                    {imagePreview && (
+                                        <>
+                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <div className="d-flex align-items-center">
+                                                <div className="text-truncate">
+                                                    <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                        {imagePreview.name}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </Form.Group>
                                 <Form.Group controlId="name">
                                     <Form.Label>Name</Form.Label>
@@ -96,20 +162,42 @@ const AddClient = () => {
                                         : <br></br>
                                     }
                                 </Form.Group>
+
                                 <Form.Group controlId="category">
                                     <Form.Label>Category</Form.Label>
-                                    <Form.Control type="text" placeholder="Category"
-                                        {...register('category', {
-                                            required: 'Category is required',
-                                        })} isInvalid={errors.category}
-                                    />
-                                    {errors.name ?
+                                    <Form.Select
+                                        aria-label="Select category"
+                                        {...register('category', { required: 'Category is required' })}
+                                        isInvalid={!!errors.category}
+                                        defaultValue=""
+                                        onChange={(e) => {
+                                            const selectedCategory = e.target.value;
+                                            const categoryObj = dataS.find((item) => item.id === selectedCategory);
+                                            setFormData(prevData => ({
+                                                ...prevData,
+                                                category: categoryObj,
+                                            }));
+
+                                            console.log('Category set in formData:', categoryObj);
+                                            console.log('Selected Category:', selectedCategory);
+                                        }}
+                                    >
+                                        {dataS.map((item) => (
+                                            <option key={item.id} value={item.id.toString()}>
+                                                {item.name}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    {errors.category ? (
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.name?.message}
+                                            {errors.category?.message}
                                         </Form.Control.Feedback>
-                                        : <br></br>
-                                    }
+                                    ) : (
+                                        <br />
+                                    )}
                                 </Form.Group>
+
+
                             </Col>
                             <Col md='6' sm='12'>
                                 <Form.Group controlId="trustedSeq">
@@ -140,7 +228,7 @@ const AddClient = () => {
                                             name="group1"
                                             type='radio'
                                             id={`inline-radio-1`}
-                                            value="Active"
+                                            value="Yes"
                                             {...register('priority', { required: 'Priority is required' })}
                                         />
                                         <Form.Check
@@ -149,31 +237,8 @@ const AddClient = () => {
                                             name="group1"
                                             type="radio"
                                             id={`inline-radio-2`}
-                                            value="Not Active"
+                                            value="No"
                                             {...register('priority', { required: 'Priority is required' })}
-                                        />
-                                    </div>
-                                </Form.Group>
-                                <Form.Group controlId="status" className="mb-2">
-                                    <Form.Label>Status</Form.Label>
-                                    <div key='inline-radio'>
-                                        <Form.Check
-                                            inline
-                                            label="Active"
-                                            name="group1"
-                                            type='radio'
-                                            id={`inline-radio-1`}
-                                            value="Active"
-                                            {...register('status', { required: 'Status is required' })}
-                                        />
-                                        <Form.Check
-                                            inline
-                                            label="Not Active"
-                                            name="group1"
-                                            type="radio"
-                                            id={`inline-radio-2`}
-                                            value="Not Active"
-                                            {...register('status', { required: 'Status is required' })}
                                         />
                                     </div>
                                 </Form.Group>
@@ -199,3 +264,4 @@ const AddClient = () => {
 }
 
 export default AddClient
+

@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllArticle } from "../../../services/apiServices";
+import { deleteClient, getAllClient } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -11,12 +11,11 @@ import PaginationCustom from "../../../components/form/PaginationCustom";
 import ModalForm from "../../../components/form/ModalForm";
 
 const Client = () => {
-    const [article, setArticle] = useState([]);
+    const [client, setClient] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
         name: '',
         category: '',
-        priority: '',
         status: ''
     });
     const [pageSize, setPageSize] = useState(10);
@@ -28,6 +27,7 @@ const Client = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
+    const [idDelete, setIdDelete] = useState(null);
 
 
     const handleSelectChange = (e) => {
@@ -47,15 +47,13 @@ const Client = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllArticle(
+            const data = await getAllClient(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
-            );
-            console.log(data.data);
-
+            )
             if (data?.data) {
-                setArticle(data.data);
+                setClient(data.data);
             } else {
-                setArticle([]);
+                setClient([]);
             }
 
         } catch (error) {
@@ -85,18 +83,21 @@ const Client = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
+    const handleShow = (clientId, selectedData) => {
+        console.log("check",clientId);
         setSelectedData(selectedData);
+        setIdDelete(clientId)
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ clientId: selectedData.clientId });
+            const response = await deleteClient( idDelete );
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../user');
+                window.location.reload();
+                navigate('../client');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -120,7 +121,6 @@ const Client = () => {
                                 <option value="">Filter</option>
                                 <option value="name">Name</option>
                                 <option value="category">Category</option>
-                                <option value="priority">Priority</option>
                                 <option value="status">Status</option>
                             </Form.Select>
                             <div className="inline-block">
@@ -155,15 +155,12 @@ const Client = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {article.map((data, rowIndex) => (
+                                {client.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
                                         {/* Ganti tampilan icon dengan image */}
                                         <td>
-                                            {/* Original:
-                <td>{data.highlight}</td>
-                */}
                                             <img
-                                                src="https://via.placeholder.com/40"
+                                                src={data.icon}
                                                 alt="icon"
                                                 style={{
                                                     width: '40px',
@@ -173,19 +170,19 @@ const Client = () => {
                                                 }}
                                             />
                                         </td>
-                                        <td>{data.name || "PT. Telkom Indonesia"}</td>
-                                        <td>{data.category || "BUMN"}</td>
-                                        <td>{data.trustedSeq || "1"}</td>
-                                        <td>{data.priority?.toLowerCase() === "high" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        <td>{data.name}</td>
+                                        <td>{data.category.name}</td>
+                                        <td>{data.trustedSeq}</td>
+                                        <td>{data.priority?.toLowerCase() === "Yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>{data.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
-                                            <Link to={`/dashboard/client/edit/${data.id || 1}`}>
+                                            <Link to={`/dashboard/client/edit/${data.id}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data?.title || "Client Title")}
+                                                onClick={() => handleShow( data?.id , data?.name)}
                                             >
                                                 <GoTrash />
                                             </Button>

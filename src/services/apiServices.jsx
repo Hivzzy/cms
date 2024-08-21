@@ -268,6 +268,123 @@ export const deleteCareer = async (id) => {
     }
 };
 
+// Client API
+export const getAllClient = async (params) => {
+    try {
+        const response = await apiClient.get('/client-management/cms-clients', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+};
+
+export const getClientById = async (id) => {
+    try {
+        const response = await apiClient.get(`/client-management/clients/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+export const createClient = async (request, imageFile) => {
+    const formData = new FormData();
+    const json = JSON.stringify(request);
+    const blob = new Blob([json], { type: 'application/json' });
+    formData.append('request', blob);
+    formData.append('file', imageFile[0]);
+
+    try {
+        const response = await apiClient.post('/client-management/clients', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        if (error.response) {
+            console.error('Get error data:', error.response.data);
+            return error.response.data;
+        } else {
+            return { message: 'An unexpected error occurred.' };
+        }
+    }
+};
+
+// export const updateClient = async (request, imageFile) => {
+//     const formData = new FormData();
+//     const json = JSON.stringify(request);
+//     const blob = new Blob([json], {
+//         type: 'application/json'
+//     });
+//     formData.append('request', blob);
+//     if (imageFile === null) {
+//         const imageFromURL = await urlToFile(request.image, request.name ,'image/jpeg');
+//         formData.append('file', imageFromURL);
+//     } else {
+//         formData.append('file', imageFile[0]); 
+//     }
+//     try {
+//         const response = await apiClient.put('/client-management/clients', formData, {
+//             headers: {
+//                 'Content-Type': 'multipart/form-data',
+//             }
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching data:', error);
+//         console.error('Get error data:', error.response?.data);
+//         return error.response?.data || { message: "An unknown error occurred" };
+//     }
+// };
+
+
+export const updateClient = async (request, imageFile) => {
+
+    console.log("request Is",request)
+    console.log("ImageFile Is",imageFile)
+    const formData = new FormData();
+    try {
+        const json = JSON.stringify(request);
+        const blob = new Blob([json], {
+            type: 'application/json'
+        });
+        formData.append('request', blob);
+        
+        if (imageFile) {
+            formData.append('file', imageFile[0]);
+        }
+
+        const response = await apiClient.put('/client-management/clients', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+};
+
+export const deleteClient = async (id) => {
+    try {
+        const response = await apiClient.delete(`/client-management/clients/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+};
+
+
 
 
 
