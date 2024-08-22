@@ -173,7 +173,7 @@ const Client = () => {
                                         <td>{data.name}</td>
                                         <td>{data.category.name}</td>
                                         <td>{data.trustedSeq}</td>
-                                        <td>{data.priority?.toLowerCase() === "Yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        <td>{data.priority?.toLowerCase() === "yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>{data.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
                                             <Link to={`/dashboard/client/edit/${data.id}`}>

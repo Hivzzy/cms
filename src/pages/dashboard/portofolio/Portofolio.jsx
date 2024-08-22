@@ -14,14 +14,16 @@ import DetailCareerCard from "./DetailCareerCard";
 
 
 const Portofolio = () => {
-    const [career, setCareer] = useState([]);
+    const [portofolio, setPortofolio] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
         title: '',
-        position: '',
-        placements: '',
+        client: '',
+        category: '',
+        nda: '',
         startDate: '',
         endDate: '',
+        highlight: '',
         status: ''
     });
     const [pageSize, setPageSize] = useState(10);
@@ -60,9 +62,9 @@ const Portofolio = () => {
             console.log(data.data);
 
             if (data?.data) {
-                setCareer(data.data);
+                setPortofolio(data.data);
             } else {
-                setCareer([]);
+                setPortofolio([]);
             }
 
         } catch (error) {
@@ -76,7 +78,7 @@ const Portofolio = () => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
     }, []);
 
-    const userTableHeader = ["TITLE", "POSISITION", "PLACEMENT", 'START', 'END', 'STATUS', 'ACTION'];
+    const userTableHeader = ['TITLE', 'CLIENT', 'CATEGORY', 'NDA', 'START', 'END', 'HIGHLIGHT', 'STATUS', 'ACTION'];
 
     const handleSubmit = (event) => {
         event.preventDefault(); // Prevent the default form submission behavior
@@ -135,10 +137,12 @@ const Portofolio = () => {
                             <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
                                 <option value="">Filter</option>
                                 <option value="title">Title</option>
-                                <option value="position">Position</option>
-                                <option value="placement">Placement</option>
+                                <option value="client">Client</option> 
+                                <option value="category">Category</option>
+                                <option value="nda">NDA</option>
                                 <option value="startDate">Start Date</option>
                                 <option value="endDate">End Date</option>
+                                <option value="highlight">Highlight</option>
                                 <option value="status">Status</option>
                             </Form.Select>
                             <div className="inline-block">
@@ -165,7 +169,6 @@ const Portofolio = () => {
                             <thead>
                                 <tr>
                                     {userTableHeader.map((header) => (
-                                        // width: index === 2 ? '100px' : '50%'
                                         <th key={header} style={{ fontSize: '14px' }}>
                                             {header}
                                         </th>
@@ -173,14 +176,14 @@ const Portofolio = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {career.map((data, rowIndex) => (
+                                {portofolio.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
                                         <td>{data.title}</td>
                                         <td>{data.position}</td>
                                         <td>{data.placement}</td>
                                         <td>{data.startDate}</td>
                                         <td>{data.endDate}</td>
-                                        <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        <td>{data.status?.toLowerCase() == "active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
                                             <Button
                                                 className="p-0"
@@ -189,7 +192,7 @@ const Portofolio = () => {
                                             >
                                                 <IoEyeOutline />
                                             </Button>
-                                            <Link to={`/dashboard/career/edit/${data.id}`}>
+                                            <Link to={`/dashboard/portofolio/edit/${data.id}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>

@@ -20,7 +20,25 @@ const AddClient = () => {
     const [formData, setFormData] = useState([]);
     const [icon, setIcon] = useState();
     const [imagePreview, setImagePreview] = useState(null);
-    const dataS = [{ id: "1u", name: "Public" }, { id: "2s", name: "Private" }];
+    const dataS = [
+        { id: "00258081-9a33-486b-9b14-a0457c6cf855", name: "BUMN" },
+        { id: "29b93675-398f-4a8c-b4e1-a807c376ef54", name: "Assurance" },
+        { id: "ca6c5a2b-0f98-4302-aa0e-04e7390ba021", name: "Banking" },
+        { id: "54000e98-8587-4daa-856e-2738d704c555", name: "IT Company" },
+        { id: "186780ae-6e5f-4097-b73e-a8db4e5280f4", name: "Fintech" },
+        { id: "5f577d21-3094-43b1-9afd-7497c47feb20", name: "Manufacture" },
+        { id: "52c860ce-1b75-43e8-9c0b-06cd0f69a626", name: "F&B" },
+        { id: "a30ea498-a799-47d2-be14-0fa8d1c7975b", name: "Health Services" },
+        { id: "0d98f5b2-8fda-443a-9b46-df9681dfa6f7", name: "Distribution" },
+        { id: "d9c7dee1-5892-44f9-941b-1e7e0c764dbb", name: "Retail" },
+        { id: "1065ced7-f087-4e11-8686-aa806b226eab", name: "Finance" },
+        { id: "df16afcf-8072-492b-9c79-0e57be8cda3e", name: "Education" },
+        { id: "2b6713a2-f8dc-4ccb-bc8c-4b825e16d285", name: "Network Infrastructure" },
+        { id: "060a07ab-3aaf-4893-a183-1a8ddc6989da", name: "Digital Media" },
+        { id: "5a1bebcd-e76c-4a0b-b6e7-de918db284b4", name: "Capital Market" },
+        { id: "7a80fdc1-c305-456e-8f95-8fd6b1f13d88", name: "Mining" },
+        { id: "df5e65c6-2fd3-4a6d-bf87-b7c69471833d", name: "Others" },
+    ];
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
@@ -90,6 +108,7 @@ const AddClient = () => {
         setImagePreview(null);
         document.getElementById('icon').value = null;
     }
+
 
 
     return (

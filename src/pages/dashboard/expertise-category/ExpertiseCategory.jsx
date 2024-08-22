@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllArticle } from "../../../services/apiServices";
+import { deleteExpertiseCategory, getAllExpertiseCategory } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -11,7 +11,7 @@ import PaginationCustom from "../../../components/form/PaginationCustom";
 import ModalForm from "../../../components/form/ModalForm";
 
 const ExpertiseCategory = () => {
-    const [expertise, setExpertise] = useState([]);
+    const [expertiseCategory, setExpertiseCategory] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
         name: '',
@@ -26,6 +26,7 @@ const ExpertiseCategory = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
+    const [idDelete, setIdDelete] = useState(null);
 
 
     const handleSelectChange = (e) => {
@@ -33,7 +34,6 @@ const ExpertiseCategory = () => {
     };
 
     const handleSearchChange = (e) => {
-        // setSearchValue(e.target.value);
         const { name, value } = e.target;
         setSearchValue(prevState => ({
             ...prevState,
@@ -45,15 +45,13 @@ const ExpertiseCategory = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllArticle(
+            const data = await getAllExpertiseCategory(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
-            );
-            console.log(data.data);
-
+            )
             if (data?.data) {
-                setExpertise(data.data);
+                setExpertiseCategory(data.data);
             } else {
-                setExpertise([]);
+                setExpertiseCategory([]);
             }
 
         } catch (error) {
@@ -65,13 +63,13 @@ const ExpertiseCategory = () => {
 
     useEffect(() => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []);
 
-    const userTableHeader = ["ICON", "NAME", "CATEGORY", "STATUS", "ACTION"];
+    const userTableHeader = ["ICON", "NAME", "SEQ", "STATUS", "ACTION"];
 
     const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
+        event.preventDefault();
         getData(pageSize, pageNumber, selectedValue, searchValue);
     };
 
@@ -83,18 +81,20 @@ const ExpertiseCategory = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
+    const handleShow = (expertiseCategoryId, selectedData) => {
         setSelectedData(selectedData);
+        setIdDelete(expertiseCategoryId)
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ clientId: selectedData.clientId });
+            const response = await deleteExpertiseCategory( idDelete );
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../user');
+                window.location.reload();
+                navigate('../client');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -110,7 +110,7 @@ const ExpertiseCategory = () => {
             <Card>
                 <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                     <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Client</h5>
+                        <h5 className="card-title" style={{ color: '#242845' }}>Expertise Category</h5>
                     </div>
                     <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
                         <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
@@ -151,12 +151,12 @@ const ExpertiseCategory = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {expertise.map((data, rowIndex) => (
+                                {expertiseCategory.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
                                         {/* Ganti tampilan icon dengan image */}
                                         <td>
-                                             <img
-                                                src="https://via.placeholder.com/40"
+                                            <img
+                                                src={data.icon}
                                                 alt="icon"
                                                 style={{
                                                     width: '40px',
@@ -166,17 +166,17 @@ const ExpertiseCategory = () => {
                                                 }}
                                             />
                                         </td>
-                                        <td>{data.name || "PT. Telkom Indonesia"}</td>
-                                        <td>{data.category || "BUMN"}</td>
+                                        <td>{data.name}</td>
+                                        <td>{data.seq}</td>
                                         <td>{data.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
-                                            <Link to={`/dashboard/client/edit/${data.id || 1}`}>
+                                            <Link to={`/dashboard/expertiseCategory/edit/${data?.id}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data?.title || "Client Title")}
+                                                onClick={() => handleShow( data?.id , data?.name)}
                                             >
                                                 <GoTrash />
                                             </Button>
@@ -201,7 +201,7 @@ const ExpertiseCategory = () => {
                 show={show}
                 buttonType='danger'
                 handleClose={handleClose}
-                page='Client'
+                page='Expertise Category'
                 data={selectedData}
                 formSubmit={handleDelete}
                 isError={isError}
