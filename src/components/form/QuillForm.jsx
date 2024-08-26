@@ -3,7 +3,7 @@ import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
 import PropTypes from 'prop-types';
 
-const QuillForm = ({ formError, setValue, register, formName, validationRules, initialValue }) => {
+const QuillForm = ({ formError, setValue, register, formName, validationRules, initialValue, customHeight = '300px' }) => {
     
     const theme = 'snow';
     const modules = {
@@ -55,7 +55,7 @@ const QuillForm = ({ formError, setValue, register, formName, validationRules, i
     return (
         <>
             <div style={{ border: formError ? '1px solid #c03221' : '' }}>
-                <div ref={quillRef} style={{ height: '300px' }} />
+                <div ref={quillRef} style={{ height: customHeight }} />
             </div>
             <span style={{ color: '#c03221', fontSize: '0.875em', marginTop: '0.25rem' }}>{formError?.message}</span>
         </>

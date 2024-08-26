@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom"
 import PropTypes from 'prop-types';
 import { useMediaQuery } from "react-responsive";
 
-const ButtonFormBottom = ({ isMobile, navigateCancelPath, typeButton }) => {
+const ButtonFormBottom = ({ navigateCancelPath, buttonType }) => {
   const navigate = useNavigate();
-  const buttonPageStyle = typeButton !== undefined ? typeButton : '';
+  const buttonPageStyle = buttonType !== undefined ? buttonType : '';
   const isMobileButton = useMediaQuery({ query: '(max-width: 768px)' });
 
   return (
@@ -13,7 +13,7 @@ const ButtonFormBottom = ({ isMobile, navigateCancelPath, typeButton }) => {
       <Button className={`button-cancel ${buttonPageStyle}`} variant="" onClick={() => navigate(navigateCancelPath)}>
         Cancel
       </Button>
-      <Button className={`button-submit ${buttonPageStyle}`} type='submit' variant=''>Add data</Button>
+      <Button className={`button-submit ${buttonPageStyle}`} type='submit' variant=''>{buttonType == 'edit' ? 'Edit' : 'Add'} data</Button>
     </Stack>
   )
 }
@@ -21,7 +21,7 @@ const ButtonFormBottom = ({ isMobile, navigateCancelPath, typeButton }) => {
 ButtonFormBottom.propTypes = {
   isMobile : PropTypes.bool,
   navigateCancelPath : PropTypes.string,
-  typeButton: PropTypes.string
+  buttonType: PropTypes.string
 }
 
 export default ButtonFormBottom

@@ -21,11 +21,11 @@ const EditArticle = () => {
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
     const [formData, setFormData] = useState([]);
-    const [isUpdateImage, setIsUpdateImage] = useState(false)
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
-    const { articleId } = useParams();
+    const { id } = useParams();
+
     const [article, setArticle] = useState({
         title: '',
         releaseDate: '',
@@ -35,10 +35,12 @@ const EditArticle = () => {
         status: '',
     });
 
+    const [newImage, setNewImage] = useState(null);
+
     useEffect(() => {
         const getData = async () => {
             try {
-                const data = await getArticleById(articleId);
+                const data = await getArticleById(id);
                 if (data?.data) {
                     setArticle(data.data);
                     console.log('useEffect awal', data.data);
@@ -51,9 +53,10 @@ const EditArticle = () => {
         };
 
         getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, formState: { errors }, setError, clearErrors } = useForm({
         defaultValues: {
             status: 'ACTIVE',
             highlight: 'YES',
@@ -71,14 +74,12 @@ const EditArticle = () => {
         }
     });
 
-    const [image, setImage] = useState(null);
-
     const formSubmit = async () => {
         try {
-            const response = await updateArticle(formData, image);
+            const response = await updateArticle(formData, newImage);
             setShow(false);
             if (response.code === 201) {
-                navigate('../metadata');
+                navigate('../article');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -102,15 +103,18 @@ const EditArticle = () => {
         const tagsArray = typeof data.tags === 'string' ? data.tags.split(", ") : [data.tags];
 
         console.log('apa ada gambar', data.image && data.image > 0);
-        
+
 
         if (data.image && data.image > 0) {
-            setImage(data.image)
-            setIsUpdateImage(true)
+            setNewImage(data.image)
+        }else{
+            setNewImage(null)
         }
 
+        console.log('id', id);
+
         setFormData({
-            articleId: data.id,
+            articleId: id,
             category: data.category,
             description: data.description,
             highlight: data.highlight,
@@ -119,10 +123,7 @@ const EditArticle = () => {
             title: data.title,
             source: sourceArray,
             tags: tagsArray,
-            image: isUpdateImage ? null : article.image,
-            // For dev
-            createdBy: 'ADMIN',
-            modifiedBy: 'ADMIN'
+            image: newImage,
         })
 
         setShow(true);
@@ -132,13 +133,36 @@ const EditArticle = () => {
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
+        const maxSize = 2 * 1024 * 1024;
+
+        console.log('upload image');
+
+
         if (file) {
+            if (file.size > maxSize) {
+                console.log('Image max Size');
+                setImagePreview(null);
+                document.getElementById('icon').value = null;
+                setError('icon', {
+                    type: 'manual',
+                    message: 'File size exceeds 2MB. Please upload a smaller image.',
+                });
+                return;
+            } else {
+                clearErrors('icon');
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview({ name: file.name, src: reader.result });
-                console.log('imagePrev', reader.result);
             };
             reader.readAsDataURL(file);
+            if (article.image) {
+                setArticle(prev=>({
+                    ...prev,
+                    image: null
+                }))
+            }
         } else {
             setImagePreview(null);
         }
@@ -167,10 +191,9 @@ const EditArticle = () => {
                             <Col md='6' sm='12'>
                                 <Form.Group controlId="image">
                                     <Form.Label>Cover Image</Form.Label>
-                                    <Form.Control
-                                        type="file" isInvalid={!!errors.image}
+                                    <Form.Control type="file" isInvalid={!!errors.image} accept=".png, .jpg, .jpeg"
                                         {...register('image', {
-                                            required: !article ? 'Cover Image is required' : false,
+                                            required: !article.image ? 'Cover Image is required' : false,
                                             onChange: handleImageChange
                                         })}
                                         className="d-none"
@@ -187,7 +210,22 @@ const EditArticle = () => {
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
-                                    {article.image ?
+                                    {imagePreview ?
+                                        <>
+                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                            <div className="d-flex align-items-center">
+                                                <div className="text-truncate">
+                                                    <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
+                                                        {imagePreview.name}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                                </div>
+                                            </div>
+                                        </>
+                                        :
+                                        article.image &&
                                         <>
                                             <Image src={article.image} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
                                             <div className="d-flex align-items-center">
@@ -201,28 +239,7 @@ const EditArticle = () => {
                                                 </div>
                                             </div>
                                         </>
-                                        :
-                                        imagePreview &&
-                                        <>
-                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
-                                            <div>
-                                                <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
-                                                    {imagePreview.name}{imagePreview.name}
-                                                </span>
-                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
-                                            </div>
-                                        </>}
-                                    {/* {imagePreview && (
-                                        <>
-                                            <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
-                                            <div>
-                                                <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
-                                                    {imagePreview.name}{imagePreview.name}
-                                                </span>
-                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
-                                            </div>
-                                        </>
-                                    )} */}
+                                    }
                                 </Form.Group>
                                 <Form.Group controlId="title">
                                     <Form.Label>Tittle</Form.Label>
@@ -364,7 +381,7 @@ const EditArticle = () => {
                                 />
                             </Col>
                             <Row>
-                                <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../article' />
+                                <ButtonFormBottom navigateCancelPath='../article' buttonType='edit' />
                             </Row>
                         </Row>
                     </Form>
@@ -377,6 +394,7 @@ const EditArticle = () => {
                     formSubmit={formSubmit}
                     isError={isError}
                     errorMessage={errorMessage}
+                    buttonType='edit'
                 />
             </Card>
 

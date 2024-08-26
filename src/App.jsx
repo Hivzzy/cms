@@ -34,6 +34,15 @@ import AddArticle from './pages/dashboard/article/AddArticle';
 import EditArticle from './pages/dashboard/article/EditArticle';
 import AddMetadata from './pages/dashboard/metadata/AddMetadata';
 import EditMetadata from './pages/dashboard/metadata/EditMetadata';
+import Expertise from './pages/dashboard/expertise/Expertise';
+import AddExpertise from './pages/dashboard/expertise/AddExpertise';
+import EditExpertise from './pages/dashboard/expertise/EditExpertise';
+import Team from './pages/dashboard/team/Team';
+import AddTeam from './pages/dashboard/team/AddTeam';
+import EditTeam from './pages/dashboard/team/EditTeam';
+import Testimonial from './pages/dashboard/testimonial/Testimonial';
+import AddTestimonial from './pages/dashboard/testimonial/AddTestimonial';
+import EditTestimonial from './pages/dashboard/testimonial/EditTestimonial';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -56,8 +65,20 @@ function App() {
 
             <Route path="/dashboard/article" element={<Article />}></Route>
             <Route path="/dashboard/article/add" element={<AddArticle />}></Route>
-            <Route path="/dashboard/article/edit/:articleId" element={<EditArticle />}></Route>
-            <Route path="/dashboard/article/detail/:articleId" element={<Article />}></Route>
+            <Route path="/dashboard/article/edit/:id" element={<EditArticle />}></Route>
+            <Route path="/dashboard/article/detail/:id" element={<Article />}></Route>
+
+            <Route path="/dashboard/expertise" element={<Expertise />}></Route>
+            <Route path="/dashboard/expertise/add" element={<AddExpertise />}></Route>
+            <Route path="/dashboard/expertise/edit/:id" element={<EditExpertise />}></Route>
+
+            <Route path="/dashboard/team" element={<Team />}></Route>
+            <Route path="/dashboard/team/add" element={<AddTeam />}></Route>
+            <Route path="/dashboard/team/edit/:id" element={<EditTeam />}></Route>
+
+            <Route path="/dashboard/testimonial" element={<Testimonial />}></Route>
+            <Route path="/dashboard/testimonial/add" element={<AddTestimonial />}></Route>
+            <Route path="/dashboard/testimonial/edit/:id" element={<EditTestimonial />}></Route>
 
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>

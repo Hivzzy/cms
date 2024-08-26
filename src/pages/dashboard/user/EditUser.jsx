@@ -10,9 +10,8 @@ import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 import { useMediaQuery } from "react-responsive";
 
 const EditUser = () => {
-    const { userId } = useParams();
-    console.log(userId);
-    
+    const { userId } = useParams();    
+
     const [user, setUser] = useState({});
 
     const navigate = useNavigate();
@@ -38,12 +37,11 @@ const EditUser = () => {
 
     const formSubmit = async () => {
         try {
-            setFormData()
-            const response = await updateUser(formData, { userId: user.userId });
-            console.log('Success:', response);
+            const response = await updateUser(formData);
             setShow(false);
             if (response.code === 200) {
-                // navigate('../user');
+                console.log('Success:', response);
+                navigate('../user');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -80,7 +78,7 @@ const EditUser = () => {
     }
 
     const handleShow = (data) => {
-        setFormData(data);
+        setFormData(prev => ({...prev, ...data, userId: userId}));
         setShow(true);
     };
 
@@ -185,7 +183,7 @@ const EditUser = () => {
                             </Col>
                         </Row>
                         <Row className="mt-4">
-                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../user' typeButton='edit' />
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../user' buttonType='edit' />
                         </Row>
                     </Form>
                 </Card.Body>

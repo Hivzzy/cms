@@ -8,6 +8,10 @@ div label::after {
     color: red;
 }
 
+div label.not-required::after {
+    content: '';
+}
+
 div.form-check label::after {
     content: '';
 }
@@ -30,6 +34,17 @@ div .form-control {
 
 .ql-editor {
     color: #242845;
+}
+
+.invalid-input {
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #c03221;
+}
+
+.invalid-form.form-control {
+    border-color: #c03221;
 }
 
 /* BUTTON */

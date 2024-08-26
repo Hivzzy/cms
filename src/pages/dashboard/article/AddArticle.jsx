@@ -40,11 +40,8 @@ const AddArticle = () => {
         try {
             const response = await createArticle(formData, image);
             console.log('response:', response);
-            if (response.code === 200) {
-                setIsError(false);
-                setErrorMessage('')
-                setShow(false);
-                // navigate('../metadata');
+            if (response.code === 201) {
+                navigate('../metadata');
             } else {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -52,6 +49,9 @@ const AddArticle = () => {
             }
         } catch (error) {
             console.error('Error:', error.response?.data || error.message);
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
         }
     };
 

@@ -144,9 +144,9 @@ const PaginationCustom = ({ pageSize, pageNumber, setPageNumber, totalData, setP
             </Pagination>
             <div className={`ms-3`}>
                 <select className="form-select form-select-sm" aria-label="Default select example" onChange={handleChangeSelect}>
-                    <option value='10'>10/page</option>
-                    <option value='20'>20/page</option>
-                    <option value='30'>30/page</option>
+                    <option value={10}>10/page</option>
+                    <option value={20}>20/page</option>
+                    <option value={30}>30/page</option>
                 </select>
             </div>
         </>

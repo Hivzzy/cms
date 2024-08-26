@@ -1,4 +1,4 @@
-import { Button, Card, Table } from "react-bootstrap"
+import { Button, Card, Form, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
 import { deleteArticle, getAllArticle } from "../../../services/apiServices";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
@@ -10,12 +10,12 @@ import { Link } from "react-router-dom";
 import ModalForm from "../../../components/form/ModalForm";
 import PaginationCustom from "../../../components/form/PaginationCustom";
 import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
+import TableHeader from "../../../components/dashboard/TableHeader";
 
 const Article = () => {
     const [article, setArticle] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
-        startReleaseDate: '',
         category: '',
         highlight: '',
         status: ''
@@ -31,12 +31,21 @@ const Article = () => {
 
     const [isNoData, setIsNoData] = useState(false);
 
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'title', direction: 'ASC' });
+
+    const [statusValue, setStatusValue] = useState('');
+    const [startReleaseDate, setstartReleaseDate] = useState('');
+
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            console.log('panggil api, page Number', pageNumber);
-            
             const data = await getAllArticle(
-                { pageSize: pageSize, pageNumber: pageNumber, [selectedValue]: searchValue[selectedValue] }
+                {
+                    pageSize: pageSize,
+                    pageNumber: pageNumber,
+                    [selectedValue]: selectedValue === 'status' ? statusValue : selectedValue === 'startReleaseDate' ? startReleaseDate : searchValue[selectedValue],
+                    sortBy: sortConfig.sortBy,
+                    direction: sortConfig.direction
+                }
             );
 
             if (data?.data) {
@@ -56,12 +65,19 @@ const Article = () => {
     useEffect(() => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageSize, pageNumber]);
+    }, [pageSize, pageNumber, sortConfig, statusValue, startReleaseDate]);
 
-    const userTableHeader = ["TITLE", "RELEASE DATE", "CATEGORY", 'HIGHLIGHT', 'STATUS', 'ACTION'];
+    const tableHeaders = [
+        { name: "TITLE", value: "title" },
+        { name: "RELEASE DATE", value: "releaseDate" },
+        { name: "CATEGORY" },
+        { name: "HIGHLIGHT" },
+        { name: "STATUS" },
+        { name: "ACTION" }
+    ];
 
     const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
+        event.preventDefault();
         getData(pageSize, pageNumber, selectedValue, searchValue);
     };
 
@@ -80,8 +96,7 @@ const Article = () => {
 
     const handleDelete = async () => {
         try {
-            const response = await deleteArticle(selectedData);
-            console.log('Success:', response);
+            const response = await deleteArticle(selectedData.id);
             setShow(false);
             if (response.code === 200) {
                 getData(pageSize, pageNumber, selectedValue, searchValue);
@@ -110,6 +125,20 @@ const Article = () => {
         },
     ]
 
+    const otherSelectRender = () => (
+        <>
+            {/* <Form.Select aria-label="Select Category" value={startReleaseDate} name={selectedValue} onChange={(e) => setstartReleaseDate(e.target.value)} style={{ minWidth: '170px' }}>
+                <Form.Label>Source</Form.Label>
+                <Form.Control type="password"
+
+                />
+            </Form.Select> */}
+            <Form.Control type="date" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingRight: '0.75rem' }}
+                value={startReleaseDate} onChange={(e) => setstartReleaseDate(e.target.value)} disabled={!selectedValue}
+            />
+        </>
+    )
+
     return (
         <>
             <Card>
@@ -121,6 +150,10 @@ const Article = () => {
                     setSelectedValue={setSelectedValue}
                     searchValue={searchValue}
                     setSearchValue={setSearchValue}
+                    statusValue={statusValue}
+                    setStatusValue={setStatusValue}
+                    selectedOtherFilterValue='startReleaseDate'
+                    renderOtherFIlterForm={otherSelectRender}
                 />
                 <Card.Body>
                     {isNoData ?
@@ -131,15 +164,7 @@ const Article = () => {
                         <>
                             <div className="table-responsive border-bottom my-3">
                                 <Table>
-                                    <thead>
-                                        <tr>
-                                            {userTableHeader.map((header) => (
-                                                <th key={header} style={{ fontSize: '14px' }}>
-                                                    {header}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
+                                    <TableHeader tableHeaders={tableHeaders} sortConfig={sortConfig} setSortConfig={setSortConfig} />
                                     <tbody>
                                         {article.map((data, rowIndex) => (
                                             <tr key={rowIndex}>
@@ -160,7 +185,7 @@ const Article = () => {
                                                         </Button>
                                                     </Link>
                                                     <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                        onClick={() => handleShow(data?.title)}
+                                                        onClick={() => handleShow(data)}
                                                     >
                                                         <GoTrash />
                                                     </Button>
@@ -188,7 +213,7 @@ const Article = () => {
                 buttonType='danger'
                 handleClose={handleClose}
                 page='Article'
-                data={selectedData}
+                data={selectedData?.title}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}

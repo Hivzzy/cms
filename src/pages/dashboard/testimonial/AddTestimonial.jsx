@@ -1,25 +1,24 @@
-import { useState } from "react";
-import DashboardCard from "../DashboardCard";
-import MetadataForm from "./MetadataForm";
-import { useNavigate } from "react-router-dom";
-import { createMetadata } from "../../../services/apiServices";
+import { useState } from 'react'
+import DashboardCard from '../DashboardCard';
+import TestimonialForm from './TestimonialForm';
+import { useNavigate } from 'react-router-dom';
+import { createTestimonial } from '../../../services/apiServices';
 
-const AddMetadata = () => {
+const AddTestimonial = () => {
     const navigate = useNavigate();
     const [show, setShow] = useState(false);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState({ status: 'Active' });
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
 
     const formSubmit = async () => {
         try {
-            const response = await createMetadata(formData);
+            const response = await createTestimonial(formData);
             setShow(false);
             console.log('form data', formData);
-            
+
             if (response.code === 200) {
-                console.log('Success: create metadata');
-                navigate('../metadata');
+                // navigate('../testimonial');
                 console.log(response);
 
             } else if (response.code === 400) {
@@ -36,8 +35,8 @@ const AddMetadata = () => {
 
     return (
         <>
-            <DashboardCard cardTittle="Add Metadata">
-                <MetadataForm
+            <DashboardCard cardTittle="Add Testimonial">
+                <TestimonialForm
                     formSubmit={formSubmit}
                     formData={formData}
                     setFormData={setFormData}
@@ -53,4 +52,4 @@ const AddMetadata = () => {
     )
 }
 
-export default AddMetadata
+export default AddTestimonial
