@@ -21,6 +21,7 @@ const AddClient = () => {
     const [icon, setIcon] = useState();
     const [imagePreview, setImagePreview] = useState(null);
     const dataS = [
+        { id: "", name: "Category"},
         { id: "00258081-9a33-486b-9b14-a0457c6cf855", name: "BUMN" },
         { id: "29b93675-398f-4a8c-b4e1-a807c376ef54", name: "Assurance" },
         { id: "ca6c5a2b-0f98-4302-aa0e-04e7390ba021", name: "Banking" },
@@ -80,8 +81,8 @@ const AddClient = () => {
             icon: data.name,
             name: data.name,
             category: {
-                id: formData?.category?.id || '00258081-9a33-486b-9b14-a0457c6cf855',
-                name: formData?.category?.name || 'BUMN'
+                id: formData?.category?.id || '',
+                name: formData?.category?.name || ''
             },
             trustedSeq: parseInt(data.trustedSeq, 10),
             priority: data.priority,

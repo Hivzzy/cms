@@ -68,7 +68,7 @@ const EditClient = () => {
         };
 
         getData();
-    }, [clientId]) // perubahan: menambahkan dependency array untuk memicu useEffect ketika clientId berubah
+    }, [clientId])
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm({
         defaultValues: {
@@ -85,21 +85,20 @@ const EditClient = () => {
     });
 
     useEffect(() => {
-        // Set default values for the form after the client data is fetched
         reset({
             name: client.name,
-            category: client.category.id || client.category, // perubahan: menambahkan category.id jika ada, atau default ke client.category
+            category: client.category.id || client.category,
             trustedSeq: client.trustedSeq,
             priority: client.priority,
             status: client.status,
         });
-    }, [client, reset]) // perubahan: menambahkan dependency array untuk memicu useEffect ketika client atau reset berubah
+    }, [client, reset]) 
 
     const [icon, setIcon] = useState(null);
 
     const formSubmit = async () => {
         try {
-            const response = await updateClient(formData, icon); // perubahan: memastikan icon terbaru dikirim ke updateClient
+            const response = await updateClient(formData, icon);
             setShow(false);
             if (response.code === 200) {
                 navigate('../client');
@@ -131,7 +130,7 @@ const EditClient = () => {
 
         setFormData({
             id: clientId,
-            icon: isUpdateIcon ? icon : data.name, // perubahan: memastikan icon yang benar dikirim
+            icon: isUpdateIcon ? icon : data.name,
             name: data.name,
             category: {
                 id: selectedCategory?.id || '',
@@ -152,7 +151,7 @@ const EditClient = () => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setIcon(file); // perubahan: memastikan icon yang di-upload disimpan dalam state
+                setIcon(file);
                 setIconPreview({ name: file.name, src: reader.result });
             };
             reader.readAsDataURL(file);
@@ -162,7 +161,7 @@ const EditClient = () => {
     };
 
     const removeImage = () => {
-        setIcon(null); // perubahan: memastikan ikon direset saat gambar dihapus
+        setIcon(null);
         setIconPreview(null);
         document.getElementById('icon').value = null;
     };

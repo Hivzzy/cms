@@ -192,7 +192,7 @@ const Portofolio = () => {
                                             >
                                                 <IoEyeOutline />
                                             </Button>
-                                            <Link to={`/dashboard/portofolio/edit/${data.id}`}>
+                                            <Link to={`/dashboard/portofolio/edit`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>

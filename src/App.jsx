@@ -46,6 +46,7 @@ import ExpertiseCategory from './pages/dashboard/expertise-category/ExpertiseCat
 import Portofolio from './pages/dashboard/portofolio/Portofolio';
 import AddExpertiseCategory from './pages/dashboard/expertise-category/AddExpertiseCategory';
 import EditExpertiseCategory from './pages/dashboard/expertise-category/EditExpertiseCategory';
+import AddPortofolio from './pages/dashboard/portofolio/AddPortofolio';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -83,6 +84,8 @@ function App() {
             <Route path="/dashboard/expertiseCategory/edit/:expertiseCategoryId" element={<EditExpertiseCategory />}></Route>
 
             <Route path="/dashboard/portofolio" element={<Portofolio />}></Route>
+            <Route path="/dashboard/portofolio/add" element={<AddPortofolio />}></Route>
+            <Route path="/dashboard/portofolio/edit" element={<AddPortofolio />}></Route>
 
             <Route path="/dashboard/client" element={<Client />}></Route>
             <Route path="/dashboard/client/add" element={<AddClient />}></Route>
