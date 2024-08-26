@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const DashboardCard = ({ cardTittle, children }) => {
     return (
         <>
-            <Card>
+            <Card className="mb-0">
                 <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                     <div className="header-title mb-3 mb-md-0">
                         <h5 className="card-title" style={{ color: '#242845' }}>{cardTittle}</h5>

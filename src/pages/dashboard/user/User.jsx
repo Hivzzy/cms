@@ -1,23 +1,29 @@
-import { Button, Card, Form, InputGroup, Stack, Table } from "react-bootstrap"
+import { Button, Card, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
 import { deleteUser, getAllUser } from "../../../services/apiServices";
 // import DataTable from "../../../src/components/DataTable";
-import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
 
-
-import { useMediaQuery } from 'react-responsive';
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import { Link } from "react-router-dom";
 import ModalForm from "../../../components/form/ModalForm";
 import PaginationCustom from "../../../components/form/PaginationCustom";
+import TableHeader from "../../../components/dashboard/TableHeader";
+import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
 
 
 const User = () => {
     const [users, setUsers] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
-    const [searchValue, setSearchValue] = useState('');
+    const [searchValue, setSearchValue] = useState({
+        username: '',
+        email: '',
+        fullname: '',
+        role: '',
+    });
+    const [statusValue, setStatusValue] = useState('')
+
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(0);
@@ -25,22 +31,20 @@ const User = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [selectedData, setSelectedData] = useState(null);
+    const [selectedData, setSelectedData] = useState({userId: 0, username: ''});
 
-    const handleSelectChange = (e) => {
-        setSelectedValue(e.target.value);
-    };
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'fullname', direction: 'ASC' });
 
-    const handleSearchChange = (e) => {
-        setSearchValue(e.target.value);
-    };
-
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
-
-    const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
+    const getData = async () => {
         try {
             const data = await getAllUser(
-                { size: pageSize, page: pageNumber, [selectedValue]: searchValue }
+                {
+                    pageSize: pageSize,
+                    pageNumber: pageNumber,
+                    [selectedValue]: selectedValue === 'status' ? statusValue : searchValue[selectedValue],
+                    sortBy: sortConfig.sortBy,
+                    direction: sortConfig.direction
+                }
             );
             if (data?.data) {
                 setTotalData(data.total)
@@ -51,20 +55,30 @@ const User = () => {
 
         } catch (error) {
             // setError(error.message);
-        } finally {
-            // setLoading(false);
         }
     };
 
     useEffect(() => {
-        getData(pageSize, pageNumber, selectedValue, searchValue);
-    }, []);
+        getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pageSize, pageNumber, sortConfig, statusValue]);
 
-    const userTableHeader = ["FULLNAME", "USERNAME", "EMAIL", "ROLE", "STATUS", "ACTION"];
+    const userTableHeader = [
+        { name: "FULLNAME", value: "fullname" },
+        { name: "USERNAME", value: "username" },
+        { name: "EMAIL" },
+        { name: "ROLE" },
+        { name: "STATUS" },
+        { name: "ACTION" }
+    ];
 
     const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
-        getData(pageSize, pageNumber, selectedValue, searchValue);
+        if (event) {
+            event.preventDefault();
+        }
+
+
+        getData(searchValue, selectedValue)
     };
 
     const handleClose = () => {
@@ -82,11 +96,10 @@ const User = () => {
 
     const handleDelete = async () => {
         try {
-            const response = await deleteUser({ userId: selectedData.userId });
-            console.log('Success:', response);
+            const response = await deleteUser(selectedData.userId);
             setShow(false);
             if (response.code === 200) {
-                getData(pageSize, pageNumber, selectedValue, searchValue);
+                getData(selectedValue, searchValue);
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -97,55 +110,43 @@ const User = () => {
         }
     };
 
+    const filterOptions = [
+        {
+            value: 'username', name: 'Username'
+        },
+        {
+            value: 'email', name: 'Email'
+        },
+        {
+            value: 'fullname', name: 'Fullname'
+        },
+        {
+            value: 'role', name: 'Role'
+        },
+        {
+            value: 'status', name: 'Status'
+        },
+    ]
+
     return (
         <>
             <Card>
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>User</h5>
-                    </div>
-                    <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '150px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="username">Username</option>
-                                <option value="email">Email</option>
-                                <option value="fullname">Fullname</option>
-                                <option value="role">Role</option>
-                                <option value="status">Status</option>
-                            </Form.Select>
-                            <InputGroup>
-                                <InputGroup.Text id="search-input">
-                                    <svg width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                        <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                    </svg>
-                                </InputGroup.Text>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter"
-                                    value={searchValue} onChange={handleSearchChange} readOnly={!selectedValue}
-                                />
-                            </InputGroup>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack>
-                </Card.Header>
+                <DashboardCardHeader
+                    tittle='User'
+                    filterOptions={filterOptions}
+                    handleSubmit={handleSubmit}
+                    selectedValue={selectedValue}
+                    setSelectedValue={setSelectedValue}
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    getData={getData}
+                    statusValue={statusValue}
+                    setStatusValue={setStatusValue}
+                />
                 <Card.Body>
                     <div className="table-responsive border-bottom my-3">
                         <Table>
-                            <thead>
-                                <tr>
-                                    {userTableHeader.map((header) => (
-                                        <th key={header} style={{ fontSize: '14px' }}>
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
+                            <TableHeader tableHeaders={userTableHeader} sortConfig={sortConfig} setSortConfig={setSortConfig} />
                             <tbody>
                                 {users.map((user, rowIndex) => (
                                     <tr key={rowIndex}>
@@ -161,7 +162,7 @@ const User = () => {
                                                 </Button>
                                             </Link>
                                             <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(user.username)}
+                                                onClick={() => handleShow(user)}
                                             >
                                                 <GoTrash />
                                             </Button>
@@ -187,7 +188,7 @@ const User = () => {
                 buttonType='danger'
                 handleClose={handleClose}
                 page='Article'
-                data={selectedData}
+                data={selectedData.username}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}

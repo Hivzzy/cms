@@ -5,7 +5,7 @@ import iconDelete from '../../assets/images/figma/modal-submit-delete.svg';
 import PropTypes from 'prop-types';
 
 const ModalForm = ({ show, handleClose, page, data, buttonType, formSubmit, isError, errorMessage, isDelete }) => {
-    return ( 
+    return (
         <Modal show={show} onHide={handleClose} centered aria-labelledby="contained-modal-title-vcenter" style={{ '--bs-modal-width': '400px' }}>
             <Modal.Header closeButton style={{ border: 'none' }} />
             <Stack className="px-4 d-flex justify-content-center text-center">
@@ -13,8 +13,9 @@ const ModalForm = ({ show, handleClose, page, data, buttonType, formSubmit, isEr
                 <div style={{ marginTop: '1rem', fontSize: '20px', fontWeight: 600, color: '#242845' }}>
                     Hold it right there!
                 </div>
+                {/* Message */}
                 <p style={{ marginTop: '1rem', fontSize: '16px', fontWeight: 400, color: '#242845' }}>
-                    {isDelete ?
+                    {isDelete && !isError ?
                         <>
                             Delete {page} <span className="fw-bold">&ldquo;{data}&rdquo;</span> ?
                         </>
@@ -25,11 +26,12 @@ const ModalForm = ({ show, handleClose, page, data, buttonType, formSubmit, isEr
                             </>
                             :
                             <>
-                                Add new {page} <span className="fw-bold">&ldquo;{data}&rdquo;</span> ?
+                                {buttonType == 'edit' ? 'Edit' : 'Add new'} {page} <span className="fw-bold">&ldquo;{data}&rdquo;</span> ?
                             </>
                     }
                 </p>
-                {isDelete ?
+                {/* Button */}
+                {isDelete && !isError ?
                     <>
                         <button onClick={formSubmit} className={`btn button-submit ${buttonType} mt-2 mb-3`}>
                             Delete {page}
@@ -40,7 +42,7 @@ const ModalForm = ({ show, handleClose, page, data, buttonType, formSubmit, isEr
                         null
                         :
                         <button onClick={formSubmit} className={`btn button-submit ${buttonType} mt-2 mb-3`}>
-                            Add {page}
+                            {buttonType == 'edit' ? 'Edit' : 'Add'} {page}
                         </button>
                 }
                 <button onClick={handleClose} className={`btn button-cancel ${isError ? 'danger' : buttonType}`}>

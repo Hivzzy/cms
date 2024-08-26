@@ -1,27 +1,25 @@
+import { useNavigate } from "react-router-dom";
+import { createTeam } from "../../../services/apiServices";
 import { useState } from "react";
 import DashboardCard from "../DashboardCard";
-import MetadataForm from "./MetadataForm";
-import { useNavigate } from "react-router-dom";
-import { createMetadata } from "../../../services/apiServices";
+import TeamForm from "./TeamForm";
 
-const AddMetadata = () => {
+const AddTeam = () => {
     const navigate = useNavigate();
     const [show, setShow] = useState(false);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState({ status: 'Active' });
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
+    const [uploadedImage, setUploadedImage] = useState(null);
 
     const formSubmit = async () => {
+        console.log('uploaded', uploadedImage);
         try {
-            const response = await createMetadata(formData);
+            const response = await createTeam(formData, uploadedImage);
             setShow(false);
-            console.log('form data', formData);
-            
             if (response.code === 200) {
-                console.log('Success: create metadata');
-                navigate('../metadata');
+                navigate('../team');
                 console.log(response);
-
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -36,8 +34,8 @@ const AddMetadata = () => {
 
     return (
         <>
-            <DashboardCard cardTittle="Add Metadata">
-                <MetadataForm
+            <DashboardCard cardTittle="Add Expertise">
+                <TeamForm
                     formSubmit={formSubmit}
                     formData={formData}
                     setFormData={setFormData}
@@ -47,10 +45,12 @@ const AddMetadata = () => {
                     setIsError={setIsError}
                     errorMessage={errorMessage}
                     setErrorMessage={setErrorMessage}
+                    setUploadedImage={setUploadedImage}
+                    isCreate={true}
                 />
             </DashboardCard>
         </>
     )
 }
 
-export default AddMetadata
+export default AddTeam

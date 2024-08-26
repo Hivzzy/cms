@@ -15,11 +15,11 @@ function DashboardRowActionButton({ setShow, setSelectedData, data, handleShowMo
     return (
         <td>
             {handleShowModalDetail &&
-                <Link onClick={() => handleShowModalDetail(dataId)}>
+                <span onClick={() => handleShowModalDetail(dataId)}>
                     <Button className="p-0" style={{ fontSize: '15px', color: '#0078D7', width: '24px', height: '24px', background: '#F4F7FE', border: '0px', marginRight: '0.5rem' }}>
                         <IoEyeOutline />
                     </Button>
-                </Link>
+                </span>
             }
             <Link to={linkToEdit}>
                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
@@ -39,7 +39,7 @@ DashboardRowActionButton.propTypes = {
     rowIndex: PropTypes.number,
     setShow: PropTypes.func,
     setSelectedData: PropTypes.func,
-    data: PropTypes.string,
+    data: PropTypes.object,
     handleShowModalDetail: PropTypes.func,
     linkToEdit: PropTypes.string,
     dataId: PropTypes.string

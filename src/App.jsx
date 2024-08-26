@@ -33,6 +33,16 @@ import Article from './pages/dashboard/article/Article';
 import AddArticle from './pages/dashboard/article/AddArticle';
 import EditArticle from './pages/dashboard/article/EditArticle';
 import AddMetadata from './pages/dashboard/metadata/AddMetadata';
+import EditMetadata from './pages/dashboard/metadata/EditMetadata';
+import Expertise from './pages/dashboard/expertise/Expertise';
+import AddExpertise from './pages/dashboard/expertise/AddExpertise';
+import EditExpertise from './pages/dashboard/expertise/EditExpertise';
+import Team from './pages/dashboard/team/Team';
+import AddTeam from './pages/dashboard/team/AddTeam';
+import EditTeam from './pages/dashboard/team/EditTeam';
+import Testimonial from './pages/dashboard/testimonial/Testimonial';
+import AddTestimonial from './pages/dashboard/testimonial/AddTestimonial';
+import EditTestimonial from './pages/dashboard/testimonial/EditTestimonial';
 import Career from './pages/dashboard/career/Career';
 import AddCareer from './pages/dashboard/career/AddCareer';
 import EditCareer from './pages/dashboard/career/EditCareer';
@@ -65,32 +75,13 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="/dashboard/metadata" element={<Metadata />}></Route>
             <Route path="/dashboard/metadata/add" element={<AddMetadata />}></Route>
+            <Route path="/dashboard/metadata/edit/:id" element={<EditMetadata />}></Route>
 
             <Route path="/dashboard/article" element={<Article />}></Route>
             <Route path="/dashboard/article/add" element={<AddArticle />}></Route>
             <Route path="/dashboard/article/edit/:articleId" element={<EditArticle />}></Route>
             <Route path="/dashboard/article/detail/:articleId" element={<Article />}></Route>
 
-            <Route path="/dashboard/career" element={<Career />}></Route>
-            <Route path="/dashboard/career/add" element={<AddCareer />}></Route>
-            <Route path="/dashboard/career/edit/:careerId" element={<EditCareer />}></Route>
-
-            <Route path="/dashboard/clientCategory" element={<ClientCategory />}></Route>
-            <Route path="/dashboard/clientCategory/add" element={<AddClientCategory />}></Route>
-            <Route path="/dashboard/clientCategory/edit/:clientCategoryId" element={<EditClientCategory />}></Route>
-
-            <Route path="/dashboard/expertiseCategory" element={<ExpertiseCategory />}></Route>
-            <Route path="/dashboard/expertiseCategory/add" element={<AddExpertiseCategory />}></Route>
-            <Route path="/dashboard/expertiseCategory/edit/:expertiseCategoryId" element={<EditExpertiseCategory />}></Route>
-
-            <Route path="/dashboard/portofolio" element={<Portofolio />}></Route>
-            <Route path="/dashboard/portofolio/add" element={<AddPortofolio />}></Route>
-            <Route path="/dashboard/portofolio/edit" element={<AddPortofolio />}></Route>
-
-            <Route path="/dashboard/client" element={<Client />}></Route>
-            <Route path="/dashboard/client/add" element={<AddClient />}></Route>
-            <Route path="/dashboard/client/edit/:clientId" element={<EditClient />}></Route>
-            
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>
             <Route path="/dashboard/user/edit/:userId" element={<EditUser />}></Route>

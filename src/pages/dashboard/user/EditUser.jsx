@@ -10,7 +10,8 @@ import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 import { useMediaQuery } from "react-responsive";
 
 const EditUser = () => {
-    const { userId } = useParams();
+    const { userId } = useParams();    
+
     const [user, setUser] = useState({});
 
     const navigate = useNavigate();
@@ -36,10 +37,10 @@ const EditUser = () => {
 
     const formSubmit = async () => {
         try {
-            const response = await updateUser(formData, { userId: user.userId });
-            console.log('Success:', response);
+            const response = await updateUser(formData);
             setShow(false);
             if (response.code === 200) {
+                console.log('Success:', response);
                 navigate('../user');
             } else if (response.code === 400) {
                 setIsError(true);
@@ -54,7 +55,7 @@ const EditUser = () => {
     useEffect(() => {
         const getData = async () => {
             try {
-                const data = await getUserById({ userId });
+                const data = await getUserById(userId);
                 if (data?.data) {
                     setUser(data.data);
                 } else {
@@ -77,7 +78,7 @@ const EditUser = () => {
     }
 
     const handleShow = (data) => {
-        setFormData(data);
+        setFormData(prev => ({...prev, ...data, userId: userId}));
         setShow(true);
     };
 
@@ -143,16 +144,6 @@ const EditUser = () => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group controlId="password">
-                                    <Form.Label>Password</Form.Label>
-                                    <Form.Control type="password" placeholder="Password" disabled />
-                                    <br></br>
-                                </Form.Group>
-                                <Form.Group controlId="confirmPassword">
-                                    <Form.Label>Confirm Password</Form.Label>
-                                    <Form.Control type="password" placeholder="Confirm Password" disabled />
-                                    <br></br>
-                                </Form.Group>
                                 <Form.Group controlId="role">
                                     <Form.Label>Role</Form.Label>
                                     <Form.Select aria-label="Default select example" {...register('role', { required: 'Confirm Password is required' })} isInvalid={!!errors.role} defaultValue={user.role}>
@@ -192,7 +183,7 @@ const EditUser = () => {
                             </Col>
                         </Row>
                         <Row className="mt-4">
-                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../user' typeButton='edit' />
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../user' buttonType='edit' />
                         </Row>
                     </Form>
                 </Card.Body>
