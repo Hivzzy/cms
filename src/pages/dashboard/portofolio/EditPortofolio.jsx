@@ -3,11 +3,11 @@ import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
 import { useMediaQuery } from "react-responsive";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "../../../services/apiServices";
+import { createClient, getClientCategoriesLov, getClientsLov, getPortofolioById, updatePortofolio } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
@@ -22,39 +22,84 @@ const EditPortofolio = () => {
     const [icon, setIcon] = useState();
     const [imagePreview, setImagePreview] = useState(null);
     const [carouselImages, setCarouselImages] = useState([]);
-    const dataS = [
-        { id: "", name: "Category" },
-        { id: "00258081-9a33-486b-9b14-a0457c6cf855", name: "BUMN" },
-        { id: "29b93675-398f-4a8c-b4e1-a807c376ef54", name: "Assurance" },
-        { id: "ca6c5a2b-0f98-4302-aa0e-04e7390ba021", name: "Banking" },
-        { id: "54000e98-8587-4daa-856e-2738d704c555", name: "IT Company" },
-        { id: "186780ae-6e5f-4097-b73e-a8db4e5280f4", name: "Fintech" },
-        { id: "5f577d21-3094-43b1-9afd-7497c47feb20", name: "Manufacture" },
-        { id: "52c860ce-1b75-43e8-9c0b-06cd0f69a626", name: "F&B" },
-        { id: "a30ea498-a799-47d2-be14-0fa8d1c7975b", name: "Health Services" },
-        { id: "0d98f5b2-8fda-443a-9b46-df9681dfa6f7", name: "Distribution" },
-        { id: "d9c7dee1-5892-44f9-941b-1e7e0c764dbb", name: "Retail" },
-        { id: "1065ced7-f087-4e11-8686-aa806b226eab", name: "Finance" },
-        { id: "df16afcf-8072-492b-9c79-0e57be8cda3e", name: "Education" },
-        { id: "2b6713a2-f8dc-4ccb-bc8c-4b825e16d285", name: "Network Infrastructure" },
-        { id: "060a07ab-3aaf-4893-a183-1a8ddc6989da", name: "Digital Media" },
-        { id: "5a1bebcd-e76c-4a0b-b6e7-de918db284b4", name: "Capital Market" },
-        { id: "7a80fdc1-c305-456e-8f95-8fd6b1f13d88", name: "Mining" },
-        { id: "df5e65c6-2fd3-4a6d-bf87-b7c69471833d", name: "Others" },
-    ];
+    const [carouselImageFiles, setCarouselImageFiles] = useState([]);    
+    const [clientsLov, setClientsLov] = useState([]);
+    const [categoryLov, setCategoryLov] = useState([]);
+
+    const fetchClientsLov = async () => {
+        try {
+            const response = await getClientsLov();
+            setClientsLov((prev) => ([...prev, ...response.data]));
+            console.log('Clients:', response?.data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const fetchCategoryLov = async () => {
+        try {
+            const response = await getClientCategoriesLov();
+            console.log(response?.data)
+            setCategoryLov((prev) => ([...prev, ...response.data]));
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const getData = async () => {
+        try {
+            const response = await getPortofolioById(window.location.pathname.split('/').pop());
+            console.log('Success:', response);
+
+            if (response.code === 200) {
+                setFormData(response.data);
+                setIcon(response.data.image);
+                setImagePreview({ name: response.data.image, src: response.data.image });
+                setCarouselImages(response.data.metadata.carousel.map((src) => ({ name: src, src:src })));
+            
+            } else if (response.code === 400) {
+                setIsError(true);
+                setErrorMessage(response.message)
+                setShow(true);
+            }
+
+        } catch (error) {
+            console.error('Error:', error.response?.data || error.message);
+        }
+    }
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors }, clearErrors } = useForm({
         defaultValues: {
-            priority: 'Yes',
             status: 'Active',
+        },
+        values: {
+            title : formData?.title,
+            client : formData?.client?.id,
+            category : formData?.metadata?.category,
+            nda : formData?.metadata?.isNda,
+            startDate : formData?.startDate,
+            endDate : formData?.endDate,
+            description : formData?.description,
+            highlight : formData?.highlight,
+            fe : formData?.metadata?.technicalInfo?.fe,
+            be : formData?.metadata?.technicalInfo?.be,
+            os : formData?.metadata?.technicalInfo?.os,
+            db : formData?.metadata?.technicalInfo?.db,
+            appServer : formData?.metadata?.technicalInfo?.appServer,
+            devTool : formData?.metadata?.technicalInfo?.devTool,
+            other : formData?.metadata?.technicalInfo?.other
         }
     });
 
     const formSubmit = async () => {
+        const portofolioData = {
+            ...formData,
+        };
+
         try {
-            const response = await createClient(formData, icon);
+            const response = await updatePortofolio(portofolioData, icon, carouselImageFiles);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
@@ -65,7 +110,7 @@ const EditPortofolio = () => {
                 setShow(true);
             }
         } catch (error) {
-            console.error('Error:', error.response?.data || error.message);
+            console.error('Error:', error.response || error.message);
         }
     };
 
@@ -80,50 +125,103 @@ const EditPortofolio = () => {
         setIcon(data.icon);
         setFormData(prevData => ({
             ...prevData,
-            icon: data.name,
-            name: data.name,
-            category: {
-                id: formData?.category?.id || '',
-                name: formData?.category?.name || 'BUMN'
-            },
-            trustedSeq: parseInt(data.trustedSeq, 10),
-            priority: data.priority,
-            status: data.status
+            status: 'Active',
+            title: data.title,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            description: data.description,
+            isHighlight: data.highlight,
+            metadata : {
+                category: data.category,
+                isNda: data.nda,
+                technicalInfo :{
+                    fe: data.fe,
+                    be: data.be,
+                    os: data.os,
+                    db: data.db,
+                    appServer: data.appServer,
+                    devTool: data.devTool,
+                    other: data.other
+                }
+            }
         }));
         setShow(true);
     }
 
-
-    const handleImageChange = (e, index) => {
+    const handleChangeIcon = (e) => {
         const file = e.target.files[0];
+        const maxSize = 2 * 1024 * 1024;
+        const allowedTypes = ['image/jpeg', 'image/png'];
         if (file) {
+            if (!allowedTypes.includes(file.type)) {
+                console.log('Invalid file type');
+                setImagePreview(null);
+                document.getElementById('icon').value = null;
+                // setError('icon', {
+                //     type: 'manual',
+                //     message: 'Invalid file type. Please upload a JPG, JPEG, or PNG image.',
+                // });
+                return;
+            }
+            if (file.size > maxSize) {
+                console.log('Image max Size');
+                setImagePreview(null);
+                document.getElementById('icon').value = null;
+                // setError('icon', {
+                //     type: 'manual',
+                //     message: 'File size exceeds 2MB. Please upload a smaller image.',
+                // });
+                return;
+            } else {
+                clearErrors('icon');
+            }
             const reader = new FileReader();
             reader.onloadend = () => {
-                if (index !== undefined) {
-                    // Update existing image in the carousel
-                    setCarouselImages(prevImages => {
-                        const updatedImages = [...prevImages];
-                        updatedImages[index] = { name: file.name, src: reader.result };
-                        return updatedImages;
-                    });
-                } else {
-                    // Set preview for main icon
-                    setImagePreview({ name: file.name, src: reader.result });
-                }
+                setImagePreview({ name: file.name, src: reader.result });
             };
             reader.readAsDataURL(file);
-        } else {
-            if (index !== undefined) {
-                setCarouselImages(prevImages => {
-                    const updatedImages = [...prevImages];
-                    updatedImages[index] = null;
-                    return updatedImages;
-                });
-            } else {
-                setImagePreview(null);
+            if (formData?.icon) {
+                setFormData(prev => ({
+                    ...prev,
+                    icon: null
+                }))
             }
+        } else {
+            setImagePreview(null);
         }
+        console.log('Icon:', file);
     };
+
+    // const handleImageChange = (e, index) => {
+    //     const file = e.target.files[0];
+    //     if (file) {
+    //         const reader = new FileReader();
+    //         reader.onloadend = () => {
+    //             if (index !== undefined) {
+    //                 // Update existing image in the carousel
+    //                 setCarouselImages(prevImages => {
+    //                     const updatedImages = [...prevImages];
+    //                     updatedImages[index] = { name: file.name, src: reader.result };
+    //                     return updatedImages;
+    //                 });
+    //             } else {
+    //                 // Set preview for main icon
+    //                 setImagePreview({ name: file.name, src: reader.result });
+    //             }
+    //         };
+    //         reader.readAsDataURL(file);
+    //     } else {
+    //         if (index !== undefined) {
+    //             setCarouselImages(prevImages => {
+    //                 const updatedImages = [...prevImages];
+    //                 updatedImages[index] = null;
+    //                 return updatedImages;
+    //             });
+    //         } else {
+    //             setImagePreview(null);
+    //         }
+    //     }
+    // };
 
     const removeImage = (index) => {
         if (index !== undefined) {
@@ -139,6 +237,12 @@ const EditPortofolio = () => {
     }
 
 
+    useEffect(() => {
+        if (clientsLov.length === 0) fetchClientsLov();
+        if (categoryLov.length === 0) fetchCategoryLov();
+
+        getData();
+    }, []);
 
 
     return (
@@ -159,7 +263,7 @@ const EditPortofolio = () => {
                                         type="file" isInvalid={!!errors.icon} placeholder="Image Client"
                                         {...register('icon', {
                                             required: 'Icon Image is required',
-                                            onChange: handleImageChange
+                                            onChange: handleChangeIcon
                                         })}
                                         className="d-none"
                                     />
@@ -195,6 +299,8 @@ const EditPortofolio = () => {
                                 <ImageCarouselUploader
                                     carouselImages={carouselImages}
                                     setCarouselImages={setCarouselImages}
+                                    imageFiles={carouselImageFiles}
+                                    setImageFiles={setCarouselImageFiles}
                                 />
 
                                 <Form.Group controlId="title">
@@ -218,17 +324,17 @@ const EditPortofolio = () => {
                                         aria-label="Select Client"
                                         {...register('client', { required: 'Client is required' })}
                                         isInvalid={!!errors.client}
-                                        defaultValue=""
                                         onChange={(e) => {
                                             const selectedCategory = e.target.value;
-                                            const categoryObj = dataS.find((item) => item.id === selectedCategory);
+                                            const categoryObj = clientsLov.find((item) => item.id === selectedCategory);
                                             setFormData(prevData => ({
                                                 ...prevData,
                                                 client: categoryObj,
                                             }));
+                                            console.log('Client set in formData:', categoryObj);
                                         }}
                                     >
-                                        {dataS.map((item) => (
+                                        {clientsLov.map((item) => (
                                             <option key={item.id} value={item.id.toString()}>
                                                 {item.name}
                                             </option>
@@ -248,10 +354,10 @@ const EditPortofolio = () => {
                                         aria-label="Select category"
                                         {...register('category', { required: 'Category is required' })}
                                         isInvalid={!!errors.category}
-                                        defaultValue=""
+                                        defaultValue={formData?.category?.id}
                                         onChange={(e) => {
                                             const selectedCategory = e.target.value;
-                                            const categoryObj = dataS.find((item) => item.id === selectedCategory);
+                                            const categoryObj = categoryLov.find((item) => item.id === selectedCategory);
                                             setFormData(prevData => ({
                                                 ...prevData,
                                                 category: categoryObj,
@@ -261,7 +367,7 @@ const EditPortofolio = () => {
                                             console.log('Selected Category:', selectedCategory);
                                         }}
                                     >
-                                        {dataS.map((item) => (
+                                        {categoryLov.map((item) => (
                                             <option key={item.id} value={item.id.toString()}>
                                                 {item.name}
                                             </option>
@@ -278,7 +384,7 @@ const EditPortofolio = () => {
 
                                 <Form.Group controlId="nda" className="mb-2">
                                     <Form.Label>NDA</Form.Label>
-                                    <div key='inline-radio'>
+                                    <div key='inline-radio1'>
                                         <Form.Check
                                             inline
                                             label="Yes"
@@ -286,6 +392,7 @@ const EditPortofolio = () => {
                                             type='radio'
                                             id={`inline-radio-1`}
                                             value="Yes"
+                                            checked={formData?.metadata?.isNda.toLowerCase() === 'yes'}
                                             {...register('nda', { required: 'NDA is required' })}
                                         />
                                         <Form.Check
@@ -295,6 +402,7 @@ const EditPortofolio = () => {
                                             type="radio"
                                             id={`inline-radio-2`}
                                             value="No"
+                                            checked={formData?.metadata?.isNda.toLowerCase() === 'no'}
                                             {...register('nda', { required: 'NDA is required' })}
                                         />
                                     </div>
@@ -343,107 +451,107 @@ const EditPortofolio = () => {
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="fe">
                                     <Form.Label>Technical Info - FE</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('fe', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.fe}
                                     />
                                     {errors.title ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.fe?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="be">
                                     <Form.Label>Technical Info - BE</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('be', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.be}
                                     />
-                                    {errors.title ?
+                                    {errors.be ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.be?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="os">
                                     <Form.Label>Technical Info - OS</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('os', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.os}
                                     />
-                                    {errors.title ?
+                                    {errors.os ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.os?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="db">
                                     <Form.Label>Technical Info - DB</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('db', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.db}
                                     />
-                                    {errors.title ?
+                                    {errors.db ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.db?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="appServer">
                                     <Form.Label>Technical Info - App Server</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('appServer', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.appServer}
                                     />
-                                    {errors.title ?
+                                    {errors.appServer ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.appServer?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="devTool">
                                     <Form.Label>Technical Info - Dev Tool</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('devTool', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.devTool}
                                     />
-                                    {errors.title ?
+                                    {errors.devTool ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.devTool?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
-                                <Form.Group controlId="title">
+                                <Form.Group controlId="other">
                                     <Form.Label>Technical Info - Other</Form.Label>
-                                    <Form.Control type="text" placeholder="Title"
-                                        {...register('title', {
-                                            required: 'Title is required',
-                                        })} isInvalid={errors.title}
+                                    <Form.Control type="text" placeholder="Technical Info"
+                                        {...register('other', {
+                                            required: 'The field is required',
+                                        })} isInvalid={errors.other}
                                     />
-                                    {errors.title ?
+                                    {errors.other ?
                                         <Form.Control.Feedback type="invalid">
-                                            {errors.title?.message}
+                                            {errors.other?.message}
                                         </Form.Control.Feedback>
                                         : <br></br>
                                     }
                                 </Form.Group>
                                 <Form.Group controlId="highlight" className="mb-2">
                                     <Form.Label>Highlight</Form.Label>
-                                    <div key='inline-radio'>
+                                    <div key='inline-radio2'>
                                         <Form.Check
                                             inline
                                             label="Yes"
@@ -451,6 +559,7 @@ const EditPortofolio = () => {
                                             type='radio'
                                             id={`inline-radio-1`}
                                             value="Yes"
+                                            checked={formData?.isHighlight?.toLowerCase() === 'yes'}
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                         <Form.Check
@@ -460,6 +569,7 @@ const EditPortofolio = () => {
                                             type="radio"
                                             id={`inline-radio-2`}
                                             value="No"
+                                            checked={formData?.isHighlight?.toLowerCase() === 'no'}
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                     </div>
@@ -467,7 +577,7 @@ const EditPortofolio = () => {
                             </Col>
                         </Row>
                         <Row>
-                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../portofolio' />
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../portofolio' buttonType="edit" />
                         </Row>
                     </Form>
                 </Card.Body>
@@ -476,7 +586,7 @@ const EditPortofolio = () => {
                 show={show}
                 handleClose={handleClose}
                 page='Portofolio'
-                data={formData?.name}
+                data={formData?.title}
                 formSubmit={formSubmit}
                 isError={isError}
                 errorMessage={errorMessage}

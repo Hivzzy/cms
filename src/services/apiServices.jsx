@@ -388,6 +388,93 @@ export const updateExpertiseCategory = async (body) => {
     }
 };
 
+//Portofolio
+
+export const getAllPortofolios = async (params) => {
+    try {
+        const response = await apiClient.get('/portfolio-management/cms-portfolios', { params });
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+};
+
+export const getPortofolioById = async (id) => {
+    try {
+        const response = await apiClient.get(`/portfolio-management/portfolios/${id}`);
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+};
+
+export const createPortofolio = async (request, icon, additionalImages) => {
+    const formData = new FormData()
+    try {
+        const json = JSON.stringify(request);
+        // console.log(request)
+        const blob = new Blob([json], {
+            type: 'application/json'
+        });
+        formData.append('request', blob);
+
+        if (icon !== null) {
+            formData.append('file', icon[0]);
+        }
+
+        
+        additionalImages.forEach((image) => {
+            formData.append('additionalFiles', image);
+        })
+
+        const response = await apiClient.post('/portfolio-management/portfolios', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+}
+
+export const updatePortofolio = async (request, icon, additionalImages) => {
+    const formData = new FormData()
+    
+    try {
+        const json = JSON.stringify(request);
+        // console.log(request)
+        const blob = new Blob([json], {
+            type: 'application/json'
+        });
+        formData.append('request', blob);
+
+        if (icon !== null) {
+            formData.append('file', icon[0]);
+        }
+
+        console.log('additionalImages', additionalImages)
+
+        additionalImages.forEach((image) => {
+            formData.append('additionalFiles', image);
+        })
+
+        const response = await apiClient.put(`/portfolio-management/portfolios/`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        return error.response.data;
+    }
+}
+
+
 // Team
 export const getAllTeam = async (params) => {
     try {
@@ -833,20 +920,31 @@ export const deleteExpertiseCategory1 = async (id) => {
     } catch (error) {
         console.error('Error fetching data:', error);
         console.error('Get error data:', error.response.data);
-        return error.response.data;
+        return error.response;
     }
 };
 
-//Visitor
-const visitorPath =  '/visitor-management/visitors';
-export const getAllVisitor = async (params) => {
+// LOV
+export const getClientsLov = async () => {
     try {
-        const response = await apiClient.get(`${visitorPath}`, { params });
+        const response = await apiClient.get('/lov-management/client-option-lists');
+        console.log('response', response);
         return response.data;
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching data:', error);
-        console.error('Get error data:', error.response.data);
-        // throw error;
+        return error.response;
+    }
+}
+
+export const getClientCategoriesLov = async () => {
+    try {
+        const response = await apiClient.get('/lov-management/client-category-option-lists');
+        console.log('response', response);
+        return response.data;
+    }
+    catch (error) {
+        console.error('Error fetching data:', error);
         return error.response.data;
     }
-};
+}

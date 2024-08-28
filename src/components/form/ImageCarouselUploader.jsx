@@ -4,7 +4,7 @@ import { IoIosCloseCircle } from "react-icons/io";
 import PropTypes from 'prop-types'; // Pastikan PropTypes digunakan
 import { useMediaQuery } from "react-responsive";
 
-const ImageCarouselUploader = ({ carouselImages, setCarouselImages }) => {
+const ImageCarouselUploader = ({ carouselImages, setCarouselImages, imageFiles, setImageFiles }) => {
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
     const handleImageChange = (e) => {
         const files = e.target.files;
@@ -16,9 +16,9 @@ const ImageCarouselUploader = ({ carouselImages, setCarouselImages }) => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     newImages.push({ name: file.name, src: reader.result });
-                    if (newImages.length === files.length || newImages.length === 5) {
-                        setCarouselImages([...carouselImages, ...newImages].slice(0, 5)); // Batas maksimum 5 gambar
-                    }
+                    setCarouselImages([...carouselImages, ...newImages].slice(0, 5)); // Batas maksimum 5 gambar
+                    setImageFiles([...imageFiles, ...files].slice(0, 5)); // Batas maksimum 5 gambar
+
                 };
                 reader.readAsDataURL(file);
             }

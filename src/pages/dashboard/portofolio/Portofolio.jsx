@@ -1,6 +1,6 @@
 import { Button, Card, Form, Stack, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteCareer, getAllCareer } from "../../../services/apiServices";
+import { deleteCareer, getAllCareer, getAllPortofolios } from "../../../services/apiServices";
 import { FiPlusCircle } from "react-icons/fi";
 import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
@@ -26,7 +26,7 @@ const Portofolio = () => {
         highlight: '',
         status: ''
     });
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(100);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData] = useState(10);
 
@@ -56,7 +56,7 @@ const Portofolio = () => {
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
-            const data = await getAllCareer(
+            const data = await getAllPortofolios(
                 { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
             );
             console.log(data.data);
@@ -78,7 +78,7 @@ const Portofolio = () => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
     }, []);
 
-    const userTableHeader = ['TITLE', 'CLIENT', 'CATEGORY', 'NDA', 'START', 'END', 'HIGHLIGHT', 'STATUS', 'ACTION'];
+    const portofolioTableHeader = ['TITLE', 'CLIENT', 'CATEGORY', 'NDA', 'START', 'END', 'HIGHLIGHT', 'STATUS', 'ACTION'];
 
     const handleSubmit = (event) => {
         event.preventDefault(); // Prevent the default form submission behavior
@@ -168,7 +168,7 @@ const Portofolio = () => {
                         <Table>
                             <thead>
                                 <tr>
-                                    {userTableHeader.map((header) => (
+                                    {portofolioTableHeader.map((header) => (
                                         <th key={header} style={{ fontSize: '14px' }}>
                                             {header}
                                         </th>
@@ -179,10 +179,12 @@ const Portofolio = () => {
                                 {portofolio.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
                                         <td>{data.title}</td>
-                                        <td>{data.position}</td>
-                                        <td>{data.placement}</td>
+                                        <td>{data.client.name}</td>
+                                        <td>{data.metadata.category}</td>
+                                        <td>{data.metadata.isNda}</td>
                                         <td>{data.startDate}</td>
                                         <td>{data.endDate}</td>
+                                        <td>{data.isHighlight}</td>
                                         <td>{data.status?.toLowerCase() == "active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         <td>
                                             <Button
@@ -192,7 +194,7 @@ const Portofolio = () => {
                                             >
                                                 <IoEyeOutline />
                                             </Button>
-                                            <Link to={`/dashboard/portofolio/edit`}>
+                                            <Link to={`/dashboard/portofolio/edit/${data.id}`}>
                                                 <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
                                                     <FaRegEdit />
                                                 </Button>
