@@ -2,12 +2,24 @@ import { Link } from "react-router-dom";
 import { Accordion } from "react-bootstrap";
 import PropTypes from 'prop-types';
 import SidebarList from '../components/dashboard/SidebarList'
+import { useEffect } from "react";
 
 const SidebarLayout = ({ logo, setLogo, logoFull, logoCrop }) => {
     const minisidebar = () => {
         document.getElementsByTagName("ASIDE")[0].classList.toggle("sidebar-mini");
         setLogo((prevLogo) => prevLogo === logoFull ? logoCrop : logoFull);
     };
+
+    useEffect(() => {
+        if (window.innerWidth <= 1200) {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.add('sidebar-mini');
+                setLogo(logoCrop);
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const dashboardIcon = (
         <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -54,8 +66,7 @@ const SidebarLayout = ({ logo, setLogo, logoFull, logoCrop }) => {
 
     return (
         <aside
-            className='sidebar-white sidebar-default navs-rounded-all sidebar sidebar-base'
-            data-sidebar="responsive"
+            className='sidebar-white sidebar-default navs-rounded-all sidebar sidebar-base' data-sidebar="responsive"
         >
             <div className="sidebar-header d-flex align-items-center justify-content-start">
                 <Link to="/dashboard" className="navbar-brand">
@@ -69,7 +80,7 @@ const SidebarLayout = ({ logo, setLogo, logoFull, logoCrop }) => {
                     data-active="true"
                     onClick={minisidebar}
                 >
-                    <i className="icon">
+                    <i className="icon" style={{ transform: 'rotate(0deg)' }}>
                         <svg
                             width="20"
                             className="icon-20"

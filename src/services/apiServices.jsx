@@ -491,7 +491,8 @@ export const updateTeam = async (request, imageFile) => {
 };
 
 // Testimonial
-const testimonialPath = '/testimonial-management/testimonials';
+// const testimonialPath = '/testimonial-management/testimonials';
+const testimonialPath = '/testimony-management/testimonials';
 export const getAllTestimonial = async (params) => {
     try {
         const response = await apiClient.get(testimonialPath, { params });

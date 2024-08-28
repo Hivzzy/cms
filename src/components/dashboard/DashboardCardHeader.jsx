@@ -18,13 +18,19 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
 
     const handleSearchChange = (e) => {
         const { name, value } = e.target;
-        console.log('target', e.target);
-
         setSearchValue(prevState => ({
             ...prevState,
             [name]: value,
         }));
     };
+
+    const isHaveAnotherFilter = () => {
+        if (Array.isArray(selectedOtherFilterValue)) {
+            return selectedOtherFilterValue.includes(selectedValue);
+        } else {
+            return selectedValue === selectedOtherFilterValue;
+        }
+    }
 
     return (
         <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
@@ -46,7 +52,7 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
                             <option value="Not Active">Not Active</option>
                         </Form.Select>
                         :
-                        selectedValue === selectedOtherFilterValue ?
+                        isHaveAnotherFilter() ?
                             renderOtherFIlterForm()
                             :
                             <InputGroup>
@@ -81,7 +87,10 @@ DashboardCardHeader.propTypes = {
     setSearchValue: PropTypes.func,
     statusValue: PropTypes.string,
     setStatusValue: PropTypes.func,
-    selectedOtherFilterValue: PropTypes.string,
+    selectedOtherFilterValue: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.array,
+    ]),
     renderOtherFIlterForm: PropTypes.func
 }
 

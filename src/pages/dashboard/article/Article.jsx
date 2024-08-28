@@ -1,16 +1,12 @@
-import { Button, Card, Form, Table } from "react-bootstrap"
+import { Card, Form, Modal } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteArticle, getAllArticle } from "../../../services/apiServices";
-import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
-import { IoEyeOutline } from "react-icons/io5";
-
+import { deleteArticle, getAllArticle, getArticleById } from "../../../services/apiServices";
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-import { Link } from "react-router-dom";
 import ModalForm from "../../../components/form/ModalForm";
-import PaginationCustom from "../../../components/form/PaginationCustom";
 import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
-import TableHeader from "../../../components/dashboard/TableHeader";
+import DashboardCardBody from "../../../components/dashboard/DashboardCardBody";
+import DashboardCard from "../DashboardCard";
+import ArticleForm from "./ArticleForm";
 
 const Article = () => {
     const [article, setArticle] = useState([]);
@@ -20,6 +16,10 @@ const Article = () => {
         highlight: '',
         status: ''
     });
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'title', direction: 'ASC' });
+    const [statusValue, setStatusValue] = useState('');
+    const [highlightValue, setHighlightValue] = useState('');
+    const [startReleaseDate, setstartReleaseDate] = useState('');
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(10);
@@ -27,45 +27,75 @@ const Article = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
+
     const [selectedData, setSelectedData] = useState(null);
+    const [dataDetail, setDataDetail] = useState({});
+    const [showDetail, setShowDetail] = useState(false);
 
-    const [isNoData, setIsNoData] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [sortConfig, setSortConfig] = useState({ sortBy: 'title', direction: 'ASC' });
-
-    const [statusValue, setStatusValue] = useState('');
-    const [startReleaseDate, setstartReleaseDate] = useState('');
-
-    const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
         try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const getSearchValue = (selectedValue) => {
+                if (selectedValue === 'status') {
+                    return statusValue;
+                } else if (selectedValue === 'startReleaseDate') {
+                    return startReleaseDate;
+                } else if (selectedValue === 'highlight') {
+                    if (highlightValue == 'null') {
+                        return null
+                    }
+                    return highlightValue;
+                } else {
+                    return searchValue[selectedValue];
+                }
+            };
             const data = await getAllArticle(
                 {
                     pageSize: pageSize,
-                    pageNumber: pageNumber,
-                    [selectedValue]: selectedValue === 'status' ? statusValue : selectedValue === 'startReleaseDate' ? startReleaseDate : searchValue[selectedValue],
+                    pageNumber: numberPage,
+                    [selectedValue]: getSearchValue(selectedValue),
                     sortBy: sortConfig.sortBy,
                     direction: sortConfig.direction
                 }
             );
-
             if (data?.data) {
-                setIsNoData(false);
-                setTotalData(data.total);
                 setArticle(data.data);
+                setTotalData(data.total);
             } else {
-                setIsNoData(true)
                 setArticle([]);
+                setTotalData(0);
+                setIsError(true);
+                setErrorMessage(data.message)
+                setShow(true);
             }
-
         } catch (error) {
-            setIsNoData(true)
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        getData(pageSize, pageNumber, selectedValue, searchValue);
+        getData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageSize, pageNumber, sortConfig, statusValue, startReleaseDate]);
+    }, [pageSize, pageNumber, sortConfig]);
+
+    useEffect(() => {
+        setPageNumber(1);
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusValue, startReleaseDate, highlightValue]);
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        setPageNumber(1)
+        getData(1);
+    };
 
     const tableHeaders = [
         { name: "TITLE", value: "title" },
@@ -76,10 +106,6 @@ const Article = () => {
         { name: "ACTION" }
     ];
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        getData(pageSize, pageNumber, selectedValue, searchValue);
-    };
 
     const handleClose = () => {
         setShow(false);
@@ -89,17 +115,15 @@ const Article = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
-        setSelectedData(selectedData);
-        setShow(true);
-    }
-
     const handleDelete = async () => {
         try {
             const response = await deleteArticle(selectedData.id);
             setShow(false);
             if (response.code === 200) {
-                getData(pageSize, pageNumber, selectedValue, searchValue);
+                getData(pageNumber - 1);
+                if (article.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
             } else {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -125,19 +149,58 @@ const Article = () => {
         },
     ]
 
-    const otherSelectRender = () => (
-        <>
-            {/* <Form.Select aria-label="Select Category" value={startReleaseDate} name={selectedValue} onChange={(e) => setstartReleaseDate(e.target.value)} style={{ minWidth: '170px' }}>
-                <Form.Label>Source</Form.Label>
-                <Form.Control type="password"
-
+    const otherSelectRender = () => {
+        if (selectedValue == 'startReleaseDate') {
+            return (
+                <Form.Control type="date" placeholder="Search..." aria-label="Search filter" name='startReleaseDate' style={{ paddingRight: '0.75rem' }}
+                    value={startReleaseDate} onChange={(e) => setstartReleaseDate(e.target.value)} disabled={!selectedValue}
                 />
-            </Form.Select> */}
-            <Form.Control type="date" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingRight: '0.75rem' }}
-                value={startReleaseDate} onChange={(e) => setstartReleaseDate(e.target.value)} disabled={!selectedValue}
-            />
+            )
+        } else if (selectedValue == 'highlight') {
+            return (
+                <Form.Select aria-label="Select Highlight" value={highlightValue} name='highlight' onChange={(e) => setHighlightValue(e.target.value)} style={{ minWidth: '170px' }}>
+                    <option value='null'>Select Highlight</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </Form.Select>
+            )
+        }
+
+    }
+
+    const rowRender = (data) => (
+        <>
+            <td>{data.title}</td>
+            <td>{data.releaseDate}</td>
+            <td>{data.category}</td>
+            <td>{data.highlight}</td>
         </>
     )
+
+    const handleShowModalDetail = async (dataId) => {
+        try {
+            const data = await getArticleById(dataId);
+            if (data.code === 200) {
+                setDataDetail(prev => ({
+                    ...prev,
+                    ...data.data,
+                    articleId: data.data.id,
+                    category: data.data.metadata.category,
+                    source: data.data.metadata.source?.join(', '),
+                    tags: data.data.metadata.tags?.join(', '),
+                }));
+                setShowDetail(true)
+                console.log(data.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleCloseDetail = () => {
+        setShowDetail(false);
+    }
+
 
     return (
         <>
@@ -152,61 +215,26 @@ const Article = () => {
                     setSearchValue={setSearchValue}
                     statusValue={statusValue}
                     setStatusValue={setStatusValue}
-                    selectedOtherFilterValue='startReleaseDate'
+                    selectedOtherFilterValue={['startReleaseDate', 'highlight']}
                     renderOtherFIlterForm={otherSelectRender}
+                    getData={getData}
                 />
-                <Card.Body>
-                    {isNoData ?
-                        <div className="text-center fw-bold h1 m-5">
-                            No data available
-                        </div>
-                        :
-                        <>
-                            <div className="table-responsive border-bottom my-3">
-                                <Table>
-                                    <TableHeader tableHeaders={tableHeaders} sortConfig={sortConfig} setSortConfig={setSortConfig} />
-                                    <tbody>
-                                        {article.map((data, rowIndex) => (
-                                            <tr key={rowIndex}>
-                                                <td>{data.title}</td>
-                                                <td>{data.releaseDate}</td>
-                                                <td>{data.category}</td>
-                                                <td>{data.highlight}</td>
-                                                <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                                <td>
-                                                    <Link to={`/dashboard/article/detail/${data.id}`}>
-                                                        <Button className="p-0" style={{ fontSize: '15px', color: '#0078D7', width: '24px', height: '24px', background: '#F4F7FE', border: '0px', marginRight: '0.5rem' }}>
-                                                            <IoEyeOutline />
-                                                        </Button>
-                                                    </Link>
-                                                    <Link to={`/dashboard/article/edit/${data.id}`}>
-                                                        <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
-                                                            <FaRegEdit />
-                                                        </Button>
-                                                    </Link>
-                                                    <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                        onClick={() => handleShow(data)}
-                                                    >
-                                                        <GoTrash />
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
-                            </div>
-                            <div className="d-flex justify-content-center">
-                                <PaginationCustom
-                                    pageSize={pageSize}
-                                    pageNumber={pageNumber}
-                                    setPageNumber={setPageNumber}
-                                    totalData={totalData}
-                                    setPageSize={setPageSize}
-                                />
-                            </div>
-                        </>
-                    }
-                </Card.Body>
+                <DashboardCardBody
+                    tableHeaders={tableHeaders}
+                    rowData={article}
+                    rowRender={rowRender}
+                    pageSize={pageSize}
+                    pageNumber={pageNumber}
+                    setPageNumber={setPageNumber}
+                    totalData={totalData}
+                    setPageSize={setPageSize}
+                    setSortConfig={setSortConfig}
+                    sortConfig={sortConfig}
+                    setShow={setShow}
+                    setSelectedData={setSelectedData}
+                    handleShowModalDetail={handleShowModalDetail}
+                    isLoading={isLoading}
+                />
             </Card >
             <ModalForm
                 show={show}
@@ -219,6 +247,18 @@ const Article = () => {
                 errorMessage={errorMessage}
                 isDelete={true}
             />
+            <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '85%' }}>
+                <DashboardCard cardTittle="Detail Article">
+                    <ArticleForm
+                        formData={dataDetail}
+                        isJustDetail={true}
+                        show={show}
+                        setShow={setShow}
+                        setShowDetail={setShowDetail}
+                        setSelectedData={setSelectedData}
+                    />
+                </DashboardCard>
+            </Modal>
         </>
     )
 }

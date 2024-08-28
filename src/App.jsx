@@ -43,22 +43,30 @@ import EditTeam from './pages/dashboard/team/EditTeam';
 import Testimonial from './pages/dashboard/testimonial/Testimonial';
 import AddTestimonial from './pages/dashboard/testimonial/AddTestimonial';
 import EditTestimonial from './pages/dashboard/testimonial/EditTestimonial';
+import { AuthProvider } from './pages/auth/AuthProvider';
+import RoutePrivate from './pages/auth/RoutePrivate';
+import RouteGuest from './pages/auth/RouteGuest';
 
 function App() {
   const [isEmailSent, setIsEmailSent] = useState(false);
 
   return (
-    <>
+    <AuthProvider>
       <Router>
         <Routes>
-          <Route element={<AuthLayout isEmailSent={isEmailSent} setIsEmailSent={setIsEmailSent} />}>
+          <Route element={
+            <RouteGuest element={<AuthLayout isEmailSent={isEmailSent} setIsEmailSent={setIsEmailSent} />}
+            />}
+          >
             <Route path="/" element={<Navigate to="/sign-in" />}></Route>
             <Route path="/sign-in" element={<Login />}></Route>
             <Route path="/forgot-password" element={<ForgotPassword isEmailSent={isEmailSent} setIsEmailSent={setIsEmailSent} />}></Route>
             <Route path="/change-password" element={<ChangePassword />}></Route>
             {/* Path nerima token */}
           </Route>
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/dashboard" element={
+            <RoutePrivate element={<DashboardLayout />} />}
+          >
             <Route path="/dashboard/metadata" element={<Metadata />}></Route>
             <Route path="/dashboard/metadata/add" element={<AddMetadata />}></Route>
             <Route path="/dashboard/metadata/edit/:id" element={<EditMetadata />}></Route>
@@ -82,12 +90,12 @@ function App() {
 
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>
-            <Route path="/dashboard/user/edit/:userId" element={<EditUser />}></Route>
+            <Route path="/dashboard/user/edit/:id" element={<EditUser />}></Route>
           </Route>
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </Router>
-    </>
+    </AuthProvider>
   )
 }
 

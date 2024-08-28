@@ -6,9 +6,9 @@ import PropTypes from 'prop-types';
 import ButtonDetailFormBottom from '../../../components/form/ButtonDetailFormBottom';
 
 const MetadataForm = ({ formSubmit, formData, setFormData, show, setShow, isError, setIsError, errorMessage, setErrorMessage,
-    defaultValues, isJustDetail, typeFormButton, handleDelete, setShowDetail }) => {
+    isJustDetail, typeFormButton, setSelectedData, setShowDetail }) => {
     const { register, handleSubmit, formState: { errors } } = useForm({
-        defaultValues: defaultValues
+        defaultValues: formData
     });
 
     const handleClose = () => {
@@ -25,6 +25,7 @@ const MetadataForm = ({ formSubmit, formData, setFormData, show, setShow, isErro
         if (!isJustDetail) {
             setFormData(data);
         }else{
+            setSelectedData(formData)
             setShowDetail(false)
         }
         setShow(true);
@@ -37,7 +38,7 @@ const MetadataForm = ({ formSubmit, formData, setFormData, show, setShow, isErro
                     <Col md='6' sm='12'>
                         <Form.Group controlId="code">
                             <Form.Label>Code</Form.Label>
-                            <Form.Control type="text" placeholder="Code" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Code" disabled={isJustDetail}
                                 {...register('code', {
                                     required: 'Code is required',
                                     minLength: { value: 3, message: 'Input min 3 character' },
@@ -55,7 +56,7 @@ const MetadataForm = ({ formSubmit, formData, setFormData, show, setShow, isErro
                     <Col md='6' sm='12'>
                         <Form.Group controlId="value">
                             <Form.Label>Value</Form.Label>
-                            <Form.Control type="text" placeholder="Value" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Value" disabled={isJustDetail}
                                 {...register('value', {
                                     required: 'Value is required',
                                     minLength: { value: 3, message: 'Input min 3 character' },
@@ -74,11 +75,11 @@ const MetadataForm = ({ formSubmit, formData, setFormData, show, setShow, isErro
                     {!isJustDetail ?
                         <ButtonFormBottom navigateCancelPath='../metadata' buttonType={typeFormButton} />
                         :
-                        <ButtonDetailFormBottom setShowDetail={setShowDetail} navigateEditPath={`./edit/${defaultValues.id}`} handleShow={handleShow} />
+                        <ButtonDetailFormBottom setShowDetail={setShowDetail} navigateEditPath={`./edit/${formData.id}`} handleShow={handleShow} />
                     }
                 </Row>
             </Form>
-            {!isJustDetail ?
+            {!isJustDetail &&
                 <ModalForm
                     show={show}
                     handleClose={handleClose}
@@ -88,17 +89,6 @@ const MetadataForm = ({ formSubmit, formData, setFormData, show, setShow, isErro
                     isError={isError}
                     errorMessage={errorMessage}
                     buttonType={typeFormButton}
-                /> :
-                <ModalForm
-                    show={show}
-                    buttonType='danger'
-                    handleClose={handleClose}
-                    page='Metadata'
-                    data={formData?.code}
-                    formSubmit={handleDelete}
-                    isError={isError}
-                    errorMessage={errorMessage}
-                    isDelete={true}
                 />
             }
         </>
@@ -115,10 +105,9 @@ MetadataForm.propTypes = {
     setIsError: PropTypes.func,
     errorMessage: PropTypes.string,
     setErrorMessage: PropTypes.func,
-    defaultValues: PropTypes.object,
     isJustDetail: PropTypes.bool,
     typeFormButton: PropTypes.string,
-    handleDelete: PropTypes.func,
+    setSelectedData: PropTypes.func,
     setShowDetail: PropTypes.func
 }
 

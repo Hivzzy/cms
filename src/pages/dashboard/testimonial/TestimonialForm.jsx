@@ -8,10 +8,10 @@ import { useEffect, useState } from 'react';
 import { getLOVClient } from '../../../services/apiServices';
 
 const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isError, setIsError, errorMessage, setErrorMessage,
-    defaultValues, isJustDetail, typeFormButton, handleDelete, setShowDetail }) => {
+    isJustDetail, typeFormButton, setShowDetail, isCreate }) => {
 
     const { register, handleSubmit, formState: { errors } } = useForm({
-        defaultValues: defaultValues
+        defaultValues: formData
     });
 
     const [clientData, setClientData] = useState([])
@@ -119,7 +119,7 @@ const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isE
                     <Col md='6' sm='12'>
                         <Form.Group controlId="name">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="Name" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Name" disabled={isJustDetail}
                                 {...register('name', {
                                     required: 'Name is required',
                                     minLength: { value: 5, message: 'Input min 5 character' },
@@ -135,7 +135,7 @@ const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isE
                         </Form.Group>
                         <Form.Group controlId="position">
                             <Form.Label>Position</Form.Label>
-                            <Form.Control type="text" placeholder="Position" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Position" disabled={isJustDetail}
                                 {...register('position', {
                                     required: 'Position is required',
                                     minLength: { value: 5, message: 'Input min 5 character' },
@@ -153,7 +153,7 @@ const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isE
                             <Form.Label>Client</Form.Label>
                             <Form.Select aria-label="Select Client"
                                 {...register('client', { required: 'Client is required' })}
-                                isInvalid={!!errors.client} defaultValue=''
+                                isInvalid={!!errors.client} defaultValue='' disabled={isJustDetail}
                             >
                                 <option value='' disabled style={{ height: '50px', overflow: 'auto' }}>Client</option>
                                 {clientData.map((data, index) => (
@@ -171,7 +171,7 @@ const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isE
                     <Col md='6' sm='12'>
                         <Form.Group controlId="description">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control as="textarea" placeholder="Description" readOnly={isJustDetail} style={{ resize: 'none' }}
+                            <Form.Control as="textarea" placeholder="Description" disabled={isJustDetail} style={{ resize: 'none' }}
                                 {...register('description', {
                                     required: 'Description is required',
                                     minLength: { value: 5, message: 'Input min 5 character' }
@@ -186,7 +186,7 @@ const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isE
                         </Form.Group>
                         <Form.Group controlId="seq">
                             <Form.Label className='not-required'>Seq</Form.Label>
-                            <Form.Control type="number" placeholder="Seq" readOnly={isJustDetail} min={0}
+                            <Form.Control type="number" placeholder="Seq" disabled={isJustDetail} min={0}
                                 {...register('seq')} isInvalid={errors.seq}
                             />
                             {errors.seq ?
@@ -196,37 +196,51 @@ const TestimonialForm = ({ formSubmit, formData, setFormData, show, setShow, isE
                                 : <br></br>
                             }
                         </Form.Group>
+                        {!isCreate &&
+                            <Form.Group controlId="status">
+                                <Form.Label>Status</Form.Label>
+                                <div key='inline-radio'>
+                                    <Form.Check disabled={isJustDetail}
+                                        inline
+                                        label="Active"
+                                        name="group1"
+                                        type='radio'
+                                        id={`inline-radio-1`}
+                                        value="Active"
+                                        {...register('status', { required: 'Role is required' })}
+                                    />
+                                    <Form.Check disabled={isJustDetail}
+                                        inline
+                                        label="Not Active"
+                                        name="group1"
+                                        type="radio"
+                                        id={`inline-radio-2`}
+                                        value="Not Active"
+                                        {...register('status', { required: 'Role is required' })}
+                                    />
+                                </div>
+                            </Form.Group>
+                        }
                     </Col>
                 </Row>
                 <Row>
                     {!isJustDetail ?
                         <ButtonFormBottom navigateCancelPath='../metadata' buttonType={typeFormButton} />
                         :
-                        <ButtonDetailFormBottom setShowDetail={setShowDetail} navigateEditPath={`./edit/${defaultValues.id}`} handleShow={handleShow} />
+                        <ButtonDetailFormBottom setShowDetail={setShowDetail} navigateEditPath={`./edit/${formData.id}`} handleShow={handleShow} />
                     }
                 </Row>
             </Form>
-            {!isJustDetail ?
+            {!isJustDetail &&
                 <ModalForm
                     show={show}
                     handleClose={handleClose}
-                    page='Metadata'
+                    page='Testimony'
                     data={formData?.code}
                     formSubmit={formSubmit}
                     isError={isError}
                     errorMessage={errorMessage}
                     buttonType={typeFormButton}
-                /> :
-                <ModalForm
-                    show={show}
-                    buttonType='danger'
-                    handleClose={handleClose}
-                    page='Metadata'
-                    data={formData?.code}
-                    formSubmit={handleDelete}
-                    isError={isError}
-                    errorMessage={errorMessage}
-                    isDelete={true}
                 />
             }
         </>
@@ -243,11 +257,10 @@ TestimonialForm.propTypes = {
     setIsError: PropTypes.func,
     errorMessage: PropTypes.string,
     setErrorMessage: PropTypes.func,
-    defaultValues: PropTypes.object,
     isJustDetail: PropTypes.bool,
     typeFormButton: PropTypes.string,
-    handleDelete: PropTypes.func,
-    setShowDetail: PropTypes.func
+    setShowDetail: PropTypes.func,
+    isCreate: PropTypes.bool
 }
 
 export default TestimonialForm

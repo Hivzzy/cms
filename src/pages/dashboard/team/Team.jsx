@@ -9,11 +9,6 @@ import TeamForm from "./TeamForm"
 
 const Team = () => {
     const [teamData, setTeamData] = useState([]);
-    const [isError, setIsError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [show, setShow] = useState(false);
-    const [selectedData, setSelectedData] = useState(null);
-
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
         name: '',
@@ -21,16 +16,21 @@ const Team = () => {
         email: '',
         status: '',
     });
-
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'name', direction: 'ASC' });
     const [statusValue, setStatusValue] = useState('');
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(10);
 
-    const [sortConfig, setSortConfig] = useState({ sortBy: 'name', direction: 'ASC' });
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [show, setShow] = useState(false);
 
+    const [selectedData, setSelectedData] = useState(null);
     const [dataDetail, setDataDetail] = useState({});
     const [showDetail, setShowDetail] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(true);
 
     const filterOptions = [
         {
@@ -56,22 +56,20 @@ const Team = () => {
         { name: "ACTION" }
     ];
 
-    const getData = async () => {
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
         try {
-            console.log();
-
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             const data = await getAllTeam(
                 {
-                    size: pageSize,
-                    page: pageNumber,
+                    pageSize: pageSize,
+                    pageNumber: numberPage,
                     [selectedValue]: selectedValue === 'status' ? statusValue : searchValue[selectedValue],
                     sortBy: sortConfig.sortBy,
                     direction: sortConfig.direction
                 }
             );
             if (data?.data) {
-                console.log(data.data);
-                
                 setTeamData(data.data);
                 setTotalData(data.total);
             } else {
@@ -84,29 +82,38 @@ const Team = () => {
             setIsError(true);
             setErrorMessage("Terjadi kesalahan server")
             setShow(true);
+        } finally {
+            setIsLoading(false)
         }
     };
 
     useEffect(() => {
         getData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageSize, pageNumber, sortConfig, statusValue]);
+    }, [pageSize, pageNumber, sortConfig]);
+
+    useEffect(() => {
+        setPageNumber(1);
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusValue]);
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        getData();
+        setPageNumber(1);
+        getData(1);
     };
 
     const handleDelete = async () => {
-        console.log('selected data', selectedData);
-
         try {
             const response = await deleteTeam(selectedData.id);
-            console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                getData(pageSize, pageNumber, selectedValue, searchValue);
-            } else if (response.code === 400) {
+                getData(pageNumber - 1);
+                if (teamData.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
+            } else {
                 setIsError(true);
                 setErrorMessage(response.message)
                 setShow(true);
@@ -139,10 +146,15 @@ const Team = () => {
             if (data.code === 200) {
                 setDataDetail(data.data)
                 setShowDetail(true)
-                console.log(data.data);
+            } else {
+                setIsError(true);
+                setErrorMessage(data.message)
+                setShow(true);
             }
         } catch (error) {
-            console.log(error);
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
         }
     }
 
@@ -178,6 +190,7 @@ const Team = () => {
                     setShow={setShow}
                     setSelectedData={setSelectedData}
                     handleShowModalDetail={handleShowModalDetail}
+                    isLoading={isLoading}
                 />
             </Card>
             <ModalForm
@@ -192,14 +205,14 @@ const Team = () => {
                 isDelete={true}
             />
             <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '85%' }}>
-                <DashboardCard cardTittle="Detail Metadata">
+                <DashboardCard cardTittle="Detail Team">
                     <TeamForm
                         formData={dataDetail}
                         isJustDetail={true}
                         show={show}
                         setShow={setShow}
-                        handleDelete={handleDelete}
                         setShowDetail={setShowDetail}
+                        setSelectedData={setSelectedData}
                     />
                 </DashboardCard>
             </Modal>
