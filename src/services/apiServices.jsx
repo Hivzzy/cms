@@ -924,6 +924,18 @@ export const deleteExpertiseCategory1 = async (id) => {
     }
 };
 
+export const getAllVisitor = async (params) => {
+    try {
+        const response = await apiClient.get('/visitor-management/visitors', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+}
+
 // LOV
 export const getClientsLov = async () => {
     try {

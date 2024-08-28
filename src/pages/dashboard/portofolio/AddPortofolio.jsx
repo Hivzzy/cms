@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate } from "react-router-dom";
-import { createClient, createPortofolio, getClientCategoriesLov, getClientsLov } from "../../../services/apiServices";
+import {  createPortofolio, getClientCategoriesLov, getClientsLov } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";

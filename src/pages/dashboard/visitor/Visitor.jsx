@@ -110,7 +110,7 @@ const Visitor = () => {
                     setStatusValue={setStatusValue}
                     selectedOtherFilterValue='startReleaseDate'
                     renderOtherFIlterForm={otherSelectRender}
-                    showAddButton={false}
+                    showAddButton={true}
                 />
                 <Card.Body>
                     {isNoData ?

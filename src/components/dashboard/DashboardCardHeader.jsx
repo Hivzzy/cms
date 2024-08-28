@@ -61,7 +61,7 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
                     }
                 </Form>
                 
-                {showAddButton && (
+                {!showAddButton && (
                     <Link to='./add'>
                         <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
                             <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
