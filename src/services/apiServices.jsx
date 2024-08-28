@@ -841,7 +841,7 @@ export const deleteClientCategory = async (id) => {
 
 
 // Expertise Category API
-export const getAllExpertiseCategory1 = async (params) => {
+export const getAllExpertiseCategorys = async (params) => {
     try {
         const response = await apiClient.get('/expertise-category-management/expertise-categories', { params });
         return response.data;
@@ -853,7 +853,7 @@ export const getAllExpertiseCategory1 = async (params) => {
     }
 }
 
-export const getExpertiseCategoryById1 = async (id) => {
+export const getExpertiseCategoryByIds = async (id) => {
     try {
         const response = await apiClient.get(`/expertise-category-management/expertise-categories/${id}`);
         return response.data;
@@ -864,7 +864,7 @@ export const getExpertiseCategoryById1 = async (id) => {
     }
 };
 
-export const createExpertiseCategory1 = async (request, imageFile) => {
+export const createExpertiseCategorys = async (request, imageFile) => {
     const formData = new FormData();
     const json = JSON.stringify(request);
     const blob = new Blob([json], { type: 'application/json' });
@@ -887,7 +887,7 @@ export const createExpertiseCategory1 = async (request, imageFile) => {
     }
 };
 
-export const updateExpertiseCategory1 = async (request, imageFile) => {
+export const updateExpertiseCategorys = async (request, imageFile) => {
     console.log(request);
     console.log(imageFile)
     const formData = new FormData();
@@ -916,7 +916,7 @@ export const updateExpertiseCategory1 = async (request, imageFile) => {
     }
 };
 
-export const deleteExpertiseCategory1 = async (id) => {
+export const deleteExpertiseCategorys = async (id) => {
     try {
         const response = await apiClient.delete(`/expertise-category-management/expertise-categories/${id}`);
         return response.data;

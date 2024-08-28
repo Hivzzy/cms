@@ -72,7 +72,7 @@ const EditClient = () => {
     };
 
     return (
-        <DashboardCard cardTittle='Edit Metadata'>
+        <DashboardCard cardTittle='Edit Client'>
             {isLoading ? (
                 <p className='fw-bold text-center fs-3'>
                     Loading...

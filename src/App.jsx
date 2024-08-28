@@ -114,7 +114,7 @@ function App() {
 
             <Route path="/dashboard/expertiseCategory" element={<ExpertiseCategory />}></Route>
             <Route path="/dashboard/expertiseCategory/add" element={<AddExpertiseCategory />}></Route>
-            <Route path="/dashboard/expertiseCategory/edit/:Id" element={<EditExpertiseCategory />}></Route>
+            <Route path="/dashboard/expertiseCategory/edit/:id" element={<EditExpertiseCategory />}></Route>
 
             <Route path="/dashboard/portofolio" element={<Portofolio />}></Route>
             <Route path="/dashboard/portofolio/add" element={<AddPortofolio />}></Route>

@@ -60,7 +60,7 @@ const EditCareer = () => {
     };
 
     return (
-        <DashboardCard cardTittle='Edit Client Category'>
+        <DashboardCard cardTittle='Edit Career'>
             {isLoading ? (
                 <p className='fw-bold text-center fs-3'>
                     Loading...
