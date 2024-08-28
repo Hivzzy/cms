@@ -106,7 +106,7 @@ function App() {
 
             <Route path="/dashboard/career" element={<Career />}></Route>
             <Route path="/dashboard/career/add" element={<AddCareer />}></Route>
-            <Route path="/dashboard/career/edit/:careerId" element={<EditCareer />}></Route>
+            <Route path="/dashboard/career/edit/:id" element={<EditCareer />}></Route>
 
             <Route path="/dashboard/clientCategory" element={<ClientCategory />}></Route>
             <Route path="/dashboard/clientCategory/add" element={<AddClientCategory />}></Route>
