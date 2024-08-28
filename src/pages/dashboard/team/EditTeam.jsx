@@ -22,9 +22,15 @@ const EditTeam = () => {
                 const data = await getTeamById(id);
                 if (data?.data) {
                     setFormData(data.data);
+                } else {
+                    setIsError(true);
+                    setErrorMessage(data.message)
+                    setShow(true);
                 }
             } catch (error) {
-                console.error("Error API", error.message);
+                setIsError(true);
+                setErrorMessage("Terjadi kesalahan server")
+                setShow(true);
             } finally {
                 setIsLoading(false);
             }
@@ -71,7 +77,6 @@ const EditTeam = () => {
                         setIsError={setIsError}
                         errorMessage={errorMessage}
                         setErrorMessage={setErrorMessage}
-                        defaultValues={formData}
                         typeFormButton='edit'
                         setUploadedImage={setUploadedImage}
                     />

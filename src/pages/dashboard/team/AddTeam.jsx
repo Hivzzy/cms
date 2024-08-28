@@ -13,14 +13,12 @@ const AddTeam = () => {
     const [uploadedImage, setUploadedImage] = useState(null);
 
     const formSubmit = async () => {
-        console.log('uploaded', uploadedImage);
         try {
             const response = await createTeam(formData, uploadedImage);
             setShow(false);
-            if (response.code === 200) {
+            if (response.code === 201) {
                 navigate('../team');
-                console.log(response);
-            } else if (response.code === 400) {
+            } else {
                 setIsError(true);
                 setErrorMessage(response.message)
                 setShow(true);

@@ -26,6 +26,7 @@ const Expertise = () => {
 
     const [sortConfig, setSortConfig] = useState({ sortBy: 'name', direction: 'ASC' });
 
+    const [isLoading, setIsLoading] = useState(true);
 
     const filterOptions = [
         {
@@ -47,12 +48,14 @@ const Expertise = () => {
         { name: "ACTION" }
     ];
 
-    const getData = async () => {
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
         try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             const data = await getAllExpertise(
                 {
                     pageSize: pageSize,
-                    pageNumber: pageNumber,
+                    pageNumber: numberPage,
                     [selectedValue]: selectedValue === 'status' ? statusValue : selectedValue === 'category' ? categoryValue : searchValue[selectedValue],
                     sortBy: sortConfig.sortBy,
                     direction: sortConfig.direction
@@ -73,13 +76,27 @@ const Expertise = () => {
             setIsError(true);
             setErrorMessage("Terjadi kesalahan server")
             setShow(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         getData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageSize, pageNumber, sortConfig, statusValue, categoryValue])
+    }, [pageSize, pageNumber, sortConfig])
+
+    useEffect(() => {
+        setPageNumber(1)
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusValue, categoryValue])
+    
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        setPageNumber(1)
+        getData(1);
+    };
 
     useEffect(() => {
         const getCategory = async () => {
@@ -99,20 +116,17 @@ const Expertise = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
-        getData();
-    };
 
     const handleDelete = async () => {
-        console.log('selected data', selectedData);
-
         try {
             const response = await deleteExpertise(selectedData.id);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                getData(pageSize, pageNumber, selectedValue, searchValue);
+                getData(pageNumber - 1);
+                if (expertise.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -146,7 +160,7 @@ const Expertise = () => {
 
     const otherSelectRender = () => (
         <>
-            <Form.Select aria-label="Select Category" value={categoryValue} name={selectedValue} onChange={(e) => setCategoryValue(e.target.value)} style={{minWidth: '170px'}}>
+            <Form.Select aria-label="Select Category" value={categoryValue} name={selectedValue} onChange={(e) => setCategoryValue(e.target.value)} style={{ minWidth: '170px' }}>
                 <option value="">Select Category</option>
                 {expertiseCategory.map((category) => (
                     <option value={category.name} key={category.id}>{category.name}</option>
@@ -184,6 +198,7 @@ const Expertise = () => {
                     sortConfig={sortConfig}
                     setShow={setShow}
                     setSelectedData={setSelectedData}
+                    isLoading={isLoading}
                 />
             </Card>
             <ModalForm

@@ -15,39 +15,20 @@ const EditTestimonial = () => {
     const [isLoading, setIsLoading] = useState(true);
     const { id } = useParams();
 
-    const dummy = {
-        id: 1,
-        name: "John Doe",
-        position: "Software Engineer",
-        description: "Great service and support!",
-        seq: 1,
-        status: "active",
-        client: {
-            id: 101,
-            name: "Tech Corp",
-            icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-        }
-    }
-
     useEffect(() => {
-        // const getData = async () => {
-        //   try {
-        //     const data = await getTestimonialById(id);
-        //     if (data?.data) {
-        //       setFormData(data.data);
-        //     }
-        //   } catch (error) {
-        //     console.error("Error API", error.message);
-        //   } finally {
-        //     setIsLoading(false);
-        //   }
-        // };
-        // getData();
-
-        setFormData(dummy)
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 1000)
+        const getData = async () => {
+          try {
+            const data = await getTestimonialById(id);
+            if (data?.data) {
+              setFormData(data.data);
+            }
+          } catch (error) {
+            console.error("Error API", error.message);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        getData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { deleteTestimonial, getAllTestimonial, getTestimonialById } from "../../../services/apiServices";
-import { Card, Modal } from "react-bootstrap";
+import { Card, Form, Modal } from "react-bootstrap";
 import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
 import DashboardCardBody from "../../../components/dashboard/DashboardCardBody";
 import ModalForm from "../../../components/form/ModalForm";
@@ -9,11 +9,7 @@ import TestimonialForm from "./TestimonialForm";
 
 const Testimonial = () => {
     const [testimonialData, setTestimonialData] = useState([]);
-    const [isError, setIsError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [show, setShow] = useState(false);
-    const [selectedData, setSelectedData] = useState(null);
-
+    const [clientData, setClientData] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
         name: '',
@@ -21,15 +17,21 @@ const Testimonial = () => {
         client: '',
         description: '',
     });
-
-    const [pageSize, setPageSize] = useState(10);
-    const [pageNumber, setPageNumber] = useState(0);
-    const [totalData, setTotalData] = useState(10);
-    
     const [sortConfig, setSortConfig] = useState({ sortBy: 'seq', direction: 'ASC' });
+    const [clientValue, setClientValue] = useState('');
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [totalData, setTotalData] = useState(10);
 
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [show, setShow] = useState(false);
+
+    const [selectedData, setSelectedData] = useState(null);
     const [dataDetail, setDataDetail] = useState({});
     const [showDetail, setShowDetail] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(true);
 
     const filterOptions = [
         {
@@ -56,165 +58,63 @@ const Testimonial = () => {
         { name: "ACTION" }
     ];
 
-    const testimonialsDummy = [
+    const clientDummy = [
         {
-            id: 1,
-            name: "John Doe",
-            position: "Software Engineer",
-            description: "Great service and support!",
-            seq: 1,
-            status: "active",
-            client: {
-                id: 101,
-                name: "Tech Corp",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
+            id: 'ca6c5a2b-0f98-4302-aa0e-04e7390ba021',
+            name: 'PT Bank'
         },
         {
-            id: 2,
-            name: "Jane Smith",
-            position: "Project Manager",
-            description: "Highly recommend this company.",
-            seq: 2,
-            status: "active",
-            client: {
-                id: 102,
-                name: "Innovate Ltd",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
+            id: '186780ae-6e5f-4097-b73e-a8db4e5280f4',
+            name: 'PT Finnet Indonesia'
         },
         {
-            id: 3,
-            name: "Alice Johnson",
-            position: "UX Designer",
-            description: "Amazing experience!",
-            seq: 3,
-            status: "active",
-            client: {
-                id: 103,
-                name: "Design Studio",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
+            id: 'a30ea498-a799-47d2-be14-0fa8d1c7975b',
+            name: 'PT Affinity Health Indonesia'
         },
-        {
-            id: 4,
-            name: "Bob Brown",
-            position: "Data Analyst",
-            description: "Very professional team.",
-            seq: 4,
-            status: "active",
-            client: {
-                id: 104,
-                name: "Data Insights",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        },
-        {
-            id: 5,
-            name: "Charlie Davis",
-            position: "Marketing Specialist",
-            description: "Exceeded our expectations.",
-            seq: 5,
-            status: "active",
-            client: {
-                id: 105,
-                name: "Market Leaders",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        },
-        {
-            id: 6,
-            name: "Diana Evans",
-            position: "HR Manager",
-            description: "Fantastic collaboration.",
-            seq: 6,
-            status: "active",
-            client: {
-                id: 106,
-                name: "HR Solutions",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        },
-        {
-            id: 7,
-            name: "Ethan Foster",
-            position: "Product Manager",
-            description: "Very satisfied with the results.",
-            seq: 7,
-            status: "active",
-            client: {
-                id: 107,
-                name: "Product Hub",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        },
-        {
-            id: 8,
-            name: "Fiona Green",
-            position: "Business Analyst",
-            description: "Great attention to detail.",
-            seq: 8,
-            status: "active",
-            client: {
-                id: 108,
-                name: "Biz Analytics",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        },
-        {
-            id: 9,
-            name: "George Harris",
-            position: "Sales Manager",
-            description: "Excellent customer service.",
-            seq: 9,
-            status: "active",
-            client: {
-                id: 109,
-                name: "Sales Experts",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        },
-        {
-            id: 10,
-            name: "Hannah White",
-            position: "Operations Manager",
-            description: "Smooth and efficient process.",
-            seq: 10,
-            status: "active",
-            client: {
-                id: 110,
-                name: "Ops Solutions",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
-            }
-        }
-    ];
+    ]
 
-    const getData = async () => {
-        // try {
-        //     const data = await getAllTestimonial(
-        //         {
-        //             size: pageSize,
-        //             page: pageNumber,
-        //             [selectedValue]: selectedValue === 'status' ? statusValue : searchValue[selectedValue],
-        //             sortBy: sortConfig.sortBy,
-        //             direction: sortConfig.direction
-        //         }
-        //     );
-        //     if (data?.data) {
-        //         setTestimonialData(data.data);
-        //         setTotalData(data.total);
-        //     } else {
-        //         setTestimonialData([]);
-        //         setIsError(true);
-        //         setErrorMessage(data.message)
-        //         setShow(true);
-        //     }
-        // } catch (error) {
-        //     setIsError(true);
-        //     setErrorMessage("Terjadi kesalahan server")
-        //     setShow(true);
-        // }
-        setTestimonialData(testimonialsDummy);
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
+        try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const getSearchValue = (selectedValue) => {
+                if (selectedValue === 'client') {
+                    if (clientValue == 'null') {
+                        return null
+                    }
+                    return clientValue;
+                } else {
+                    return searchValue[selectedValue];
+                }
+            };
+
+            const data = await getAllTestimonial(
+                {
+                    pageSize: pageSize,
+                    pageNumber: numberPage,
+                    [selectedValue]: getSearchValue(selectedValue),
+                    sortBy: sortConfig.sortBy,
+                    direction: sortConfig.direction
+                }
+            );
+            if (data?.data) {
+                setTestimonialData(data.data);
+                setTotalData(data.total);
+                setClientData(clientDummy);
+            } else {
+                setTestimonialData([]);
+                setIsError(true);
+                setErrorMessage(data.message)
+                setShow(true);
+            }
+
+        } catch (error) {
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
+        } finally {
+            setIsLoading(false)
+        }
     };
 
     useEffect(() => {
@@ -222,20 +122,29 @@ const Testimonial = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pageSize, pageNumber, sortConfig]);
 
+    useEffect(() => {
+        setPageNumber(1);
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [clientValue]);
+
     const handleSubmit = (event) => {
         event.preventDefault();
-        getData();
+        setPageNumber(1);
+        getData(1);
     };
 
     const handleDelete = async () => {
         console.log('selected data', selectedData);
-
         try {
             const response = await deleteTestimonial(selectedData.id);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                getData(pageSize, pageNumber, selectedValue, searchValue);
+                getData(pageNumber - 1);
+                if (testimonialData.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -259,39 +168,31 @@ const Testimonial = () => {
             <td>{data.name}</td>
             <td>{data.position}</td>
             <td>{data.client.name}</td>
-            <td>{data.description}</td>
+            <td style={{ maxWidth: '25rem' }} className="text-truncate">{data.description}</td>
             <td>{data.seq}</td>
         </>
     )
 
+    const otherSelectRender = () => (
+        <Form.Select aria-label="Select Client" value={clientValue} name='client' onChange={(e) => setClientValue(e.target.value)} style={{ minWidth: '170px' }}>
+            <option value="null">Select Client</option>
+            {clientData.map((data, index) => (
+                <option value={data.name} key={index}>{data.name}</option>
+            ))}
+        </Form.Select>
+    )
+
     const handleShowModalDetail = async (dataId) => {
-        // try {
-        //     const data = await getTestimonialById(dataId);
-        //     if (data.code === 200) {
-        //         setDataDetail(data.data)
-        //         setShowDetail(true)
-        //         console.log(data.data);
-        //     }
-        // } catch (error) {
-        //     console.log(error);
-
-        // }
-
-        const dummy = {
-            id: 1,
-            name: "John Doe",
-            position: "Software Engineer",
-            description: "Great service and support!",
-            seq: 1,
-            status: "active",
-            client: {
-                id: 101,
-                name: "Tech Corp",
-                icon: "https://cdn-icons-png.freepik.com/256/1077/1077114.png"
+        try {
+            const data = await getTestimonialById(dataId);
+            if (data.code === 200) {
+                setDataDetail(data.data)
+                setShowDetail(true)
+                console.log(data.data);
             }
+        } catch (error) {
+            console.log(error);
         }
-        setDataDetail(dummy)
-        setShowDetail(true)
     }
 
     const handleCloseDetail = () => {
@@ -309,6 +210,8 @@ const Testimonial = () => {
                     setSelectedValue={setSelectedValue}
                     searchValue={searchValue}
                     setSearchValue={setSearchValue}
+                    selectedOtherFilterValue='client'
+                    renderOtherFIlterForm={otherSelectRender}
                 />
                 <DashboardCardBody
                     tableHeaders={tableHeaders}
@@ -324,6 +227,7 @@ const Testimonial = () => {
                     setShow={setShow}
                     setSelectedData={setSelectedData}
                     handleShowModalDetail={handleShowModalDetail}
+                    isLoading={isLoading}
                 />
             </Card>
             <ModalForm
@@ -338,14 +242,14 @@ const Testimonial = () => {
                 isDelete={true}
             />
             <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '85%' }}>
-                <DashboardCard cardTittle="Detail Metadata">
+                <DashboardCard cardTittle="Detail Testimonial">
                     <TestimonialForm
                         formData={dataDetail}
                         isJustDetail={true}
                         show={show}
                         setShow={setShow}
-                        handleDelete={handleDelete}
                         setShowDetail={setShowDetail}
+                        setSelectedData={setSelectedData}
                     />
                 </DashboardCard>
             </Modal>

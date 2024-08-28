@@ -5,6 +5,7 @@ import { authSignIn } from '../../services/apiServices';
 import ModalAuth from '../../components/form/ModalAuth';
 import { useState } from 'react';
 import { IoEyeOffOutline, IoEye } from "react-icons/io5";
+import { useAuth } from './AuthProvider';
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
@@ -14,6 +15,8 @@ const Login = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
+    const { login } = useAuth();
+
     const onSubmit = async (data) => {
         try {
             const response = await authSignIn(data);
@@ -21,6 +24,9 @@ const Login = () => {
             if (response.code == 200) {
                 setShow(false)
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('username', response.data.username);
+                localStorage.setItem('role', response.data.role);
+                login();
                 navigate('/dashboard');
             } else {
                 console.log('kondisi else');
@@ -94,6 +100,7 @@ const Login = () => {
                                     noSpaces: value => /^\S*$/.test(value) || 'Password must not contain spaces',
                                 }
                             })}
+                            autoComplete='current-password'
                         />
                         <div
                             className="position-absolute"

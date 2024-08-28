@@ -1,4 +1,4 @@
-import { Card, Table } from 'react-bootstrap'
+import { Card, Placeholder, Table } from 'react-bootstrap'
 import PaginationCustom from '../form/PaginationCustom'
 import PropTypes from 'prop-types';
 import TableHeader from './TableHeader';
@@ -6,33 +6,57 @@ import DashboardRowActionButton from './DashboardRowActionButton';
 import { FaCheckCircle } from 'react-icons/fa';
 
 const DashboardCardBody = ({ tableHeaders, rowData, rowRender, pageSize, pageNumber, setPageNumber, totalData, setPageSize, sortConfig, setSortConfig,
-    setShow, setSelectedData, handleShowModalDetail
+    setShow, setSelectedData, handleShowModalDetail, isHaveStatus = true, isLoading
 }) => {
     return (
         <Card.Body>
-            <div className="table-responsive border-bottom my-3">
-                <Table>
-                    <TableHeader tableHeaders={tableHeaders} setSortConfig={setSortConfig} sortConfig={sortConfig} />
-                    <tbody style={{ fontSize: '14px' }}>
-                        {rowData.map((data, rowIndex) => (
-                            <tr key={rowIndex}>
-                                {rowRender(data)}
-                                <td>{data?.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                <DashboardRowActionButton
-                                    setShow={setShow}
-                                    setSelectedData={setSelectedData}
-                                    data={data}
-                                    handleShowModalDetail={handleShowModalDetail}
-                                    linkToEdit={`./edit/${data.id}`}
-                                    dataId={data.id}
-                                />
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            </div>
+            {rowData.length > 0 ?
+                <div className="table-responsive border-bottom my-3">
+                    <Table>
+                        <TableHeader tableHeaders={tableHeaders} setSortConfig={setSortConfig} sortConfig={sortConfig} />
+                        {isLoading ?
+                            <tbody style={{ fontSize: '14px' }}>
+                                {rowData.map((_, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        {tableHeaders.map((_, rowIndex) => (
+                                            <td key={rowIndex}>
+                                                <Placeholder animation="glow">
+                                                    <Placeholder xs={12} />
+                                                </Placeholder>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                            :
+                            <tbody style={{ fontSize: '14px' }}>
+                                {rowData.map((data, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        {rowRender(data)}
+                                        {isHaveStatus &&
+                                            <td>{data?.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        }
+                                        <DashboardRowActionButton
+                                            setShow={setShow}
+                                            setSelectedData={setSelectedData}
+                                            data={data}
+                                            handleShowModalDetail={handleShowModalDetail}
+                                            linkToEdit={`./edit/${data.id ? data.id : data.userId}`}
+                                            dataId={data.id}
+                                        />
+                                    </tr>
+                                ))}
+                            </tbody>
+                        }
+                    </Table>
+                </div>
+                :
+                <div className="text-center fw-bold h1 m-5">
+                    No data available
+                </div>
+            }
             <div className="d-flex justify-content-center">
-                {totalData > 0 ?
+                {rowData.length > 0 &&
                     <PaginationCustom
                         pageSize={pageSize}
                         pageNumber={pageNumber}
@@ -40,10 +64,6 @@ const DashboardCardBody = ({ tableHeaders, rowData, rowRender, pageSize, pageNum
                         totalData={totalData}
                         setPageSize={setPageSize}
                     />
-                    :
-                    <div className='fw-bold fs-2 mb-3'>
-                        Data not found!
-                    </div>
                 }
             </div>
         </Card.Body>
@@ -63,7 +83,9 @@ DashboardCardBody.propTypes = {
     setSortConfig: PropTypes.func,
     setShow: PropTypes.func,
     setSelectedData: PropTypes.func,
-    handleShowModalDetail: PropTypes.func
+    handleShowModalDetail: PropTypes.func,
+    isHaveStatus: PropTypes.bool,
+    isLoading: PropTypes.bool
 }
 
 export default DashboardCardBody

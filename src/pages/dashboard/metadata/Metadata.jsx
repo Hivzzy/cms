@@ -1,14 +1,12 @@
-import { Card, Modal, Table } from "react-bootstrap"
+import { Card, Modal } from "react-bootstrap"
 import { useEffect, useState } from "react";
 import { deleteMetadata, getAllMetadata, getMetadataById } from "../../../services/apiServices";
 
 import ModalForm from "../../../components/form/ModalForm";
-import PaginationCustom from "../../../components/form/PaginationCustom";
 import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
-import DashboardRowActionButton from "../../../components/dashboard/DashboardRowActionButton";
 import MetadataForm from "./MetadataForm";
 import DashboardCard from "../DashboardCard";
-import TableHeader from "../../../components/dashboard/TableHeader";
+import DashboardCardBody from "../../../components/dashboard/DashboardCardBody";
 
 const Metadata = () => {
     const [metadata, setMetadata] = useState([
@@ -26,6 +24,7 @@ const Metadata = () => {
         code: '',
         value: '',
     });
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'code', direction: 'ASC' });
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
     const [totalData, setTotalData] = useState(10);
@@ -33,26 +32,21 @@ const Metadata = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [selectedData, setSelectedData] = useState(null);
 
+    const [selectedData, setSelectedData] = useState(null);
     const [metadataDetail, setMetadataDetail] = useState({});
     const [showDetail, setShowDetail] = useState(false);
-    const [sortConfig, setSortConfig] = useState({ sortBy: 'code', direction: 'ASC' });
 
-    const handleSelectChange = (e) => {
-        setSelectedValue(e.target.value);
-    };
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleSearchChange = (e) => {
-        setSearchValue(e.target.value);
-    };
-
-    const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
         try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             const data = await getAllMetadata(
                 {
                     pageSize: pageSize,
-                    pageNumber: pageNumber,
+                    pageNumber: numberPage,
                     [selectedValue]: searchValue[selectedValue],
                     sortBy: sortConfig.sortBy,
                     direction: sortConfig.direction
@@ -71,19 +65,20 @@ const Metadata = () => {
             setIsError(true);
             setErrorMessage("Terjadi kesalahan server")
             setShow(true);
+        } finally {
+            setIsLoading(false)
         }
     };
 
     useEffect(() => {
-        getData(pageSize, pageNumber, selectedValue, searchValue);
-        console.log('call api');
-
+        getData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pageSize, pageNumber, sortConfig]);
 
     const handleSubmit = (event) => {
         event.preventDefault(); // Prevent the default form submission behavior
-        getData(pageSize, pageNumber, selectedValue, searchValue);
+        setPageNumber(1)
+        getData(1);
     };
 
     const handleClose = () => {
@@ -95,14 +90,15 @@ const Metadata = () => {
     }
 
     const handleDelete = async () => {
-        console.log('selected data', selectedData);
-
         try {
             const response = await deleteMetadata(selectedData.id);
-            console.log('Success:', response);
+            console.log('Success delete:', response);
             setShow(false);
             if (response.code === 200) {
-                getData(pageSize, pageNumber, selectedValue, searchValue);
+                getData(pageNumber - 1);
+                if (metadata.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -128,7 +124,6 @@ const Metadata = () => {
             if (data.code === 200) {
                 setMetadataDetail(data.data)
                 setShowDetail(true)
-                console.log(data.data);
             }
         } catch (error) {
             setIsError(true);
@@ -147,6 +142,13 @@ const Metadata = () => {
         { name: "ACTION" }
     ];
 
+    const rowRender = (data) => (
+        <>
+            <td>{data.code}</td>
+            <td style={{ maxWidth: '700px' }} className="text-truncate">{data.value}</td>
+        </>
+    )
+
     return (
         <>
             <Card>
@@ -155,42 +157,27 @@ const Metadata = () => {
                     filterOptions={filterOptions}
                     handleSubmit={handleSubmit}
                     selectedValue={selectedValue}
-                    handleSelectChange={handleSelectChange}
+                    setSelectedValue={setSelectedValue}
                     searchValue={searchValue}
-                    handleSearchChange={handleSearchChange}
+                    setSearchValue={setSearchValue}
                 />
-                <Card.Body>
-                    <div className="table-responsive border-bottom my-3">
-                        <Table>
-                            <TableHeader tableHeaders={tableHeaders} sortConfig={sortConfig} setSortConfig={setSortConfig} />
-                            <tbody>
-                                {metadata.map((data, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        <td>{data.code}</td>
-                                        <td style={{ maxWidth: '700px' }} className="text-truncate">{data.value}</td>
-                                        <DashboardRowActionButton
-                                            setShow={setShow}
-                                            setSelectedData={setSelectedData}
-                                            data={data}
-                                            handleShowModalDetail={handleShowModalDetail}
-                                            linkToEdit={`./edit/${data.id}`}
-                                            dataId={data.id}
-                                        />
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                    <div className="d-flex justify-content-center">
-                        <PaginationCustom
-                            pageSize={pageSize}
-                            pageNumber={pageNumber}
-                            setPageNumber={setPageNumber}
-                            totalData={totalData}
-                            setPageSize={setPageSize}
-                        />
-                    </div>
-                </Card.Body>
+                <DashboardCardBody
+                    tableHeaders={tableHeaders}
+                    rowData={metadata}
+                    rowRender={rowRender}
+                    pageSize={pageSize}
+                    pageNumber={pageNumber}
+                    setPageNumber={setPageNumber}
+                    totalData={totalData}
+                    setPageSize={setPageSize}
+                    setSortConfig={setSortConfig}
+                    sortConfig={sortConfig}
+                    setShow={setShow}
+                    setSelectedData={setSelectedData}
+                    handleShowModalDetail={handleShowModalDetail}
+                    isHaveStatus={false}
+                    isLoading={isLoading}
+                />
             </Card >
             <ModalForm
                 show={show}
@@ -203,17 +190,15 @@ const Metadata = () => {
                 errorMessage={errorMessage}
                 isDelete={true}
             />
-
-            {/* Modal Detail */}
             <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '80%' }}>
                 <DashboardCard cardTittle="Detail Metadata">
                     <MetadataForm
-                        defaultValues={metadataDetail}
+                        formData={metadataDetail}
                         isJustDetail={true}
                         show={show}
                         setShow={setShow}
-                        handleDelete={handleDelete}
                         setShowDetail={setShowDetail}
+                        setSelectedData={setSelectedData}
                     />
                 </DashboardCard>
             </Modal>

@@ -10,7 +10,7 @@ import { MdFileUpload } from 'react-icons/md';
 import ButtonDetailFormBottom from '../../../components/form/ButtonDetailFormBottom';
 
 const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, setIsError, errorMessage, setErrorMessage,
-    isJustDetail, typeFormButton, handleDelete, setShowDetail, isCreate = false, setUploadedImage }) => {
+    isJustDetail, typeFormButton, setShowDetail, isCreate = false, setUploadedImage, setSelectedData }) => {
 
     const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm({
         defaultValues: formData
@@ -34,6 +34,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                 photo: data.photo[0].name
             }));
         } else {
+            setSelectedData(formData)
             setShowDetail(false)
         }
         setShow(true);
@@ -54,8 +55,13 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
         const maxSize = 2 * 1024 * 1024;
         const allowedTypes = ['image/jpeg', 'image/png'];
         if (file) {
+            if (formData?.photo) {
+                setFormData(prev => ({
+                    ...prev,
+                    photo: null
+                }))
+            }
             if (!allowedTypes.includes(file.type)) {
-                console.log('Invalid file type');
                 setImagePreview(null);
                 document.getElementById('photo').value = null;
                 setError('photo', {
@@ -65,7 +71,6 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                 return;
             }
             if (file.size > maxSize) {
-                console.log('Image max Size');
                 setImagePreview(null);
                 document.getElementById('photo').value = null;
                 setError('photo', {
@@ -81,12 +86,6 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                 setImagePreview({ name: file.name, src: reader.result });
             };
             reader.readAsDataURL(file);
-            if (formData?.photo) {
-                setFormData(prev => ({
-                    ...prev,
-                    photo: null
-                }))
-            }
         } else {
             setImagePreview(null);
         }
@@ -118,12 +117,14 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                                 })}
                                 className="d-none"
                             />
-                            <Button style={{ lineHeight: '1.5', paddingLeft: '0.75rem', paddingRight: '1rem', width: isMobile && '100%' }} className="d-block"
-                                onClick={() => document.getElementById('photo').click()}
-                            >
-                                <MdFileUpload className="me-2" size={20} />
-                                Upload Image
-                            </Button>
+                            {!isJustDetail &&
+                                <Button style={{ lineHeight: '1.5', paddingLeft: '0.75rem', paddingRight: '1rem', width: isMobile && '100%' }} className="d-block"
+                                    onClick={() => document.getElementById('photo').click()}
+                                >
+                                    <MdFileUpload className="me-2" size={20} />
+                                    Upload Image
+                                </Button>
+                            }
                             {errors.photo ?
                                 <Form.Control.Feedback type="invalid">
                                     {errors.photo?.message}
@@ -154,16 +155,18 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                                                 {formData.photo.split('/').pop()}
                                             </span>
                                         </div>
-                                        <div>
-                                            <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
-                                        </div>
+                                        {!isJustDetail &&
+                                            <div>
+                                                <IoIosCloseCircle className="ms-2 " style={{ color: '#EE5D50', cursor: 'pointer' }} onClick={removeImage} />
+                                            </div>
+                                        }
                                     </div>
                                 </>
                             }
                         </Form.Group>
                         <Form.Group controlId="name">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="Name" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Name" disabled={isJustDetail}
                                 {...register('name', {
                                     required: 'Name is required',
                                     minLength: { value: 3, message: 'Input min 3 character' },
@@ -179,7 +182,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                         </Form.Group>
                         <Form.Group controlId="position">
                             <Form.Label>Position</Form.Label>
-                            <Form.Control type="text" placeholder="Position" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Position" disabled={isJustDetail}
                                 {...register('position', {
                                     required: 'Position is required',
                                     minLength: { value: 5, message: 'Input min 5 character' },
@@ -194,7 +197,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                             }
                             <Form.Group controlId="email" className='mb-4'>
                                 <Form.Label className='not-required'>Email</Form.Label>
-                                <Form.Control type="text" placeholder="Email" readOnly={isJustDetail}
+                                <Form.Control type="text" placeholder="Email" disabled={isJustDetail}
                                     {...register('email')} />
                             </Form.Group>
                         </Form.Group>
@@ -202,7 +205,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                     <Col md='6' sm='12'>
                         <Form.Group controlId="biography">
                             <Form.Label>Biography</Form.Label>
-                            <Form.Control type="text" placeholder="Biography" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Biography" disabled={isJustDetail}
                                 {...register('biography', {
                                     required: 'Biography is required',
                                     minLength: { value: 5, message: 'Input min 5 character' },
@@ -217,14 +220,14 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                         </Form.Group>
                         <Form.Group controlId="linkedIn">
                             <Form.Label className='not-required'>LinkedIn</Form.Label>
-                            <Form.Control type="text" placeholder="LinkedIn" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="LinkedIn" disabled={isJustDetail}
                                 {...register('linkedin')}
                             />
                             <br></br>
                         </Form.Group>
                         <Form.Group controlId="seq">
                             <Form.Label className='not-required'>Seq</Form.Label>
-                            <Form.Control type="text" placeholder="Seq" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Seq" disabled={isJustDetail}
                                 {...register('seq')}
                             />
                             <br></br>
@@ -233,7 +236,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                             <Form.Group controlId="status">
                                 <Form.Label>Status</Form.Label>
                                 <div key='inline-radio'>
-                                    <Form.Check
+                                    <Form.Check disabled={isJustDetail}
                                         inline
                                         label="Active"
                                         name="group1"
@@ -243,6 +246,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                                         {...register('status', { required: 'Role is required' })}
                                     />
                                     <Form.Check
+                                        disabled={isJustDetail}
                                         inline
                                         label="Not Active"
                                         name="group1"
@@ -264,7 +268,7 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                     }
                 </Row>
             </Form>
-            {!isJustDetail ?
+            {!isJustDetail &&
                 <ModalForm
                     show={show}
                     handleClose={handleClose}
@@ -274,18 +278,6 @@ const TeamForm = ({ formSubmit, formData, setFormData, show, setShow, isError, s
                     isError={isError}
                     errorMessage={errorMessage}
                     buttonType={typeFormButton}
-                />
-                :
-                <ModalForm
-                    show={show}
-                    buttonType='danger'
-                    handleClose={handleClose}
-                    page='Team'
-                    data={formData?.name}
-                    formSubmit={handleDelete}
-                    isError={isError}
-                    errorMessage={errorMessage}
-                    isDelete={true}
                 />
             }
         </>
@@ -304,10 +296,10 @@ TeamForm.propTypes = {
     setErrorMessage: PropTypes.func,
     isJustDetail: PropTypes.bool,
     typeFormButton: PropTypes.string,
-    handleDelete: PropTypes.func,
     setShowDetail: PropTypes.func,
     isCreate: PropTypes.bool,
-    setUploadedImage: PropTypes.func
+    setUploadedImage: PropTypes.func,
+    setSelectedData: PropTypes.func,
 }
 
 export default TeamForm

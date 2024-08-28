@@ -1,16 +1,11 @@
-import { Button, Card, Table } from "react-bootstrap"
+import { Card, Modal } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteUser, getAllUser } from "../../../services/apiServices";
-// import DataTable from "../../../src/components/DataTable";
-import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
-
-import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-import { Link } from "react-router-dom";
+import { deleteUser, getAllUser, getUserById } from "../../../services/apiServices";
 import ModalForm from "../../../components/form/ModalForm";
-import PaginationCustom from "../../../components/form/PaginationCustom";
-import TableHeader from "../../../components/dashboard/TableHeader";
 import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
+import DashboardCardBody from "../../../components/dashboard/DashboardCardBody";
+import DashboardCard from "../DashboardCard";
+import UserForm from "./UserForm";
 
 
 const User = () => {
@@ -22,25 +17,30 @@ const User = () => {
         fullname: '',
         role: '',
     });
-    const [statusValue, setStatusValue] = useState('')
-
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'fullname', direction: 'ASC' });
+    const [statusValue, setStatusValue] = useState('');
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
-    const [totalData, setTotalData] = useState(0);
+    const [totalData, setTotalData] = useState(10);
 
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [selectedData, setSelectedData] = useState({userId: 0, username: ''});
 
-    const [sortConfig, setSortConfig] = useState({ sortBy: 'fullname', direction: 'ASC' });
+    const [selectedData, setSelectedData] = useState(null);
+    const [dataDetail, setDataDetail] = useState({});
+    const [showDetail, setShowDetail] = useState(false);
 
-    const getData = async () => {
+    const [isLoading, setIsLoading] = useState(true);
+
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true)
         try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             const data = await getAllUser(
                 {
                     pageSize: pageSize,
-                    pageNumber: pageNumber,
+                    pageNumber: numberPage,
                     [selectedValue]: selectedValue === 'status' ? statusValue : searchValue[selectedValue],
                     sortBy: sortConfig.sortBy,
                     direction: sortConfig.direction
@@ -51,17 +51,36 @@ const User = () => {
                 setUsers(data.data);
             } else {
                 setUsers([]);
+                setIsError(true);
+                setErrorMessage(data.message)
+                setShow(true);
             }
 
         } catch (error) {
-            // setError(error.message);
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
+        } finally {
+            setIsLoading(false)
         }
     };
 
     useEffect(() => {
         getData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageSize, pageNumber, sortConfig, statusValue]);
+    }, [pageSize, pageNumber, sortConfig]);
+
+    useEffect(() => {
+        setPageNumber(1)
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusValue]);
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        setPageNumber(1)
+        getData(1);
+    };
 
     const userTableHeader = [
         { name: "FULLNAME", value: "fullname" },
@@ -72,15 +91,6 @@ const User = () => {
         { name: "ACTION" }
     ];
 
-    const handleSubmit = (event) => {
-        if (event) {
-            event.preventDefault();
-        }
-
-
-        getData(searchValue, selectedValue)
-    };
-
     const handleClose = () => {
         setShow(false);
         setTimeout(() => {
@@ -89,17 +99,15 @@ const User = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
-        setSelectedData(selectedData);
-        setShow(true);
-    }
-
     const handleDelete = async () => {
         try {
             const response = await deleteUser(selectedData.userId);
             setShow(false);
             if (response.code === 200) {
-                getData(selectedValue, searchValue);
+                getData(pageNumber - 1);
+                if (users.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -128,6 +136,39 @@ const User = () => {
         },
     ]
 
+    const rowRender = (data) => (
+        <>
+            <td>{data.fullname}</td>
+            <td>{data.username}</td>
+            <td>{data.email}</td>
+            <td>{data.role}</td>
+        </>
+    )
+
+    const handleShowModalDetail = async (dataId) => {
+        try {
+            const data = await getUserById(dataId);
+            if (data.code === 200) {
+                setDataDetail(prev => ({
+                    ...prev,
+                    ...data.data,
+                    articleId: data.data.id,
+                    category: data.data.metadata.category,
+                    source: data.data.metadata.source?.join(', '),
+                    tags: data.data.metadata.tags?.join(', '),
+                }));
+                setShowDetail(true)
+                console.log(data.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleCloseDetail = () => {
+        setShowDetail(false);
+    }
+
     return (
         <>
             <Card>
@@ -143,57 +184,46 @@ const User = () => {
                     statusValue={statusValue}
                     setStatusValue={setStatusValue}
                 />
-                <Card.Body>
-                    <div className="table-responsive border-bottom my-3">
-                        <Table>
-                            <TableHeader tableHeaders={userTableHeader} sortConfig={sortConfig} setSortConfig={setSortConfig} />
-                            <tbody>
-                                {users.map((user, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        <td>{user.fullname}</td>
-                                        <td>{user.username}</td>
-                                        <td>{user.email}</td>
-                                        <td>{user.role}</td>
-                                        <td>{user.status === "Active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                        <td>
-                                            <Link to={`/dashboard/user/edit/${user.userId}`}>
-                                                <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
-                                                    <FaRegEdit />
-                                                </Button>
-                                            </Link>
-                                            <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(user)}
-                                            >
-                                                <GoTrash />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                    <div className="d-flex justify-content-center">
-                        <PaginationCustom
-                            pageSize={pageSize}
-                            pageNumber={pageNumber}
-                            setPageNumber={setPageNumber}
-                            totalData={totalData}
-                            setPageSize={setPageSize}
-                        />
-                    </div>
-                </Card.Body>
+                <DashboardCardBody
+                    tableHeaders={userTableHeader}
+                    rowData={users}
+                    rowRender={rowRender}
+                    pageSize={pageSize}
+                    pageNumber={pageNumber}
+                    setPageNumber={setPageNumber}
+                    totalData={totalData}
+                    setPageSize={setPageSize}
+                    setSortConfig={setSortConfig}
+                    sortConfig={sortConfig}
+                    setShow={setShow}
+                    setSelectedData={setSelectedData}
+                    handleShowModalDetail={handleShowModalDetail}
+                    isLoading={isLoading}
+                />
             </Card>
             <ModalForm
                 show={show}
                 buttonType='danger'
                 handleClose={handleClose}
                 page='Article'
-                data={selectedData.username}
+                data={selectedData?.username}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
                 isDelete={true}
             />
+            <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '85%' }}>
+                <DashboardCard cardTittle="Detail Article">
+                    <UserForm
+                        formData={dataDetail}
+                        isJustDetail={true}
+                        show={show}
+                        setShow={setShow}
+                        setShowDetail={setShowDetail}
+                        setSelectedData={setSelectedData}
+                    />
+                </DashboardCard>
+            </Modal>
         </>
     )
 }

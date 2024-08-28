@@ -3,8 +3,8 @@ import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css';
 import PropTypes from 'prop-types';
 
-const QuillForm = ({ formError, setValue, register, formName, validationRules, initialValue, customHeight = '300px' }) => {
-    
+const QuillForm = ({ formError, setValue, register, formName, validationRules, initialValue, customHeight = '300px', isJustDetail=false }) => {
+
     const theme = 'snow';
     const modules = {
         toolbar: [
@@ -26,7 +26,9 @@ const QuillForm = ({ formError, setValue, register, formName, validationRules, i
         'link', 'image', 'code-block', 'blockquote'
     ];
 
-    const { quill, quillRef } = useQuill({ theme, modules, formats });
+    const { quill, quillRef } = useQuill({
+        theme, modules, formats, readOnly: isJustDetail,
+    });
 
     useEffect(() => {
         register(formName, validationRules);
@@ -69,6 +71,8 @@ QuillForm.propTypes = {
     formName: PropTypes.string,
     validationRules: PropTypes.object,
     initialValue: PropTypes.string,
+    customHeight: PropTypes.string,
+    isJustDetail: PropTypes.bool,
 }
 
 export default QuillForm

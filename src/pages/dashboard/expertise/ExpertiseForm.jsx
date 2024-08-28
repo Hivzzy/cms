@@ -164,7 +164,7 @@ const ExpertiseForm = ({ formSubmit, formData, setFormData, show, setShow, isErr
                         </Form.Group>
                         <Form.Group controlId="name">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="Name" readOnly={isJustDetail}
+                            <Form.Control type="text" placeholder="Name" disabled={isJustDetail}
                                 {...register('name', {
                                     required: 'Name is required',
                                     minLength: { value: 3, message: 'Input min 3 character' },
