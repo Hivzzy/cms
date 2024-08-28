@@ -103,7 +103,7 @@ const EditPortofolio = () => {
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../client');
+                navigate('../portofolio');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -368,7 +368,7 @@ const EditPortofolio = () => {
                                         }}
                                     >
                                         {categoryLov.map((item) => (
-                                            <option key={item.id} value={item.id.toString()}>
+                                            <option key={item.id} value={item.name}>
                                                 {item.name}
                                             </option>
                                         ))}
