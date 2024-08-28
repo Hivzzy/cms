@@ -1,13 +1,15 @@
-import { Button, Card, Form, Stack, Table } from "react-bootstrap"
+import { Button, Card, Form, Table } from "react-bootstrap"
 import { useEffect, useState } from "react";
 import { deleteClientCategory, getAllClientCategory } from "../../../services/apiServices";
-import { FiPlusCircle } from "react-icons/fi";
-import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
 
-import { useMediaQuery } from 'react-responsive';
-import { Link, useNavigate } from "react-router-dom";
+
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import PaginationCustom from "../../../components/form/PaginationCustom";
+import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
+import TableHeader from "../../../components/dashboard/TableHeader";
+import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { GoTrash } from "react-icons/go";
 import ModalForm from "../../../components/form/ModalForm";
 
 const ClientCategory = () => {
@@ -19,55 +21,56 @@ const ClientCategory = () => {
     });
     const [pageSize, setPageSize] = useState(10);
     const [pageNumber, setPageNumber] = useState(1);
-    const [totalData] = useState(10);
+    const [totalData, setTotalData] = useState(10);
 
-    const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
-    const [idDelete, setIdDelete] = useState(null);
 
+    const [isNoData, setIsNoData] = useState(false);
 
-    const handleSelectChange = (e) => {
-        setSelectedValue(e.target.value);
-    };
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'name', direction: 'ASC' });
 
-    const handleSearchChange = (e) => {
-        // setSearchValue(e.target.value);
-        const { name, value } = e.target;
-        setSearchValue(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
-
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+    const [statusValue, setStatusValue] = useState('');
+    const [startReleaseDate, setstartReleaseDate] = useState('');
 
     const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
         try {
             const data = await getAllClientCategory(
-                { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
+                {
+                    pageSize: pageSize,
+                    pageNumber: pageNumber,
+                    [selectedValue]: selectedValue === 'status' ? statusValue : searchValue[selectedValue],
+                    sortBy: sortConfig.sortBy,
+                    direction: sortConfig.direction
+                }
             );
+
             if (data?.data) {
+                setIsNoData(false);
+                setTotalData(data.total);
                 setClientCategory(data.data);
             } else {
+                setIsNoData(true)
                 setClientCategory([]);
             }
 
         } catch (error) {
-            // setError(error.message);
-        } finally {
-            // setLoading(false);
+            setIsNoData(true)
         }
     };
 
     useEffect(() => {
         getData(pageSize, pageNumber, selectedValue, searchValue);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [pageSize, pageNumber, sortConfig, statusValue, startReleaseDate]);
 
-    const userTableHeader = ["NAME", 'STATUS', 'ACTION'];
+    const tableHeaders = [
+        { name: "NAME", value: "name" },
+        { name: "STATUS" },
+        { name: "ACTION" }
+    ];
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -82,114 +85,118 @@ const ClientCategory = () => {
         }, 1000);
     }
 
-    const handleShow = (clientCategoryId ,selectedData) => {
+    const handleShow = (selectedData) => {
         setSelectedData(selectedData);
-        setIdDelete(clientCategoryId);
         setShow(true);
     }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteClientCategory(idDelete);
+            const response = await deleteClientCategory(selectedData.id);
             setShow(false);
             if (response.code === 200) {
-                navigate('../clientCategory');
-                window.location.reload();
-            } else if (response.code === 400) {
+                getData(pageSize, pageNumber, selectedValue, searchValue);
+            } else {
                 setIsError(true);
                 setErrorMessage(response.message)
                 setShow(true);
             }
         } catch (error) {
-            console.error('Error:', error.response?.data || error.message);
+            console.error('Error:', error.response || error.message);
         }
     };
+
+    const filterOptions = [
+        {
+            value: 'name', name: 'Name'
+        },
+        {
+            value: 'status', name: 'Status'
+        },
+    ]
+
+    const otherSelectRender = () => (
+        <>
+            {/* <Form.Select aria-label="Select Category" value={startReleaseDate} name={selectedValue} onChange={(e) => setstartReleaseDate(e.target.value)} style={{ minWidth: '170px' }}>
+                <Form.Label>Source</Form.Label>
+                <Form.Control type="password"
+
+                />
+            </Form.Select> */}
+            <Form.Control type="date" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingRight: '0.75rem' }}
+                value={startReleaseDate} onChange={(e) => setstartReleaseDate(e.target.value)} disabled={!selectedValue}
+            />
+        </>
+    )
 
     return (
         <>
             <Card>
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Client Category</h5>
-                    </div>
-                    <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="name">Name</option>
-                                <option value="status">Status</option>
-                            </Form.Select>
-                            <div className="inline-block">
-                                <svg className="position-absolute" style={{ top: '2.25rem', marginLeft: '1rem' }} width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                    <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                </svg>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingLeft: '3rem' }}
-                                    value={searchValue[selectedValue] || ''} onChange={handleSearchChange}
+                <DashboardCardHeader
+                    tittle='Client Category'
+                    filterOptions={filterOptions}
+                    handleSubmit={handleSubmit}
+                    selectedValue={selectedValue}
+                    setSelectedValue={setSelectedValue}
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    statusValue={statusValue}
+                    setStatusValue={setStatusValue}
+                    selectedOtherFilterValue='startReleaseDate'
+                    renderOtherFIlterForm={otherSelectRender}
+                    showAddButton={true}
+                />
+                <Card.Body>
+                    {isNoData ?
+                        <div className="text-center fw-bold h1 m-5">
+                            No data available
+                        </div>
+                        :
+                        <>
+                            <div className="table-responsive border-bottom my-3">
+                                <Table>
+                                    <TableHeader tableHeaders={tableHeaders} sortConfig={sortConfig} setSortConfig={setSortConfig} />
+                                    <tbody>
+                                        {clientCategory.map((data, rowIndex) => (
+                                            <tr key={rowIndex}>
+                                                <td>{data.name}</td>
+                                                <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                                <td>
+                                                    <Link to={`/dashboard/clientCategory/edit/${data.id}`}>
+                                                        <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
+                                                            <FaRegEdit />
+                                                        </Button>
+                                                    </Link>
+                                                    <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
+                                                        onClick={() => handleShow(data)}
+                                                    >
+                                                        <GoTrash />
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                            <div className="d-flex justify-content-center">
+                                <PaginationCustom
+                                    pageSize={pageSize}
+                                    pageNumber={pageNumber}
+                                    setPageNumber={setPageNumber}
+                                    totalData={totalData}
+                                    setPageSize={setPageSize}
                                 />
                             </div>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack>
-                </Card.Header>
-                <Card.Body>
-                    <div className="table-responsive border-bottom my-3">
-                        <Table>
-                            <thead>
-                                <tr>
-                                    {userTableHeader.map((header, index) => (
-                                        // width: index === 2 ? '100px' : '50%'
-                                        <th key={header} style={{ fontSize: '14px', width: index === 2 ? '100px' : '50%' }}>
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {clientCategory.map((data, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        <td>{data.name}</td>
-
-                                        <td>{data.status?.toLowerCase() == "Active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                        <td>
-                                            <Link to={`/dashboard/clientCategory/edit/${data.id}`}>
-                                                <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
-                                                    <FaRegEdit />
-                                                </Button>
-                                            </Link>
-                                            <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data.id, data.name)}
-                                            >
-                                                <GoTrash />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                    <div className="d-flex justify-content-center">
-                        <PaginationCustom
-                            pageSize={pageSize}
-                            pageNumber={pageNumber}
-                            setPageNumber={setPageNumber}
-                            totalData={totalData}
-                            setPageSize={setPageSize}
-                        />
-                    </div>
+                        </>
+                    }
                 </Card.Body>
-            </Card>
+            </Card >
             <ModalForm
                 show={show}
                 buttonType='danger'
                 handleClose={handleClose}
-                page='Client Category'
-                data={selectedData}
+                page='Article'
+                data={selectedData?.title}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
@@ -197,7 +204,6 @@ const ClientCategory = () => {
             />
         </>
     )
-};
-
+}
 
 export default ClientCategory

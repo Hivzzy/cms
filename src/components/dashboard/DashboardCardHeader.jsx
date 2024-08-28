@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 
 import PropTypes from 'prop-types';
 
-const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValue, setSelectedValue, searchValue, setSearchValue, statusValue, setStatusValue, selectedOtherFilterValue, renderOtherFIlterForm }) => {
+const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValue, setSelectedValue, searchValue, setSearchValue, statusValue, setStatusValue, selectedOtherFilterValue, renderOtherFIlterForm, showAddButton }) => {
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const handleSelectChange = (e) => {
@@ -60,12 +60,15 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
                             </InputGroup>
                     }
                 </Form>
-                <Link to='./add'>
-                    <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                        <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                        <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                    </Button>
-                </Link>
+                
+                {showAddButton && (
+                    <Link to='./add'>
+                        <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
+                            <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
+                            <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
+                        </Button>
+                    </Link>
+                )}
             </Stack>
         </Card.Header>
     )
@@ -82,7 +85,8 @@ DashboardCardHeader.propTypes = {
     statusValue: PropTypes.string,
     setStatusValue: PropTypes.func,
     selectedOtherFilterValue: PropTypes.string,
-    renderOtherFIlterForm: PropTypes.func
+    renderOtherFIlterForm: PropTypes.func,
+    showAddButton: PropTypes.bool
 }
 
 export default DashboardCardHeader

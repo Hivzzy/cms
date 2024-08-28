@@ -836,3 +836,17 @@ export const deleteExpertiseCategory1 = async (id) => {
         return error.response.data;
     }
 };
+
+//Visitor
+const visitorPath =  '/visitor-management/visitors';
+export const getAllVisitor = async (params) => {
+    try {
+        const response = await apiClient.get(`${visitorPath}`, { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Get error data:', error.response.data);
+        // throw error;
+        return error.response.data;
+    }
+};
