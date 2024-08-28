@@ -1,103 +1,138 @@
-import { Button, Card, Form, Stack, Table } from "react-bootstrap"
-import { useEffect, useState } from "react";
-import { deleteClient, getAllClient } from "../../../services/apiServices";
-import { FiPlusCircle } from "react-icons/fi";
-import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
-
-import { useMediaQuery } from 'react-responsive';
-import { Link, useNavigate } from "react-router-dom";
-import PaginationCustom from "../../../components/form/PaginationCustom";
-import ModalForm from "../../../components/form/ModalForm";
+import { Card, Form, Image } from 'react-bootstrap'
+import DashboardCardHeader from '../../../components/dashboard/DashboardCardHeader'
+import { deleteClient, getAllClient, getClientCategoriesLov } from '../../../services/apiServices';
+import DashboardCardBody from '../../../components/dashboard/DashboardCardBody';
+import ModalForm from '../../../components/form/ModalForm';
+import { useEffect, useState } from 'react';
 
 const Client = () => {
     const [client, setClient] = useState([]);
-    const [selectedValue, setSelectedValue] = useState('');
-    const [searchValue, setSearchValue] = useState({
-        name: '',
-        category: '',
-        status: ''
-    });
-    const [pageSize, setPageSize] = useState(10);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [totalData] = useState(10);
-
-    const navigate = useNavigate();
+    const [clientCategory, setClientCategory] = useState([]);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
-    const [idDelete, setIdDelete] = useState(null);
 
+    const [selectedValue, setSelectedValue] = useState('');
+    const [searchValue, setSearchValue] = useState({
+        name: '',
+        category: '',
+    });
+    const [statusValue, setStatusValue] = useState('');
+    const [categoryValue, setCategoryValue] = useState('');
+    const [priorityValue, setPriorityValue] = useState('');
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [totalData, setTotalData] = useState(10);
 
-    const handleSelectChange = (e) => {
-        setSelectedValue(e.target.value);
-    };
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'name', direction: 'ASC' });
 
-    const handleSearchChange = (e) => {
-        // setSearchValue(e.target.value);
-        const { name, value } = e.target;
-        setSearchValue(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
+    const [isLoading, setIsLoading] = useState(true);
 
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+    const filterOptions = [
+        {
+            value: 'name', name: 'Name'
+        },
+        {
+            value: 'priority', name: 'Priority'
+        },
+        {
+            value: 'status', name: 'Status'
+        },
+        {
+            value: 'category', name: 'Category'
+        }
+    ]
 
-    const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
+    const clientTableHeaders = [
+        { name: "ICON" },
+        { name: "NAME", value: "name" },
+        { name: "CATEGORY", value: "category" },
+        { name: "TRUSTED SEQ", value: "trustedSeq" },
+        { name: "PRIORITY"},
+        { name: "STATUS" },
+        { name: "ACTION" }
+    ];
+
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
         try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             const data = await getAllClient(
-                { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
-            )
-            if (data?.data) {
+                {
+                    pageSize: pageSize,
+                    pageNumber: numberPage,
+                    [selectedValue]: selectedValue === 'status' ? statusValue : selectedValue === 'priority' ? priorityValue : selectedValue === 'category' ? categoryValue : searchValue[selectedValue],
+                    sortBy: sortConfig.sortBy,
+                    direction: sortConfig.direction
+                }
+            );
+            if (data?.code == 200) {
                 setClient(data.data);
+                setTotalData(data.total);
             } else {
+                console.log('404', data);
                 setClient([]);
+                setTotalData(0);
+                setIsError(true);
+                setErrorMessage(data.message)
+                setShow(true);
             }
-
         } catch (error) {
-            // setError(error.message);
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
         } finally {
-            // setLoading(false);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        getData(pageSize, pageNumber, selectedValue, searchValue);
+        getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pageSize, pageNumber, sortConfig])
+
+    useEffect(() => {
+        setPageNumber(1)
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusValue, priorityValue, categoryValue])
+    
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        setPageNumber(1)
+        getData(1);
+    };
+
+    useEffect(() => {
+        const getCategory = async () => {
+            try {
+                const data = await getClientCategoriesLov();
+                console.log(data);
+
+                if (data?.data) {
+                    setClientCategory(data.data);
+                }
+            } catch (error) {
+                console.error("Error API", error.message);
+            }
+        }
+
+        getCategory();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const userTableHeader = ["ICON", "NAME", "CATEGORY", "TRUSTED SEQ", "PRIORITY", "STATUS", "ACTION"];
-
-    const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
-        getData(pageSize, pageNumber, selectedValue, searchValue);
-    };
-
-    const handleClose = () => {
-        setShow(false);
-        setTimeout(() => {
-            setIsError(false)
-            setErrorMessage('')
-        }, 1000);
-    }
-
-    const handleShow = (clientId, selectedData) => {
-        console.log("check",clientId);
-        setSelectedData(selectedData);
-        setIdDelete(clientId)
-        setShow(true);
-    }
 
     const handleDelete = async () => {
         try {
-            const response = await deleteClient( idDelete );
+            const response = await deleteClient(selectedData.id);
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                window.location.reload();
-                navigate('../client');
+                getData(pageNumber - 1);
+                if (client.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -108,107 +143,80 @@ const Client = () => {
         }
     };
 
+    const handleClose = () => {
+        setShow(false);
+        setTimeout(() => {
+            setIsError(false)
+            setErrorMessage('')
+        }, 1000);
+    }
+
+    const rowRender = (data) => (
+        <>
+            <td>
+                <span>
+                    <Image src={data.icon} height='24px' className='me-2' />
+                    {data.icon.split('/').pop()}
+                </span>
+            </td>
+            <td>{data.name}</td>
+            <td>{data.category.name}</td>
+            <td>{data.trustedSeq}</td>
+        </>
+    )
+
+    const otherSelectRender = () => (
+        <>
+            <Form.Select aria-label="Select Category" value={categoryValue} name={selectedValue} onChange={(e) => setCategoryValue(e.target.value)} style={{ minWidth: '170px' }}>
+                <option value="">Select Category</option>
+                {clientCategory.map((category) => (
+                    <option value={category.name} key={category.id}>{category.name}</option>
+                ))}
+            </Form.Select>
+        </>
+    )
+
     return (
         <>
             <Card>
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Client</h5>
-                    </div>
-                    <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="name">Name</option>
-                                <option value="category">Category</option>
-                                <option value="status">Status</option>
-                            </Form.Select>
-                            <div className="inline-block">
-                                <svg className="position-absolute" style={{ top: '2.25rem', marginLeft: '1rem' }} width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                    <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                </svg>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingLeft: '3rem' }}
-                                    value={searchValue[selectedValue] || ''} onChange={handleSearchChange}
-                                />
-                            </div>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack>
-                </Card.Header>
-                <Card.Body>
-                    <div className="table-responsive border-bottom my-3">
-                        <Table>
-                            <thead>
-                                <tr>
-                                    {userTableHeader.map((header) => (
-                                        // width: index === 2 ? '100px' : '50%'
-                                        <th key={header} style={{ fontSize: '14px' }}>
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {client.map((data, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        {/* Ganti tampilan icon dengan image */}
-                                        <td>
-                                            <img
-                                                src={data.icon}
-                                                alt="icon"
-                                                style={{
-                                                    width: '40px',
-                                                    height: '40px',
-                                                    objectFit: 'cover',
-                                                    borderRadius: '4px'
-                                                }}
-                                            />
-                                        </td>
-                                        <td>{data.name}</td>
-                                        <td>{data.category.name}</td>
-                                        <td>{data.trustedSeq}</td>
-                                        <td>{data.priority?.toLowerCase() === "yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                        <td>{data.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                        <td>
-                                            <Link to={`/dashboard/client/edit/${data.id}`}>
-                                                <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
-                                                    <FaRegEdit />
-                                                </Button>
-                                            </Link>
-                                            <Button className="p-0" style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow( data?.id , data?.name)}
-                                            >
-                                                <GoTrash />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                    <div className="d-flex justify-content-center">
-                        <PaginationCustom
-                            pageSize={pageSize}
-                            pageNumber={pageNumber}
-                            setPageNumber={setPageNumber}
-                            totalData={totalData}
-                            setPageSize={setPageSize}
-                        />
-                    </div>
-                </Card.Body>
+                <DashboardCardHeader
+                    tittle='Client'
+                    filterOptions={filterOptions}
+                    handleSubmit={handleSubmit}
+                    selectedValue={selectedValue}
+                    setSelectedValue={setSelectedValue}
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    statusValue={statusValue}
+                    setStatusValue={setStatusValue}
+                    priorityValue={priorityValue}
+                    setPriorityValue={setPriorityValue}
+                    selectedOtherFilterValue='category'
+                    renderOtherFIlterForm={otherSelectRender}
+                />
+                <DashboardCardBody
+                    tableHeaders={clientTableHeaders}
+                    rowData={client}
+                    rowRender={rowRender}
+                    pageSize={pageSize}
+                    pageNumber={pageNumber}
+                    setPageNumber={setPageNumber}
+                    totalData={totalData}
+                    setPageSize={setPageSize}
+                    setSortConfig={setSortConfig}
+                    sortConfig={sortConfig}
+                    setShow={setShow}
+                    setSelectedData={setSelectedData}
+                    isLoading={isLoading}
+                    isHavePriority={true}
+                />
             </Card>
             <ModalForm
                 show={show}
                 buttonType='danger'
                 handleClose={handleClose}
                 page='Client'
-                data={selectedData}
+                data={selectedData?.name}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
@@ -216,7 +224,6 @@ const Client = () => {
             />
         </>
     )
-};
-
+}
 
 export default Client

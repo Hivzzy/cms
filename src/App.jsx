@@ -123,7 +123,7 @@ function App() {
 
             <Route path="/dashboard/client" element={<Client />}></Route>
             <Route path="/dashboard/client/add" element={<AddClient />}></Route>
-            <Route path="/dashboard/client/edit/:clientId" element={<EditClient />}></Route>
+            <Route path="/dashboard/client/edit/:id" element={<EditClient />}></Route>
 
             <Route path="/dashboard/user" element={<User />}></Route>
             <Route path="/dashboard/user/add" element={<AddUser />}></Route>

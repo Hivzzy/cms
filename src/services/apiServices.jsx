@@ -715,6 +715,8 @@ export const getClientById = async (id) => {
 };
 
 export const createClient = async (request, imageFile) => {
+    console.log("ini request", request)
+    console.log("ini image", imageFile)
     const formData = new FormData();
     const json = JSON.stringify(request);
     const blob = new Blob([json], { type: 'application/json' });
@@ -941,6 +943,18 @@ export const getAllVisitor = async (params) => {
 export const getClientsLov = async () => {
     try {
         const response = await apiClient.get('/lov-management/client-option-lists');
+        console.log('response', response);
+        return response.data;
+    }
+    catch (error) {
+        console.error('Error fetching data:', error);
+        return error.response;
+    }
+}
+
+export const getExpertieseCategoriesLov = async () => {
+    try {
+        const response = await apiClient.get('/lov-management/expertise-category-option-lists');
         console.log('response', response);
         return response.data;
     }

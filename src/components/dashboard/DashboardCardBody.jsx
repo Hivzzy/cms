@@ -6,7 +6,7 @@ import DashboardRowActionButton from './DashboardRowActionButton';
 import { FaCheckCircle } from 'react-icons/fa';
 
 const DashboardCardBody = ({ tableHeaders, rowData, rowRender, pageSize, pageNumber, setPageNumber, totalData, setPageSize, sortConfig, setSortConfig,
-    setShow, setSelectedData, handleShowModalDetail, isHaveStatus = true, isLoading
+    setShow, setSelectedData, handleShowModalDetail, isHaveStatus = true, isHavePriority, isLoading
 }) => {
     return (
         <Card.Body>
@@ -33,6 +33,9 @@ const DashboardCardBody = ({ tableHeaders, rowData, rowRender, pageSize, pageNum
                                 {rowData.map((data, rowIndex) => (
                                     <tr key={rowIndex}>
                                         {rowRender(data)}
+                                        {isHavePriority &&
+                                            <td>{data?.priority?.toLowerCase() === "yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+                                        }
                                         {isHaveStatus &&
                                             <td>{data?.status?.toLowerCase() === "active" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
                                         }
@@ -85,6 +88,7 @@ DashboardCardBody.propTypes = {
     setSelectedData: PropTypes.func,
     handleShowModalDetail: PropTypes.func,
     isHaveStatus: PropTypes.bool,
+    isHavePriority: PropTypes.bool,
     isLoading: PropTypes.bool
 }
 

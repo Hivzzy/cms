@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 
 import PropTypes from 'prop-types';
 
-const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValue, setSelectedValue, searchValue, setSearchValue, statusValue, setStatusValue, selectedOtherFilterValue, renderOtherFIlterForm, showAddButton }) => {
+const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValue, setSelectedValue, searchValue, setSearchValue, statusValue, setStatusValue, priorityValue, setPriorityValue, selectedOtherFilterValue, renderOtherFIlterForm, showAddButton }) => {
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const handleSelectChange = (e) => {
@@ -14,6 +14,10 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
 
     const handleStatusChange = (e) => {
         setStatusValue(e.target.value);
+    };
+
+    const handlePriorityChange = (e) => {
+        setPriorityValue(e.target.value);
     };
 
     const handleSearchChange = (e) => {
@@ -45,16 +49,22 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
                             <option value={data.value} key={index}>{data.name}</option>
                         ))}
                     </Form.Select>
-                    {selectedValue == 'status' ?
-                        <Form.Select aria-label="Select Statu" value={statusValue} name={selectedValue} onChange={handleStatusChange} style={{ minWidth: '170px' }}>
+                    {selectedValue === 'status' ? (
+                        <Form.Select aria-label="Select Status" value={statusValue} name={selectedValue} onChange={handleStatusChange} style={{ minWidth: '170px' }}>
                             <option value="">Select Status</option>
                             <option value="Active">Active</option>
                             <option value="Not Active">Not Active</option>
                         </Form.Select>
-                        :
-                        isHaveAnotherFilter() ?
+                    ) : selectedValue === 'priority' ? (
+                        <Form.Select aria-label="Select Priority" value={priorityValue} name={selectedValue} onChange={handlePriorityChange} style={{ minWidth: '170px' }}>
+                            <option value="">Select Priority</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </Form.Select>
+                    ) : (
+                        isHaveAnotherFilter() ? (
                             renderOtherFIlterForm()
-                            :
+                        ) : (
                             <InputGroup>
                                 <svg className="position-absolute" style={{ top: '0.75rem', marginLeft: '1rem', zIndex: 50 }} width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
@@ -64,9 +74,9 @@ const DashboardCardHeader = ({ tittle, filterOptions, handleSubmit, selectedValu
                                     value={searchValue[selectedValue] || ''} onChange={handleSearchChange} disabled={!selectedValue}
                                 />
                             </InputGroup>
-                    }
+                        )
+                    )}
                 </Form>
-                
                 {!showAddButton && (
                     <Link to='./add'>
                         <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
@@ -90,6 +100,8 @@ DashboardCardHeader.propTypes = {
     setSearchValue: PropTypes.func,
     statusValue: PropTypes.string,
     setStatusValue: PropTypes.func,
+    priorityValue: PropTypes.string,
+    setPriorityValue: PropTypes.func,
     selectedOtherFilterValue: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.array,
