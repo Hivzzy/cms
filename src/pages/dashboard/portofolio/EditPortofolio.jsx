@@ -3,28 +3,31 @@ import { useForm } from 'react-hook-form';
 
 import '../../../assets/css/form-style.css'
 import { useMediaQuery } from "react-responsive";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 import ModalForm from "../../../components/form/ModalForm";
 import { useNavigate } from "react-router-dom";
-import { createClient, getClientCategoriesLov, getClientsLov, getPortofolioById, updatePortofolio } from "../../../services/apiServices";
+import { createClient, createPortofolio, getClientCategoriesLov, getClientsLov, getPortofolioById, updatePortofolio } from "../../../services/apiServices";
 import ButtonFormBottom from "../../../components/form/ButtonFormBottom";
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
 import ImageCarouselUploader from "../../../components/form/ImageCarouselUploader";
+
 
 const EditPortofolio = () => {
     const navigate = useNavigate();
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState();
     const [show, setShow] = useState(false);
+    const [portoData, setPortoData] = useState({});
     const [formData, setFormData] = useState([]);
-    const [icon, setIcon] = useState();
-    const [imagePreview, setImagePreview] = useState(null);
+    const [icon, setIcon] = useState({});
+    const [imagePreview, setImagePreview ] = useState(null);
     const [carouselImages, setCarouselImages] = useState([]);
-    const [carouselImageFiles, setCarouselImageFiles] = useState([]);    
-    const [clientsLov, setClientsLov] = useState([]);
-    const [categoryLov, setCategoryLov] = useState([]);
+    const [carouselImageFiles, setCarouselImageFiles] = useState([]);
+    const [clientsLov, setClientsLov] = useState([{id : "", name : "Client"}]);
+    const [categoryLov, setCategoryLov] = useState([{id : "", name : "Category"}]);
+    const [deletedImages, setDeletedImages] = useState([]);
 
     const fetchClientsLov = async () => {
         try {
@@ -39,57 +42,45 @@ const EditPortofolio = () => {
     const fetchCategoryLov = async () => {
         try {
             const response = await getClientCategoriesLov();
-            console.log(response?.data)
+
             setCategoryLov((prev) => ([...prev, ...response.data]));
         } catch (error) {
             console.error('Error:', error);
         }
     }
 
-    const getData = async () => {
+    const fetchPortoData = async () => {
         try {
             const response = await getPortofolioById(window.location.pathname.split('/').pop());
-            console.log('Success:', response);
-
-            if (response.code === 200) {
-                setFormData(response.data);
-                setIcon(response.data.image);
-                setImagePreview({ name: response.data.image, src: response.data.image });
-                setCarouselImages(response.data.metadata.carousel.map((src) => ({ name: src, src:src })));
-            
-            } else if (response.code === 400) {
-                setIsError(true);
-                setErrorMessage(response.message)
-                setShow(true);
-            }
-
+            setPortoData(response.data);
+            setCarouselImages(response.data?.metadata?.carousel.map((item) => ({ name: item, src: item })));
+            setImagePreview({name: response.data?.image, src: response.data?.image});
+            console.log('Porto Data:', response.data);
         } catch (error) {
-            console.error('Error:', error.response?.data || error.message);
+            console.error('Error:', error);
         }
     }
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const { register, handleSubmit, formState: { errors }, clearErrors } = useForm({
-        defaultValues: {
-            status: 'Active',
-        },
         values: {
-            title : formData?.title,
-            client : formData?.client?.id,
-            category : formData?.metadata?.category,
-            nda : formData?.metadata?.isNda,
-            startDate : formData?.startDate,
-            endDate : formData?.endDate,
-            description : formData?.description,
-            highlight : formData?.highlight,
-            fe : formData?.metadata?.technicalInfo?.fe,
-            be : formData?.metadata?.technicalInfo?.be,
-            os : formData?.metadata?.technicalInfo?.os,
-            db : formData?.metadata?.technicalInfo?.db,
-            appServer : formData?.metadata?.technicalInfo?.appServer,
-            devTool : formData?.metadata?.technicalInfo?.devTool,
-            other : formData?.metadata?.technicalInfo?.other
+            title: portoData?.title,
+            startDate: portoData?.startDate,
+            endDate: portoData?.endDate,
+            description: portoData?.description,
+            client: portoData?.client?.id,
+            highlight: portoData?.isHighlight,
+            status: portoData?.status,
+            category: portoData?.metadata?.category,
+            nda : portoData?.metadata?.isNda,
+            fe : portoData?.metadata?.technicalInfo?.fe,
+            be : portoData?.metadata?.technicalInfo?.be,
+            os : portoData?.metadata?.technicalInfo?.os,
+            db : portoData?.metadata?.technicalInfo?.db,
+            appServer : portoData?.metadata?.technicalInfo?.appServer,
+            devTool : portoData?.metadata?.technicalInfo?.devTool,
+            other : portoData?.metadata?.technicalInfo?.other
         }
     });
 
@@ -103,7 +94,7 @@ const EditPortofolio = () => {
             console.log('Success:', response);
             setShow(false);
             if (response.code === 200) {
-                navigate('../client');
+                navigate('../portofolio');
             } else if (response.code === 400) {
                 setIsError(true);
                 setErrorMessage(response.message)
@@ -123,17 +114,21 @@ const EditPortofolio = () => {
     }
     const handleShow = (data) => {
         setIcon(data.icon);
+        
         setFormData(prevData => ({
             ...prevData,
-            status: 'Active',
+            id: window.location.pathname.split('/').pop(),
             title: data.title,
             startDate: data.startDate,
             endDate: data.endDate,
             description: data.description,
             isHighlight: data.highlight,
+            status: data.status,
+            client: clientsLov.find((item) => item.id === data.client),
             metadata : {
-                category: data.category,
+                carousel : deletedImages,  
                 isNda: data.nda,
+                category: data.category,
                 technicalInfo :{
                     fe: data.fe,
                     be: data.be,
@@ -151,7 +146,7 @@ const EditPortofolio = () => {
     const handleChangeIcon = (e) => {
         const file = e.target.files[0];
         const maxSize = 2 * 1024 * 1024;
-        const allowedTypes = ['image/jpeg', 'image/png'];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (file) {
             if (!allowedTypes.includes(file.type)) {
                 console.log('Invalid file type');
@@ -192,65 +187,44 @@ const EditPortofolio = () => {
         console.log('Icon:', file);
     };
 
-    // const handleImageChange = (e, index) => {
-    //     const file = e.target.files[0];
-    //     if (file) {
-    //         const reader = new FileReader();
-    //         reader.onloadend = () => {
-    //             if (index !== undefined) {
-    //                 // Update existing image in the carousel
-    //                 setCarouselImages(prevImages => {
-    //                     const updatedImages = [...prevImages];
-    //                     updatedImages[index] = { name: file.name, src: reader.result };
-    //                     return updatedImages;
-    //                 });
-    //             } else {
-    //                 // Set preview for main icon
-    //                 setImagePreview({ name: file.name, src: reader.result });
-    //             }
-    //         };
-    //         reader.readAsDataURL(file);
-    //     } else {
-    //         if (index !== undefined) {
-    //             setCarouselImages(prevImages => {
-    //                 const updatedImages = [...prevImages];
-    //                 updatedImages[index] = null;
-    //                 return updatedImages;
-    //             });
-    //         } else {
-    //             setImagePreview(null);
+
+    // const handleImageChange = (e) => {
+    //     const files = e.target.files;
+    //     const newImages = [];
+
+    //     if (files.length > 0) {
+    //         for (let i = 0; i < files.length && i < 5; i++) {
+    //             const file = files[i];
+    //             const reader = new FileReader();
+    //             reader.onloadend = () => {
+    //                 newImages.push({ name: file.name, src: reader.result });
+    //                 if (newImages.length === files.length || newImages.length === 5) {
+    //                     ([...carouselImages, ...newImages].slice(0, 5)); // Batas maksimum 5 gambar
+    //                 }
+    //             };
+    //             reader.readAsDataURL(file);
     //         }
     //     }
     // };
 
     const removeImage = (index) => {
-        if (index !== undefined) {
-            setCarouselImages(prevImages => {
-                const updatedImages = [...prevImages];
-                updatedImages.splice(index, 1); // Hapus gambar dari array
-                return updatedImages;
-            });
-        } else {
-            setImagePreview(null);
-        }
-        document.getElementById('icon').value = null;
+        setCarouselImages(prevImages => prevImages.filter((_, i) => i !== index)); // Hapus gambar yang dipilih berdasarkan indeks
+        setDeletedImages(prevImages => [...prevImages, carouselImages[index].src]); // Simpan gambar yang dihapus
+        setCarouselImageFiles(prevImages => prevImages.filter((_, i) => i !== index)); // Hapus file gambar yang dipilih berdasarkan indeks
     }
 
-
     useEffect(() => {
-        if (clientsLov.length === 0) fetchClientsLov();
-        if (categoryLov.length === 0) fetchCategoryLov();
-
-        getData();
+        if (clientsLov.length <= 1) fetchClientsLov();
+        if (categoryLov.length <= 1) fetchCategoryLov();
+        fetchPortoData();
     }, []);
-
 
     return (
         <>
             <Card>
                 <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                     <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Edit Portofolio</h5>
+                        <h5 className="card-title" style={{ color: '#242845' }}>Add Portofolio</h5>
                     </div>
                 </Card.Header>
                 <Card.Body>
@@ -262,7 +236,7 @@ const EditPortofolio = () => {
                                     <Form.Control
                                         type="file" isInvalid={!!errors.icon} placeholder="Image Client"
                                         {...register('icon', {
-                                            required: 'Icon Image is required',
+                                            required: imagePreview? false : 'Icon Image is required',
                                             onChange: handleChangeIcon
                                         })}
                                         className="d-none"
@@ -297,12 +271,13 @@ const EditPortofolio = () => {
                                 </Form.Group>
 
                                 <ImageCarouselUploader
-                                    carouselImages={carouselImages}
+                                    carouselImages={carouselImages} 
                                     setCarouselImages={setCarouselImages}
                                     imageFiles={carouselImageFiles}
-                                    setImageFiles={setCarouselImageFiles}
+                                    setImageFiles={setCarouselImageFiles} 
+                                    removeImage={removeImage}
                                 />
-
+                                {/* End of Carousel Images Section */}
                                 <Form.Group controlId="title">
                                     <Form.Label>Title</Form.Label>
                                     <Form.Control type="text" placeholder="Title"
@@ -324,18 +299,18 @@ const EditPortofolio = () => {
                                         aria-label="Select Client"
                                         {...register('client', { required: 'Client is required' })}
                                         isInvalid={!!errors.client}
+                                        defaultValue=""
                                         onChange={(e) => {
-                                            const selectedCategory = e.target.value;
-                                            const categoryObj = clientsLov.find((item) => item.id === selectedCategory);
+                                            const selectedItem = e.target.value;
+                                            const itemObj = clientsLov.find((item) => item.id === selectedItem);
                                             setFormData(prevData => ({
                                                 ...prevData,
-                                                client: categoryObj,
+                                                client: itemObj,
                                             }));
-                                            console.log('Client set in formData:', categoryObj);
                                         }}
                                     >
                                         {clientsLov.map((item) => (
-                                            <option key={item.id} value={item.id.toString()}>
+                                            <option key={item.id} value={item.id}>
                                                 {item.name}
                                             </option>
                                         ))}
@@ -354,21 +329,21 @@ const EditPortofolio = () => {
                                         aria-label="Select category"
                                         {...register('category', { required: 'Category is required' })}
                                         isInvalid={!!errors.category}
-                                        defaultValue={formData?.category?.id}
+                                        defaultValue=""
                                         onChange={(e) => {
                                             const selectedCategory = e.target.value;
                                             const categoryObj = categoryLov.find((item) => item.id === selectedCategory);
-                                            setFormData(prevData => ({
-                                                ...prevData,
-                                                category: categoryObj,
-                                            }));
-
-                                            console.log('Category set in formData:', categoryObj);
-                                            console.log('Selected Category:', selectedCategory);
+                                            // setFormData(prevData => ({
+                                            //     ...prevData,
+                                            //     metadata: {
+                                            //         ...prevData.metadata,
+                                            //         category: categoryObj.name,
+                                            //     },
+                                            // }));
                                         }}
                                     >
                                         {categoryLov.map((item) => (
-                                            <option key={item.id} value={item.id.toString()}>
+                                            <option key={item.id} value={item.name}>
                                                 {item.name}
                                             </option>
                                         ))}
@@ -384,7 +359,7 @@ const EditPortofolio = () => {
 
                                 <Form.Group controlId="nda" className="mb-2">
                                     <Form.Label>NDA</Form.Label>
-                                    <div key='inline-radio1'>
+                                    <div key='inline-radio'>
                                         <Form.Check
                                             inline
                                             label="Yes"
@@ -392,7 +367,6 @@ const EditPortofolio = () => {
                                             type='radio'
                                             id={`inline-radio-1`}
                                             value="Yes"
-                                            checked={formData?.metadata?.isNda.toLowerCase() === 'yes'}
                                             {...register('nda', { required: 'NDA is required' })}
                                         />
                                         <Form.Check
@@ -402,7 +376,6 @@ const EditPortofolio = () => {
                                             type="radio"
                                             id={`inline-radio-2`}
                                             value="No"
-                                            checked={formData?.metadata?.isNda.toLowerCase() === 'no'}
                                             {...register('nda', { required: 'NDA is required' })}
                                         />
                                     </div>
@@ -551,7 +524,7 @@ const EditPortofolio = () => {
                                 </Form.Group>
                                 <Form.Group controlId="highlight" className="mb-2">
                                     <Form.Label>Highlight</Form.Label>
-                                    <div key='inline-radio2'>
+                                    <div key='inline-radio'>
                                         <Form.Check
                                             inline
                                             label="Yes"
@@ -559,7 +532,7 @@ const EditPortofolio = () => {
                                             type='radio'
                                             id={`inline-radio-1`}
                                             value="Yes"
-                                            checked={formData?.isHighlight?.toLowerCase() === 'yes'}
+                                            // defaulthecked={portoData?.isHighlight === 'Yes'}
                                             {...register('highlight', { required: 'Highlight is required' })}
                                         />
                                         <Form.Check
@@ -569,15 +542,38 @@ const EditPortofolio = () => {
                                             type="radio"
                                             id={`inline-radio-2`}
                                             value="No"
-                                            checked={formData?.isHighlight?.toLowerCase() === 'no'}
+                                            // defaultChecked={portoData?.isHighlight === 'No'}
                                             {...register('highlight', { required: 'Highlight is required' })}
+                                        />
+                                    </div>
+                                </Form.Group>
+                                <Form.Group controlId="status" className="mb-4">
+                                    <Form.Label className="mb-3">Status</Form.Label>
+                                    <div key='status-radio'>
+                                        <Form.Check
+                                            inline
+                                            label="Active"
+                                            name="status" // perubahan: memperbaiki label name menjadi 'status'
+                                            type='radio'
+                                            id={`status-radio-1`}
+                                            value="Active"
+                                            {...register('status', { required: 'Status is required' })} // perubahan: memperbaiki label name menjadi 'status'
+                                        />
+                                        <Form.Check
+                                            inline
+                                            label="Not Active"
+                                            name="status" // perubahan: memperbaiki label name menjadi 'status'
+                                            type="radio"
+                                            id={`status-radio-2`}
+                                            value="NOT ACTIVE"
+                                            {...register('status', { required: 'Status is required' })} // perubahan: memperbaiki label name menjadi 'status'
                                         />
                                     </div>
                                 </Form.Group>
                             </Col>
                         </Row>
                         <Row>
-                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../portofolio' buttonType="edit" />
+                            <ButtonFormBottom isMobile={isMobile} navigateCancelPath='../portofolio' />
                         </Row>
                     </Form>
                 </Card.Body>

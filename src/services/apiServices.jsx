@@ -441,7 +441,7 @@ export const createPortofolio = async (request, icon, additionalImages) => {
 
 export const updatePortofolio = async (request, icon, additionalImages) => {
     const formData = new FormData()
-    
+    console.log(request)
     try {
         const json = JSON.stringify(request);
         // console.log(request)
@@ -460,7 +460,7 @@ export const updatePortofolio = async (request, icon, additionalImages) => {
             formData.append('additionalFiles', image);
         })
 
-        const response = await apiClient.put(`/portfolio-management/portfolios/`, formData, {
+        const response = await apiClient.put(`/portfolio-management/portfolios`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             }
