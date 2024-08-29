@@ -1,28 +1,36 @@
 import { Form, Image, Button } from "react-bootstrap";
 import { MdFileUpload } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
-import PropTypes from 'prop-types'; // Pastikan PropTypes digunakan
+import PropTypes from 'prop-types'; 
 import { useMediaQuery } from "react-responsive";
 
-const ImageCarouselUploader = ({ carouselImages, setCarouselImages, imageFiles, setImageFiles, removeImage }) => {
+const ImageCarouselUploader = ({ carouselImages, setCarouselImages,  imageFiles, setImageFiles }) => {
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
+
     const handleImageChange = (e) => {
-        const files = e.target.files;
+        const files = Array.from(e.target.files);
         const newImages = [];
 
         if (files.length > 0) {
-            for (let i = 0; i < files.length && i < 5; i++) {
-                const file = files[i];
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    newImages.push({ name: file.name, src: reader.result });
-                    setCarouselImages([...carouselImages, ...newImages].slice(0, 5)); // Batas maksimum 5 gambar
-                    setImageFiles([...imageFiles, ...files].slice(0, 5)); // Batas maksimum 5 gambar
+            files.forEach((file, index) => {
+                if (index < 5) { // Batasi jumlah gambar hingga 5
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        newImages.push({ name: file.name, src: reader.result });
 
-                };
-                reader.readAsDataURL(file);
-            }
+                        // Update state dengan menggabungkan gambar baru dan lama
+                        setCarouselImages(prevImages => [...prevImages, ...newImages].slice(0, 5));
+                        setImageFiles(prevFiles => [...prevFiles, file].slice(0, 5));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         }
+    };
+
+    const removeImage = (index) => {
+        setCarouselImages(prevImages => prevImages.filter((_, i) => i !== index));
+        setImageFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
     };
 
     return (
@@ -69,6 +77,8 @@ ImageCarouselUploader.propTypes = {
         src: PropTypes.string.isRequired
     })).isRequired,
     setCarouselImages: PropTypes.func.isRequired,
+    imageFiles: PropTypes.array.isRequired,
+    setImageFiles: PropTypes.func.isRequired,
 };
 
 export default ImageCarouselUploader;

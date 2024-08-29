@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import ModalForm from '../../../components/form/ModalForm';
 import ButtonFormBottom from '../../../components/form/ButtonFormBottom';
 import { Button, Col, Form, Image, Row } from 'react-bootstrap';
-import QuillForm from '../../../components/form/QuillForm';
 import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { IoIosCloseCircle } from 'react-icons/io';
@@ -11,11 +10,30 @@ import ButtonDetailFormBottom from '../../../components/form/ButtonDetailFormBot
 import { useForm } from 'react-hook-form';
 import ImageCarouselUploader from '../../../components/form/ImageCarouselUploader';
 
-const PortofolioForm = ({ formSubmit, formData, setFormData, show, setShow, isError, setIsError, errorMessage, setErrorMessage,
-    isJustDetail, typeFormButton, setShowDetail, isCreate = false, setUploadedImage, setSelectedData }) => {
+const PortofolioForm = ({
+    formSubmit,
+    formData,
+    setFormData,
+    show,
+    setShow,
+    isError,
+    setIsError,
+    errorMessage,
+    setErrorMessage,
+    isJustDetail,
+    typeFormButton,
+    setShowDetail,
+    isCreate = false,
+    setUploadedImage,
+    setCarouselImageFiles,
+    carouselImages,  // Tambahkan props ini
+    setCarouselImages,  // Tambahkan props ini
+    clientsLov,
+    categoryLov
+}) => {
 
     // const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm({
-    const { register, handleSubmit, formState: { errors }, clearErrors } = useForm({
+    const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm({
         defaultValues: formData
     });
     const [imagePreview, setImagePreview] = useState(null);
@@ -60,20 +78,20 @@ const PortofolioForm = ({ formSubmit, formData, setFormData, show, setShow, isEr
                 console.log('Invalid file type');
                 setImagePreview(null);
                 document.getElementById('icon').value = null;
-                // setError('icon', {
-                //     type: 'manual',
-                //     message: 'Invalid file type. Please upload a JPG, JPEG, or PNG image.',
-                // });
+                setError('icon', {
+                    type: 'manual',
+                    message: 'Invalid file type. Please upload a JPG, JPEG, or PNG image.',
+                });
                 return;
             }
             if (file.size > maxSize) {
                 console.log('Image max Size');
                 setImagePreview(null);
                 document.getElementById('icon').value = null;
-                // setError('icon', {
-                //     type: 'manual',
-                //     message: 'File size exceeds 2MB. Please upload a smaller image.',
-                // });
+                setError('icon', {
+                    type: 'manual',
+                    message: 'File size exceeds 2MB. Please upload a smaller image.',
+                });
                 return;
             } else {
                 clearErrors('icon');
@@ -94,47 +112,6 @@ const PortofolioForm = ({ formSubmit, formData, setFormData, show, setShow, isEr
         }
         console.log('Icon:', file);
     };
-
-    // const handleImageChange = (e) => {
-    //     const file = e.target.files[0];
-    //     const maxSize = 2 * 1024 * 1024;
-    //     const allowedTypes = ['image/jpeg', 'image/png'];
-    //     if (file) {
-    //         if (formData?.image) {
-    //             setFormData(prev => ({
-    //                 ...prev,
-    //                 image: null
-    //             }))
-    //         }
-    //         if (!allowedTypes.includes(file.type)) {
-    //             setImagePreview(null);
-    //             document.getElementById('image').value = null;
-    //             setError('image', {
-    //                 type: 'required',
-    //                 message: 'Invalid file type. Please upload a JPG, JPEG, or PNG image.',
-    //             });
-    //             return;
-    //         }
-    //         if (file.size > maxSize) {
-    //             setImagePreview(null);
-    //             document.getElementById('image').value = null;
-    //             setError('image', {
-    //                 type: 'required',
-    //                 message: 'File size exceeds 2MB. Please upload a smaller image.',
-    //             });
-    //             return;
-    //         } else {
-    //             clearErrors('image');
-    //         }
-    //         const reader = new FileReader();
-    //         reader.onloadend = () => {
-    //             setImagePreview({ name: file.name, src: reader.result });
-    //         };
-    //         reader.readAsDataURL(file);
-    //     } else {
-    //         setImagePreview(null);
-    //     }
-    // };
 
     const removeImage = () => {
         if (formData.image) {
@@ -191,8 +168,8 @@ const PortofolioForm = ({ formSubmit, formData, setFormData, show, setShow, isEr
                             )}
                         </Form.Group>
                         <ImageCarouselUploader
-                            carouselImages={carouselImages}
-                            setCarouselImages={setCarouselImages}
+                            carouselImages={carouselImages}  // Gunakan carouselImages
+                            setCarouselImages={setCarouselImages}  // Gunakan setCarouselImages
                             imageFiles={carouselImageFiles}
                             setImageFiles={setCarouselImageFiles}
                         />
@@ -245,20 +222,33 @@ const PortofolioForm = ({ formSubmit, formData, setFormData, show, setShow, isEr
                         </Form.Group>
                         <Form.Group controlId="category">
                             <Form.Label>Category</Form.Label>
-                            <Form.Select aria-label="Select category" disabled={isJustDetail}
+                            <Form.Select
+                                aria-label="Select category"
                                 {...register('category', { required: 'Category is required' })}
-                                isInvalid={!!errors.category} defaultValue=''
+                                isInvalid={!!errors.category}
+                                defaultValue=""
+                                onChange={(e) => {
+                                    const selectedCategory = e.target.value;
+                                    const categoryObj = categoryLov.find((item) => item.id === selectedCategory);
+                                    setFormData(prevData => ({
+                                        ...prevData,
+                                        category: categoryObj,
+                                    }));
+                                }}
                             >
-                                <option value='' disabled>Category</option>
-                                <option value="Public">Public</option>
-                                <option value="Private">Private</option>
+                                {categoryLov.map((item) => (
+                                    <option key={item.id} value={item.name}>
+                                        {item.name}
+                                    </option>
+                                ))}
                             </Form.Select>
-                            {errors.category ?
+                            {errors.category ? (
                                 <Form.Control.Feedback type="invalid">
                                     {errors.category?.message}
                                 </Form.Control.Feedback>
-                                : <br></br>
-                            }
+                            ) : (
+                                <br />
+                            )}
                         </Form.Group>
                         <Form.Group controlId="nda" className="mb-2">
                             <Form.Label>NDA</Form.Label>
@@ -499,21 +489,30 @@ const PortofolioForm = ({ formSubmit, formData, setFormData, show, setShow, isEr
 }
 
 PortofolioForm.propTypes = {
-    formSubmit: PropTypes.func,
-    formData: PropTypes.object,
-    setFormData: PropTypes.func,
-    show: PropTypes.bool,
-    setShow: PropTypes.func,
+    formSubmit: PropTypes.func.isRequired,
+    formData: PropTypes.object.isRequired,
+    setFormData: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    setShow: PropTypes.func.isRequired,
     isError: PropTypes.bool,
-    setIsError: PropTypes.func,
+    setIsError: PropTypes.func.isRequired,
     errorMessage: PropTypes.string,
-    setErrorMessage: PropTypes.func,
+    setErrorMessage: PropTypes.func.isRequired,
     isJustDetail: PropTypes.bool,
     typeFormButton: PropTypes.string,
     setShowDetail: PropTypes.func,
     isCreate: PropTypes.bool,
-    setUploadedImage: PropTypes.func,
+    setUploadedImage: PropTypes.func.isRequired,
+    setCarouselImageFiles: PropTypes.func.isRequired,
+    clientsLov: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    })).isRequired,
+    categoryLov: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    })).isRequired,
     setSelectedData: PropTypes.func,
-}
+};
 
 export default PortofolioForm
