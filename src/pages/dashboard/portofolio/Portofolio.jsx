@@ -1,89 +1,128 @@
-import { Button, Card, Form, Stack, Table } from "react-bootstrap"
+import { Card, Form, Modal } from "react-bootstrap"
 import { useEffect, useState } from "react";
-import { deleteCareer, getAllCareer, getAllPortofolios } from "../../../services/apiServices";
-import { FiPlusCircle } from "react-icons/fi";
-import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
-import { IoEyeOutline } from "react-icons/io5";
-
-import { useMediaQuery } from 'react-responsive';
-import { Link, useNavigate } from "react-router-dom";
-import PaginationCustom from "../../../components/form/PaginationCustom";
+import { deletePortofolio, getAllPortofolios, getPortofolioById } from "../../../services/apiServices";
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import ModalForm from "../../../components/form/ModalForm";
-import DetailCareerCard from "./DetailCareerCard";
-
+import DashboardCardHeader from "../../../components/dashboard/DashboardCardHeader";
+import DashboardCardBody from "../../../components/dashboard/DashboardCardBody";
+import DashboardCard from "../DashboardCard";
+import { FaCheckCircle } from "react-icons/fa";
+import PortofolioForm from "./PortofolioForm";
 
 const Portofolio = () => {
     const [portofolio, setPortofolio] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [searchValue, setSearchValue] = useState({
-        title: '',
-        client: '',
         category: '',
-        nda: '',
-        startDate: '',
-        endDate: '',
+        client: '',
         highlight: '',
+        nda: '',
         status: ''
     });
-    const [pageSize, setPageSize] = useState(100);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [totalData] = useState(10);
+    const [sortConfig, setSortConfig] = useState({ sortBy: 'title', direction: 'ASC' });
+    const [statusValue, setStatusValue] = useState('');
+    const [highlightValue, setHighlightValue] = useState('');
+    const [ndaValue, setNdaValue] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndeDate] = useState('');
 
-    const navigate = useNavigate();
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [totalData, setTotalData] = useState(10);
+
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [show, setShow] = useState(false);
-    const [detailShow, setDetailShow] = useState(false);
+
     const [selectedData, setSelectedData] = useState(null);
+    const [dataDetail, setDataDetail] = useState({});
+    const [showDetail, setShowDetail] = useState(false);
 
+    const [isLoading, setIsLoading] = useState(true);
 
-
-    const handleSelectChange = (e) => {
-        setSelectedValue(e.target.value);
-    };
-
-    const handleSearchChange = (e) => {
-        // setSearchValue(e.target.value);
-        const { name, value } = e.target;
-        setSearchValue(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
-
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
-
-    const getData = async (pageSize, pageNumber, selectedValue, searchValue) => {
+    const getData = async (numberPage = pageNumber) => {
+        setIsLoading(true);
         try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const getSearchValue = (selectedValue) => {
+                if (selectedValue === 'status') {
+                    return statusValue;
+                } else if (selectedValue === 'nda') {
+                    if (ndaValue == 'null') {
+                        return null
+                    }
+                    return ndaValue;
+                } else if (selectedValue === 'highlight') {
+                    if (highlightValue == 'null') {
+                        return null
+                    }
+                    return highlightValue;
+                } else if (selectedValue === 'startDate') {
+                    return startDate;
+                } else if (selectedValue === 'endDate') {
+                    return endDate;
+                } else {
+                    return searchValue[selectedValue];
+                }
+            };
             const data = await getAllPortofolios(
-                { pageSize, pageNumber, [selectedValue]: searchValue[selectedValue] }
+                {
+                    pageSize: pageSize,
+                    pageNumber: numberPage,
+                    [selectedValue]: getSearchValue(selectedValue),
+                    sortBy: sortConfig.sortBy,
+                    direction: sortConfig.direction
+                }
             );
-            console.log(data.data);
-
+            console.log("data", data)
             if (data?.data) {
                 setPortofolio(data.data);
+                setTotalData(data.total);
             } else {
                 setPortofolio([]);
+                setTotalData(0);
+                setIsError(true);
+                setErrorMessage(data.message)
+                setShow(true);
             }
-
         } catch (error) {
-            // setError(error.message);
+            setIsError(true);
+            setErrorMessage("Terjadi kesalahan server")
+            setShow(true);
         } finally {
-            // setLoading(false);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        getData(pageSize, pageNumber, selectedValue, searchValue);
-    }, []);
+        getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pageSize, pageNumber, sortConfig]);
 
-    const portofolioTableHeader = ['TITLE', 'CLIENT', 'CATEGORY', 'NDA', 'START', 'END', 'HIGHLIGHT', 'STATUS', 'ACTION'];
+    useEffect(() => {
+        setPageNumber(1);
+        getData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusValue, ndaValue, startDate, endDate, highlightValue]);
 
     const handleSubmit = (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
-        getData(pageSize, pageNumber, selectedValue, searchValue);
+        event.preventDefault();
+        setPageNumber(1)
+        getData(1);
     };
+
+    const tableHeaders = [
+        { name: "TITLE", value: "title" },
+        { name: "CLIENT", },
+        { name: "CATEGORY" },
+        { name: "NDA", value: 'nda' },
+        { name: "START", value: "startDate" },
+        { name: "END", value: "endDate" },
+        { name: "HIGHLIGHT" },
+        { name: "STATUS" },
+        { name: "ACTION" }
+    ];
+
 
     const handleClose = () => {
         setShow(false);
@@ -93,155 +132,179 @@ const Portofolio = () => {
         }, 1000);
     }
 
-    const handleShow = (selectedData) => {
-        setSelectedData(selectedData);
-        setShow(true);
-    }
-
-    const handleDetailShow = (selectedData) => {
-        setSelectedData(selectedData);
-        setDetailShow(true);
-    };
-
-    const handleDetailClose = () => {
-        setDetailShow(false);
-    };
-
     const handleDelete = async () => {
-        console.log("isi ini",selectedData)
         try {
-            const response = await deleteCareer(selectedData);
-            console.log('Success:', response);
+            const response = await deletePortofolio(selectedData.id);
             setShow(false);
             if (response.code === 200) {
-                navigate('../Career');
-            } else if (response.code === 400) {
+                getData(pageNumber - 1);
+                if (portofolio.length === 1 && pageNumber > 1) {
+                    setPageNumber(prev => prev - 1)
+                }
+            } else {
                 setIsError(true);
                 setErrorMessage(response.message)
                 setShow(true);
             }
         } catch (error) {
-            console.error('Error:', error.response?.data || error.message);
+            console.error('Error:', error.response || error.message);
         }
     };
+
+    const filterOptions = [
+        {
+            value: 'title', name: 'Title'
+        },
+        {
+            value: 'client', name: 'Client'
+        },
+        {
+            value: 'category', name: 'Category'
+        },
+        {
+            value: 'nda', name: 'NDA'
+        },
+        {
+            value: 'startDate', name: 'Start Date'
+        },
+        {
+            value: 'endDate', name: 'End Date'
+        },
+        {
+            value: 'highlight', name: 'Highlight'
+        },
+        {
+            value: 'status', name: 'Status'
+        },
+    ]
+
+    const otherSelectRender = () => {
+        if (selectedValue == 'startDate') {
+            return (
+                <Form.Control type="date" placeholder="Search..." aria-label="Search filter" name='startDate' style={{ paddingRight: '0.75rem' }}
+                    value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!selectedValue}
+                />
+            )
+        } else if (selectedValue == 'endDate') {
+            return (
+                <Form.Control type="date" placeholder="Search..." aria-label="Search filter" name='endDate' style={{ paddingRight: '0.75rem' }}
+                    value={endDate} onChange={(e) => setEndeDate(e.target.value)} disabled={!selectedValue}
+                />
+            )
+        } else if (selectedValue == 'highlight') {
+            return (
+                <Form.Select aria-label="Select Highlight" value={highlightValue} name='highlight' onChange={(e) => setHighlightValue(e.target.value)} style={{ minWidth: '170px' }}>
+                    <option value='null'>Select Highlight</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </Form.Select>
+            )
+        } else if (selectedValue == 'nda') {
+            return (
+                <Form.Select aria-label="Select NDA" value={ndaValue} name='nda' onChange={(e) => setNdaValue(e.target.value)} style={{ minWidth: '170px' }}>
+                    <option value='null'>Select NDA</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </Form.Select>
+            )
+        }
+
+    }
+
+    const rowRender = (data) => (
+        <>
+            <td>{data.title}</td>
+            <td>{data.client.name}</td>
+            <td>{data.category}</td>
+            <td>{data?.nda?.toLowerCase() === "yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+            <td>{data.startDate}</td>
+            <td>{data.endDate}</td>
+            <td>{data?.highlight?.toLowerCase() === "yes" ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
+        </>
+    )
+
+
+    const handleShowModalDetail = async (dataId) => {
+        try {
+            const data = await getPortofolioById(dataId);
+            if (data.code === 200) {
+                setDataDetail(prev => ({
+                    ...prev,
+                    ...data.data,
+                    articleId: data.data.id,
+                }));
+                setShowDetail(true)
+                console.log(data.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleCloseDetail = () => {
+        setShowDetail(false);
+    }
+
 
     return (
         <>
             <Card>
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div className="header-title mb-3 mb-md-0">
-                        <h5 className="card-title" style={{ color: '#242845' }}>Career</h5>
-                    </div>
-                    <Stack direction={isMobile ? 'vertical' : 'horizontal'} gap={4}>
-                        <Form className="d-flex flex-column flex-md-row align-items-center gap-4" onSubmit={handleSubmit}>
-                            <Form.Select aria-label="Select filter" style={{ maxWidth: isMobile ? '100%' : '170px' }} value={selectedValue} onChange={handleSelectChange}>
-                                <option value="">Filter</option>
-                                <option value="title">Title</option>
-                                <option value="client">Client</option> 
-                                <option value="category">Category</option>
-                                <option value="nda">NDA</option>
-                                <option value="startDate">Start Date</option>
-                                <option value="endDate">End Date</option>
-                                <option value="highlight">Highlight</option>
-                                <option value="status">Status</option>
-                            </Form.Select>
-                            <div className="inline-block">
-                                <svg className="position-absolute" style={{ top: '2.25rem', marginLeft: '1rem' }} width="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                    <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                </svg>
-                                <Form.Control type="search" placeholder="Search..." aria-label="Search filter" name={selectedValue} style={{ paddingLeft: '3rem' }}
-                                    value={searchValue[selectedValue] || ''} onChange={handleSearchChange}
-                                />
-                            </div>
-                        </Form>
-                        <Link to='./add'>
-                            <Button style={{ background: '#E1F7E3', color: '#23BD33', border: '0px', borderRadius: '0.5rem', width: isMobile ? '100%' : '' }} className="px-2">
-                                <FiPlusCircle size='20px' style={{ marginRight: '0.5rem' }} />
-                                <span style={{ fontSize: '14px', fontWeight: 600 }}>Add Data</span>
-                            </Button>
-                        </Link>
-                    </Stack>
-                </Card.Header>
-                <Card.Body>
-                    <div className="table-responsive border-bottom my-3">
-                        <Table>
-                            <thead>
-                                <tr>
-                                    {portofolioTableHeader.map((header) => (
-                                        <th key={header} style={{ fontSize: '14px' }}>
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {portofolio.map((data, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        <td>{data.title}</td>
-                                        <td>{data.client.name}</td>
-                                        <td>{data.metadata.category}</td>
-                                        <td>{data.metadata.isNda}</td>
-                                        <td>{data.startDate}</td>
-                                        <td>{data.endDate}</td>
-                                        <td>{data.isHighlight}</td>
-                                        <td>{data.status?.toLowerCase() == "active".toLowerCase() ? <FaCheckCircle style={{ fontSize: '20px', color: '#23BD33' }} /> : <FaCheckCircle style={{ fontSize: '20px', color: '#E7E8EC' }} />}</td>
-                                        <td>
-                                            <Button
-                                                className="p-0"
-                                                style={{ fontSize: '15px', color: '#0078D7', width: '24px', height: '24px', background: '#F4F7FE', border: '0px', marginRight: '0.5rem' }}
-                                                onClick={() => handleDetailShow(data)} // Panggil handleDetailShow dengan data yang sesuai
-                                            >
-                                                <IoEyeOutline />
-                                            </Button>
-                                            <Link to={`/dashboard/portofolio/edit/${data.id}`}>
-                                                <Button className="p-0" style={{ fontSize: '15px', color: '#FFBB34', width: '24px', height: '24px', background: '#FFF5D6', border: '0px', marginRight: '0.5rem' }}>
-                                                    <FaRegEdit />
-                                                </Button>
-                                            </Link>
-                                            <Button
-                                                className="p-0"
-                                                style={{ fontSize: '15px', color: '#FF3548', width: '24px', height: '24px', background: '#FFE1E4', border: '0px' }}
-                                                onClick={() => handleShow(data.id)}
-                                            >
-                                                <GoTrash />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                    <div className="d-flex justify-content-center">
-                        <PaginationCustom
-                            pageSize={pageSize}
-                            pageNumber={pageNumber}
-                            setPageNumber={setPageNumber}
-                            totalData={totalData}
-                            setPageSize={setPageSize}
-                        />
-                    </div>
-                </Card.Body>
-            </Card>
+                <DashboardCardHeader
+                    tittle='Portofolio'
+                    filterOptions={filterOptions}
+                    handleSubmit={handleSubmit}
+                    selectedValue={selectedValue}
+                    setSelectedValue={setSelectedValue}
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    statusValue={statusValue}
+                    setStatusValue={setStatusValue}
+                    selectedOtherFilterValue={['startDate', 'endDate', 'nda', 'highlight']}
+                    renderOtherFIlterForm={otherSelectRender}
+                    getData={getData}
+                />
+                <DashboardCardBody
+                    tableHeaders={tableHeaders}
+                    rowData={portofolio}
+                    rowRender={rowRender}
+                    pageSize={pageSize}
+                    pageNumber={pageNumber}
+                    setPageNumber={setPageNumber}
+                    totalData={totalData}
+                    setPageSize={setPageSize}
+                    setSortConfig={setSortConfig}
+                    sortConfig={sortConfig}
+                    setShow={setShow}
+                    setSelectedData={setSelectedData}
+                    handleShowModalDetail={handleShowModalDetail}
+                    isLoading={isLoading}
+                />
+            </Card >
             <ModalForm
                 show={show}
                 buttonType='danger'
                 handleClose={handleClose}
-                page='Career'
-                data={selectedData}
+                page='Portofolio'
+                data={selectedData?.title}
                 formSubmit={handleDelete}
                 isError={isError}
                 errorMessage={errorMessage}
                 isDelete={true}
             />
-            <DetailCareerCard
-                show={detailShow}
-                handleClose={handleDetailClose}
-                data={selectedData} 
-            />
+            <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '85%' }}>
+                <DashboardCard cardTittle="Detail Portofolio">
+                    <PortofolioForm
+                        formData={dataDetail}
+                        isJustDetail={true}
+                        show={show}
+                        setShow={setShow}
+                        setShowDetail={setShowDetail}
+                        setSelectedData={setSelectedData}
+                    />
+                </DashboardCard>
+            </Modal>
         </>
     )
-};
-
+}
 
 export default Portofolio

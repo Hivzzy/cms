@@ -118,8 +118,7 @@ function App() {
 
             <Route path="/dashboard/portofolio" element={<Portofolio />}></Route>
             <Route path="/dashboard/portofolio/add" element={<AddPortofolio />}></Route>
-            <Route path="/dashboard/portofolio/edit/:portofolioId" element={<EditPortofolio />}></Route>
-            {/* <Route path="/dashboard/portofolio/detail/:portofolioId" element={<EditPortofolio />}></Route> */}
+            <Route path="/dashboard/portofolio/edit/:id" element={<EditPortofolio />}></Route>
 
             <Route path="/dashboard/client" element={<Client />}></Route>
             <Route path="/dashboard/client/add" element={<AddClient />}></Route>

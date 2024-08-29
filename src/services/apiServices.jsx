@@ -389,7 +389,6 @@ export const updateExpertiseCategory = async (body) => {
 };
 
 //Portofolio
-
 export const getAllPortofolios = async (params) => {
     try {
         const response = await apiClient.get('/portfolio-management/cms-portfolios', { params });
@@ -473,6 +472,15 @@ export const updatePortofolio = async (request, icon, additionalImages) => {
         return error.response.data;
     }
 }
+
+export const deletePortofolio = async (id) => {
+    try {
+        const response = await apiClient.delete(`/portfolio-management/portfolios/${id}`);
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+};
 
 
 // Team
