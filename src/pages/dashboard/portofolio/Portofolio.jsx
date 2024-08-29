@@ -294,7 +294,7 @@ const Portofolio = () => {
             <Modal show={showDetail} onHide={handleCloseDetail} centered style={{ '--bs-modal-width': '85%' }}>
                 <DashboardCard cardTittle="Detail Portofolio">
                     <PortofolioForm
-                        formData={dataDetail}
+                        id={dataDetail.id}
                         isJustDetail={true}
                         show={show}
                         setShow={setShow}

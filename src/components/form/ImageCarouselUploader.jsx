@@ -4,7 +4,7 @@ import { IoIosCloseCircle } from "react-icons/io";
 import PropTypes from 'prop-types'; 
 import { useMediaQuery } from "react-responsive";
 
-const ImageCarouselUploader = ({ carouselImages, setCarouselImages,  imageFiles, setImageFiles }) => {
+const ImageCarouselUploader = ({ carouselImages, setCarouselImages,  imageFiles, setImageFiles, removeImage }) => {
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     const handleImageChange = (e) => {
@@ -26,11 +26,6 @@ const ImageCarouselUploader = ({ carouselImages, setCarouselImages,  imageFiles,
                 }
             });
         }
-    };
-
-    const removeImage = (index) => {
-        setCarouselImages(prevImages => prevImages.filter((_, i) => i !== index));
-        setImageFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
     };
 
     return (

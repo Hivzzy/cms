@@ -59,8 +59,8 @@ import Client from './pages/dashboard/client/Client';
 import AddClient from './pages/dashboard/client/AddClient';
 import EditClient from './pages/dashboard/client/EditClient';
 import Portofolio from './pages/dashboard/portofolio/Portofolio';
-import AddPortofolio from './pages/dashboard/portofolio/AddPortofolio';
-import EditPortofolio from './pages/dashboard/portofolio/EditPortofolio';
+import AddPortofolio from './pages/dashboard/portofolio/add';
+import EditPortofolio from './pages/dashboard/portofolio/edit';
 import Visitor from './pages/dashboard/visitor/Visitor';
 
 function App() {

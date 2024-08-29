@@ -411,7 +411,6 @@ export const createPortofolio = async (request, icon, additionalImages) => {
     const formData = new FormData()
     try {
         const json = JSON.stringify(request);
-        // console.log(request)
         const blob = new Blob([json], {
             type: 'application/json'
         });
@@ -421,11 +420,13 @@ export const createPortofolio = async (request, icon, additionalImages) => {
             formData.append('file', icon[0]);
         }
 
-        
         additionalImages.forEach((image) => {
             formData.append('additionalFiles', image);
         })
 
+        console.log("request", request)
+        console.log('icon', icon[0])
+        console.log('additionalImages', additionalImages)
         const response = await apiClient.post('/portfolio-management/portfolios', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -441,7 +442,6 @@ export const createPortofolio = async (request, icon, additionalImages) => {
 
 export const updatePortofolio = async (request, icon, additionalImages) => {
     const formData = new FormData()
-    console.log(request)
     try {
         const json = JSON.stringify(request);
         // console.log(request)
@@ -454,8 +454,6 @@ export const updatePortofolio = async (request, icon, additionalImages) => {
             formData.append('file', icon[0]);
         }
 
-        console.log('additionalImages', additionalImages)
-
         additionalImages.forEach((image) => {
             formData.append('additionalFiles', image);
         })
@@ -465,6 +463,10 @@ export const updatePortofolio = async (request, icon, additionalImages) => {
                 'Content-Type': 'multipart/form-data',
             }
         });
+
+        console.log("request", request)
+        console.log('icon', icon[0])
+        console.log('additionalImages', additionalImages)
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);

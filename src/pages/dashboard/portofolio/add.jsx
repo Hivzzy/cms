@@ -9,8 +9,9 @@ const AddPortofolio = () => {
   const [show, setShow] = useState(false);
   const [formData, setFormData] = useState({ status: 'Active' });
   const [isError, setIsError] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
   const [errorMessage, setErrorMessage] = useState();
-  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState({});
   const [carouselImages, setCarouselImages] = useState([]);  // Tambahkan state untuk carousel images
   const [carouselImageFiles, setCarouselImageFiles] = useState([]);
   const [clientsLov, setClientsLov] = useState([]);
@@ -40,9 +41,14 @@ const AddPortofolio = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const removeCarouselImage = (index) => {
+    setCarouselImages(prevImages => prevImages.filter((_, i) => i !== index)); // Hapus gambar yang dipilih berdasarkan indeks
+    setCarouselImageFiles(prevImages => prevImages.filter((_, i) => i !== index)); // Hapus file gambar yang dipilih berdasarkan indeks
+  }
+
   const formSubmit = async () => {
     try {
-      const response = await createPortofolio(formData, uploadedImage, carouselImageFiles);
+      const response = await createPortofolio({...formData, status: 'Active'}, uploadedImage, carouselImageFiles);
       setShow(false);
 
       if (response.code === 200) {
@@ -61,9 +67,9 @@ const AddPortofolio = () => {
   };
 
   return (
-    <>
       <DashboardCard cardTittle="Add Portofolio">
         <PortofolioForm
+          isCreate
           formSubmit={formSubmit}
           formData={formData}
           setFormData={setFormData}
@@ -73,16 +79,19 @@ const AddPortofolio = () => {
           setIsError={setIsError}
           errorMessage={errorMessage}
           setErrorMessage={setErrorMessage}
+          typeFormButton='add'
+          imagePreview={imagePreview}
+          setImagePreview={setImagePreview}         
           setUploadedImage={setUploadedImage}
+          carouselImageFiles={carouselImageFiles}
           setCarouselImageFiles={setCarouselImageFiles}
           carouselImages={carouselImages}
-          setCarouselImages={setCarouselImages} 
-          isCreate={true}
+          setCarouselImages={setCarouselImages}
           clientsLov={clientsLov}
           categoryLov={categoryLov}
+          removeCarouselImage={removeCarouselImage}
         />
       </DashboardCard>
-    </>
   );
 }
 

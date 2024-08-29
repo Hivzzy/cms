@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import ModalForm from '../../../components/form/ModalForm';
 import ButtonFormBottom from '../../../components/form/ButtonFormBottom';
 import { Button, Col, Form, Image, Row } from 'react-bootstrap';
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { IoIosCloseCircle } from 'react-icons/io';
 import { MdFileUpload } from 'react-icons/md';
@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import ImageCarouselUploader from '../../../components/form/ImageCarouselUploader';
 
 const PortofolioForm = ({
+    portofolioData,
     formSubmit,
     formData,
     setFormData,
@@ -24,33 +25,72 @@ const PortofolioForm = ({
     typeFormButton,
     setShowDetail,
     isCreate = false,
+    imagePreview,
+    setImagePreview,
     setUploadedImage,
+    carouselImageFiles,
     setCarouselImageFiles,
     carouselImages,  // Tambahkan props ini
     setCarouselImages,  // Tambahkan props ini
     clientsLov,
-    categoryLov
+    categoryLov,
+    removeCarouselImage,
 }) => {
 
     // const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm({
-    const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm({
-        defaultValues: formData
-    });
-    const [imagePreview, setImagePreview] = useState(null);
+    const { register, handleSubmit, formState: { errors }, setError, clearErrors, getValues } = useForm({
+        values: isCreate ? {} : {
+            id: portofolioData?.id,
+            title: portofolioData?.title,
+            client: portofolioData?.client?.id,
+            category: portofolioData?.category,
+            nda: portofolioData?.metadata?.isNda,
+            startDate: portofolioData?.startDate,
+            endDate: portofolioData?.endDate,
+            description: portofolioData?.description,
+            fe: portofolioData?.metadata?.technicalInfo?.fe,
+            be: portofolioData?.metadata?.technicalInfo?.be,
+            os: portofolioData?.metadata?.technicalInfo?.os,
+            db: portofolioData?.metadata?.technicalInfo?.db,
+            appServer: portofolioData?.metadata?.technicalInfo?.appServer,
+            devTool: portofolioData?.metadata?.technicalInfo?.devTool,
+            other: portofolioData?.metadata?.technicalInfo?.other,
+            highlight: portofolioData?.isHighlight,
+            status: portofolioData?.status,
+        }
+    });   
 
     const handleShow = (data) => {
         if (!isJustDetail) {
-            if (data.image) {
-                setUploadedImage(data.image)
+            if (data.icon) {
+                setUploadedImage(data.icon)
             } else {
                 setUploadedImage(null)
             }
 
             setFormData(prev => ({
                 ...prev,
-                ...data,
-                category: data.category,
-                image: data.image ? data.image : prev.image
+                title: data.title,                
+                client : formData?.client?.id ? formData?.client : clientsLov.find((item) => item.id === data.client),
+                
+                metadata: {
+                    category: data.category,
+                    isNda: data.nda,
+                    technicalInfo: {
+                        fe: data.fe,
+                        be: data.be,
+                        os: data.os,
+                        db: data.db,
+                        appServer: data.appServer,
+                        devTool: data.devTool,
+                        other: data.other
+                    },
+                },
+                startDate: data.startDate,
+                endDate: data.endDate,
+                description: data.description,
+                isHighlight: data.highlight,
+                status: data.status,
             }));
         } else {
             setSelectedData(formData)
@@ -69,7 +109,7 @@ const PortofolioForm = ({
         }
     }
 
-    const handleChangeIcon = (e) => {
+    const handleChangeIcon = useCallback((e) => {
         const file = e.target.files[0];
         const maxSize = 2 * 1024 * 1024;
         const allowedTypes = ['image/jpeg', 'image/png'];
@@ -101,17 +141,17 @@ const PortofolioForm = ({
                 setImagePreview({ name: file.name, src: reader.result });
             };
             reader.readAsDataURL(file);
-            if (formData?.icon) {
+            console.log("call setUploadedImage");
+            setUploadedImage(file);
+            if (formData?.image) {
                 setFormData(prev => ({
                     ...prev,
-                    icon: null
                 }))
             }
         } else {
             setImagePreview(null);
         }
-        console.log('Icon:', file);
-    };
+    }, [setUploadedImage, setImagePreview]);
 
     const removeImage = () => {
         if (formData.image) {
@@ -120,7 +160,8 @@ const PortofolioForm = ({
             setImagePreview(null);
         }
         document.getElementById('image').value = null;
-    }
+    };
+
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
@@ -132,7 +173,7 @@ const PortofolioForm = ({
                         <Form.Group controlId="icon">
                             <Form.Label>Icon</Form.Label>
                             <Form.Control
-                                type="file" isInvalid={!!errors.icon} placeholder="Image Client"
+                                type="file" isInvalid={!!errors.icon} placeholder="Portofolio Image"
                                 {...register('icon', {
                                     required: 'Icon Image is required',
                                     onChange: handleChangeIcon
@@ -153,11 +194,11 @@ const PortofolioForm = ({
                             }
                             {imagePreview && (
                                 <>
-                                    <Image src={imagePreview.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
+                                    <Image src={imagePreview?.src} height={120} style={{ maxWidth: 200, marginTop: -10, marginBottom: 10 }} className="object-fit-cover border rounded border border-5" />
                                     <div className="d-flex align-items-center">
                                         <div className="text-truncate">
                                             <span style={{ marginTop: '5px', fontSize: '0.8em' }}>
-                                                {imagePreview.name}
+                                                {imagePreview?.name}
                                             </span>
                                         </div>
                                         <div>
@@ -172,6 +213,7 @@ const PortofolioForm = ({
                             setCarouselImages={setCarouselImages}  // Gunakan setCarouselImages
                             imageFiles={carouselImageFiles}
                             setImageFiles={setCarouselImageFiles}
+                            removeImage={removeCarouselImage}
                         />
                         <Form.Group controlId="title">
                             <Form.Label>Tittle</Form.Label>
@@ -207,7 +249,7 @@ const PortofolioForm = ({
                                 }}
                             >
                                 {clientsLov.map((item) => (
-                                    <option key={item.id} value={item.id.toString()}>
+                                    <option key={item.id} value={item.id}>
                                         {item.name}
                                     </option>
                                 ))}
@@ -229,14 +271,14 @@ const PortofolioForm = ({
                                 defaultValue=""
                                 onChange={(e) => {
                                     const selectedCategory = e.target.value;
-                                    const categoryObj = categoryLov.find((item) => item.id === selectedCategory);
+                                    const categoryObj = categoryLov?.find((item) => item.id === selectedCategory);
                                     setFormData(prevData => ({
                                         ...prevData,
                                         category: categoryObj,
                                     }));
                                 }}
                             >
-                                {categoryLov.map((item) => (
+                                {categoryLov?.map((item) => (
                                     <option key={item.id} value={item.name}>
                                         {item.name}
                                     </option>
@@ -250,7 +292,8 @@ const PortofolioForm = ({
                                 <br />
                             )}
                         </Form.Group>
-                        <Form.Group controlId="nda" className="mb-2">
+                        {(isCreate || getValues('nda')?.toLowerCase() === 'yes') && (
+                            <Form.Group controlId="nda" className="mb-2">
                             <Form.Label>NDA</Form.Label>
                             <div key='inline-radio1'>
                                 <Form.Check
@@ -260,7 +303,7 @@ const PortofolioForm = ({
                                     type='radio'
                                     id={`inline-radio-1`}
                                     value="Yes"
-                                    checked={formData?.metadata?.isNda.toLowerCase() === 'yes'}
+                                    defaultChecked={isCreate? true : getValues('nda')?.toLowerCase() === 'yes'}
                                     {...register('nda', { required: 'NDA is required' })}
                                 />
                                 <Form.Check
@@ -270,11 +313,13 @@ const PortofolioForm = ({
                                     type="radio"
                                     id={`inline-radio-2`}
                                     value="No"
-                                    checked={formData?.metadata?.isNda.toLowerCase() === 'no'}
+                                    
+                                    defaultChecked={getValues('nda')?.toLowerCase() === 'no'}
                                     {...register('nda', { required: 'NDA is required' })}
                                 />
                             </div>
                         </Form.Group>
+                        )}
                         <Form.Group controlId="startDate">
                             <Form.Label>Start</Form.Label>
                             <Form.Control type="date" placeholder="Start Date"
@@ -415,8 +460,8 @@ const PortofolioForm = ({
                                 : <br></br>
                             }
                         </Form.Group>
-
-                        <Form.Group controlId="highlight" className="mb-4" style={{ marginTop: '32px' }}>
+                        
+                        {(isCreate || getValues('highlight')?.toLowerCase() === 'yes') && (<Form.Group controlId="highlight" className="mb-4" style={{ marginTop: '32px' }}>
                             <Form.Label className="mb-3">Highlight</Form.Label>
                             <div key='highlight-radio'>
                                 <Form.Check disabled={isJustDetail}
@@ -426,6 +471,7 @@ const PortofolioForm = ({
                                     type='radio'
                                     id={`highlight-radio-1`}
                                     value="YES"
+                                    defaultChecked={getValues('highlight')?.toLowerCase() === 'yes' || isCreate}
                                     {...register('highlight', { required: 'Highlight is required' })}
                                 />
                                 <Form.Check disabled={isJustDetail}
@@ -435,10 +481,11 @@ const PortofolioForm = ({
                                     type="radio"
                                     id={`highlight-radio-2`}
                                     value="NO"
+                                    defaultChecked={getValues('highlight')?.isHighlight?.toLowerCase() === 'no'}
                                     {...register('highlight', { required: 'Highlight is required' })}
                                 />
                             </div>
-                        </Form.Group>
+                        </Form.Group>)}
                         {!isCreate &&
                             <Form.Group controlId="status" className="mb-4">
                                 <Form.Label className="mb-3">Status</Form.Label>
@@ -450,7 +497,8 @@ const PortofolioForm = ({
                                         type='radio'
                                         id={`status-radio-1`}
                                         value="ACTIVE"
-                                        {...register('status', { required: 'Role is required' })}
+                                        defaultChecked={getValues('status')?.toLowerCase() === 'active'}
+                                        {...register('status', { required: 'status is required' })}
                                     />
                                     <Form.Check disabled={isJustDetail}
                                         inline
@@ -459,7 +507,8 @@ const PortofolioForm = ({
                                         type="radio"
                                         id={`status-radio-2`}
                                         value="NOT ACTIVE"
-                                        {...register('status', { required: 'Role is required' })}
+                                        defaultChecked={getValues('status')?.toLowerCase() === 'no'}
+                                        {...register('status', { required: 'status is required' })}
                                     />
                                 </div>
                             </Form.Group>
@@ -483,12 +532,14 @@ const PortofolioForm = ({
                 isError={isError}
                 errorMessage={errorMessage}
                 buttonType={typeFormButton}
+
             />
         </>
     );
 }
 
 PortofolioForm.propTypes = {
+    portofolioData: PropTypes.object,
     formSubmit: PropTypes.func.isRequired,
     formData: PropTypes.object.isRequired,
     setFormData: PropTypes.func.isRequired,
@@ -513,6 +564,13 @@ PortofolioForm.propTypes = {
         name: PropTypes.string.isRequired
     })).isRequired,
     setSelectedData: PropTypes.func,
+    carouselImages: PropTypes.array,  // Tambahkan props ini
+    setCarouselImages: PropTypes.func,  // Tambahkan props ini
+    carouselImageFiles: PropTypes.array,  // Tambahkan props ini
+    setImagePreview: PropTypes.func,  // Tambahkan props ini
+    imagePreview: PropTypes.object,  // Tambahkan props ini
+
+
 };
 
 export default PortofolioForm
