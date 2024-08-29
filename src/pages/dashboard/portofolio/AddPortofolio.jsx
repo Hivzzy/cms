@@ -262,6 +262,7 @@ const AddPortofolio = () => {
                                     setCarouselImages={setCarouselImages}
                                     imageFiles={carouselImageFiles}
                                     setImageFiles={setCarouselImageFiles} 
+                                    removeImage={removeImage}
                                 />
                                 {/* End of Carousel Images Section */}
                                 <Form.Group controlId="title">
