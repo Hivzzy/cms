@@ -175,7 +175,7 @@ const PortofolioForm = ({
                             <Form.Control
                                 type="file" isInvalid={!!errors.icon} placeholder="Portofolio Image"
                                 {...register('icon', {
-                                    required: 'Icon Image is required',
+                                    required: imagePreview ? false : 'Icon Image is required',
                                     onChange: handleChangeIcon
                                 })}
                                 className="d-none"
